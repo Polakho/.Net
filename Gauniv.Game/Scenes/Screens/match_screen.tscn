@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://dshyb7e1n6eg7"]
+
+[ext_resource type="Script" uid="uid://b4bho62l4k6nq" path="res://Script/Screens/MatchScreen.cs" id="1_usroj"]
+
+[node name="MatchScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_usroj")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "MATCH SCREEN"
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 26.0
+offset_right = 79.0
+offset_bottom = 57.0
+text = "Back"
+
+[connection signal="pressed" from="BackButton" to="." method="OnBackPressed"]

@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvfqv77pn3jfj"]
+
+[ext_resource type="Script" uid="uid://drsxnjt8jk105" path="res://Script/Screens/MainMenuScreen.cs" id="1_rhm1l"]
+
+[node name="MainMenuScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_rhm1l")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Play"
+
+[node name="SpectateButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Quit"
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/PlayButton" to="." method="OnPlayPressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/QuitButton" to="." method="OnQuitPressed"]
