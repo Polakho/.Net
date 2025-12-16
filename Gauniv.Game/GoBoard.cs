@@ -7,46 +7,54 @@ public partial class GoBoard : Node2D
 	[Export] public Texture2D BlackStoneTexture;
 	[Export] public Texture2D WhiteStoneTexture;
 	[Export] public NodePath InfoLabelPath;
-	[Export] public NodePath BackgroundPath;
-
-	// Chemin vers la Camera2D
 	[Export] public NodePath CameraPath;
 
-	// Calibration de la grille
-	[Export] public Vector2 BoardOrigin = new Vector2(64, 64);
-	[Export] public float CellSize = 32f;
-	[Export] public int BoardSize = 19;
+	// Paramètres demandés
+	[Export] public int BoardSize = 9;              // 9x9
+	[Export] public float BackgroundSizePx = 640f;  // fond 640x640
+	[Export] public float GridSizePx = 512f;        // grille 512x512
 
-	// Marge visuelle autour du board (en pixels écran)
+	// Calculés automatiquement (mais exportés si tu veux les voir)
+	[Export] public Vector2 BoardOrigin = new Vector2(64, 64);
+	[Export] public float CellSize = 64f;
+
 	[Export] public float CameraMarginPx = 40f;
+
+	// Option d’affichage
+	[Export] public bool DrawGrid = true;
+	[Export] public float GridLineWidth = 3f;
 
 	private Node2D _stones;
 	private Label _label;
 	private Camera2D _camera;
-	private Sprite2D _background;
 
 	private int[,] _grid; // 0 vide, 1 noir, 2 blanc
 	private int _currentPlayer = 1;
 
 	public override void _Ready()
 	{
-		_stones = GetNode<Node2D>(StonesContainerPath);
-		_label = GetNode<Label>(InfoLabelPath);
+		_stones = GetNodeOrNull<Node2D>(StonesContainerPath);
+		_label = GetNodeOrNull<Label>(InfoLabelPath);
 		_camera = GetNodeOrNull<Camera2D>(CameraPath);
-		_background = GetNode<Sprite2D>(BackgroundPath);
+
+		// Calcule BoardOrigin et CellSize pour une grille 512x512 centrée dans un fond 640x640
+		// 9x9 => 8 cellules
+		CellSize = GridSizePx / (BoardSize - 1);
+		float offset = (BackgroundSizePx - GridSizePx) / 2f;
+		BoardOrigin = new Vector2(offset, offset);
 
 		_grid = new int[BoardSize, BoardSize];
 		UpdateUi();
 
-		AjusterCameraPourAfficherBoard();
+		AjusterCameraPourAfficherBackground();
+
+		QueueRedraw(); // force le dessin de la grille
 	}
 
 	public override void _Notification(int what)
 	{
 		if (what == NotificationWMSizeChanged)
-		{
-			AjusterCameraPourAfficherBoard();
-		}
+			AjusterCameraPourAfficherBackground();
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
@@ -63,6 +71,7 @@ public partial class GoBoard : Node2D
 
 	private void UpdateUi()
 	{
+		if (_label == null) return;
 		_label.Text = _currentPlayer == 1 ? "Tour: Noir" : "Tour: Blanc";
 	}
 
@@ -80,7 +89,10 @@ public partial class GoBoard : Node2D
 
 	private void SpawnStone(int x, int y, int player)
 	{
+		if (_stones == null) return;
+
 		var tex = player == 1 ? BlackStoneTexture : WhiteStoneTexture;
+		if (tex == null) return;
 
 		var sprite = new Sprite2D
 		{
@@ -89,7 +101,7 @@ public partial class GoBoard : Node2D
 			ZIndex = 10
 		};
 
-		// Redimensionnement: la pierre fait ~90% d'une cellule
+		// pierre ≈ 90% d’une cellule
 		float target = CellSize * 0.9f;
 		float baseSize = Mathf.Max(tex.GetWidth(), tex.GetHeight());
 		float scale = target / baseSize;
@@ -118,43 +130,56 @@ public partial class GoBoard : Node2D
 		return true;
 	}
 
-	/// <summary>
-	/// Centre la caméra sur le centre du background et ajuste le zoom pour que tout le background soit visible.
-	/// </summary>
-	private void AjusterCameraPourAfficherBoard()
+	public override void _Draw()
 	{
-		if (_camera == null || _background == null || _background.Texture == null)
-			return;
+		if (!DrawGrid) return;
 
-		// Taille de la texture (pixels)
-		Vector2 texSize = _background.Texture.GetSize();
+		float max = (BoardSize - 1) * CellSize;
 
-		// Taille réellement affichée dans le monde (prend en compte les scales héritées)
-		Vector2 worldScale = _background.GlobalScale.Abs();
-		Vector2 displayedSize = new Vector2(texSize.X * worldScale.X, texSize.Y * worldScale.Y);
+		// Verticales
+		for (int x = 0; x < BoardSize; x++)
+		{
+			float px = BoardOrigin.X + x * CellSize;
+			DrawLine(
+				new Vector2(px, BoardOrigin.Y),
+				new Vector2(px, BoardOrigin.Y + max),
+				Colors.Black,
+				GridLineWidth
+			);
+		}
 
-		// Coin haut-gauche monde du sprite selon Centered
-		Vector2 topLeft = _background.Centered
-			? _background.GlobalPosition - displayedSize / 2f
-			: _background.GlobalPosition;
+		// Horizontales
+		for (int y = 0; y < BoardSize; y++)
+		{
+			float py = BoardOrigin.Y + y * CellSize;
+			DrawLine(
+				new Vector2(BoardOrigin.X, py),
+				new Vector2(BoardOrigin.X + max, py),
+				Colors.Black,
+				GridLineWidth
+			);
+		}
+	}
 
-		// Centre du background (en monde)
-		Vector2 center = topLeft + displayedSize / 2f;
+	private void AjusterCameraPourAfficherBackground()
+	{
+		if (_camera == null) return;
 
-		// 1) Centrer la caméra
-		_camera.GlobalPosition = center;
+		// On considère que le background est un carré 640x640 qui commence à (0,0)
+		Vector2 bgTopLeft = Vector2.Zero;
+		Vector2 bgSize = new Vector2(BackgroundSizePx, BackgroundSizePx);
+		Vector2 bgCenter = bgTopLeft + bgSize / 2f;
 
-		// 2) Calcul du zoom pour faire rentrer toute l'image
+		_camera.GlobalPosition = bgCenter;
+
 		Vector2 viewport = GetViewportRect().Size;
-
 		float availableWidth = Mathf.Max(1f, viewport.X - 2f * CameraMarginPx);
 		float availableHeight = Mathf.Max(1f, viewport.Y - 2f * CameraMarginPx);
 
-		// IMPORTANT (Godot): Zoom = écran / monde
-		float zoomX = availableWidth / displayedSize.X;
-		float zoomY = availableHeight / displayedSize.Y;
+		// Zoom = écran / monde (Godot 4)
+		float zoomX = availableWidth / bgSize.X;
+		float zoomY = availableHeight / bgSize.Y;
 
-		// On prend le plus petit pour que tout rentre dans les deux dimensions
 		float z = Mathf.Min(zoomX, zoomY);
 		z = Mathf.Clamp(z, 0.05f, 10f);
 
