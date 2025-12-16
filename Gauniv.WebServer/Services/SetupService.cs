@@ -42,6 +42,7 @@ namespace Gauniv.WebServer.Services
         private ApplicationDbContext? applicationDbContext;
         private readonly IServiceProvider serviceProvider;
         private Task? task;
+        private RoleManager<IdentityRole>? roleManager;
 
         public SetupService(IServiceProvider serviceProvider)
         {
@@ -55,6 +56,15 @@ namespace Gauniv.WebServer.Services
                 applicationDbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
                 var userSignInManager = scope.ServiceProvider.GetService<UserManager<User>>();
                 var signInManager = scope.ServiceProvider.GetService<SignInManager<User>>();
+                roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+
+                roleManager?.CreateAsync(new IdentityRole("Admin")).Wait();
+                roleManager?.CreateAsync(new IdentityRole("User")).Wait();
+
+                if (roleManager is null)
+                {
+                    throw new Exception("RoleManager is null");
+                }
 
                 var games = applicationDbContext?.Games;
 
@@ -63,27 +73,35 @@ namespace Gauniv.WebServer.Services
                     throw new Exception("ApplicationDbContext is null");
                 }
 
+                User local_admin = new User()
+                {
+                    UserName = "admin@test.com",
+                    Email = "admin@test.com",
+                    EmailConfirmed = true,
+                    Forname = "Admin",
+                    Name = "User"
+                };
+
+                var adminResult = userSignInManager?.CreateAsync(local_admin, "adminpassword").Result;
+                if (adminResult != null && adminResult.Succeeded)
+                {
+                    userSignInManager?.AddToRoleAsync(local_admin, "Admin").Wait();
+                }
+
+                // Create users
+                List<User> local_users = new List<User>();
                 for (int i = 0; i < 10; i++)
                 {
-                    var r = userSignInManager?.CreateAsync(new User()
+                    var local_user = new User()
                     {
                         UserName = $"test{i}@test.com",
                         Email = $"test{i}@test.com",
                         EmailConfirmed = true,
                         Forname = $"Test{i}",
                         Name = $"User{i}"
-                    }, "password").Result;
-                }
-
-                for (int i=0; i < 10; i++)
-                {
-                    applicationDbContext.Games.Add(new Game()
-                    {
-                        Name = $"Game{i}",
-                        Description = $"This is the description of game {i}",
-                        payload = Convert.ToBase64String(Encoding.UTF8.GetBytes($"This is the payload of game {i}")),
-                        Price = i * 10.0
-                    });
+                    };
+                    var r = userSignInManager?.CreateAsync(local_user, "password").Result;
+                    local_users.Add(local_user);
                 }
 
                 var tagList = new List<Tags>()
@@ -95,9 +113,51 @@ namespace Gauniv.WebServer.Services
                 };
 
                 applicationDbContext.Tags.AddRange(tagList);
+                applicationDbContext.SaveChanges();
 
-                // ....
+              // Create games
+                List<Game> local_games = new List<Game>();
+                for (int i = 0; i < 10; i++)
+                {
+                    var local_game = new Game()
+                    {
+                        Name = $"Game{i}",
+                        Description = $"This is the description of game {i}",
+                        Payload = Convert.ToBase64String(Encoding.UTF8.GetBytes($"This is the payload of game {i}")),
+                        Price = i * 10.0,
+                        ImagePath = "/images/Goomba.png",
+                        Tags = new List<Tags>()
+                        {
+                            tagList[i % tagList.Count]
+                        }
+                    };
+                    applicationDbContext.Games.Add(local_game);
+                    local_games.Add(local_game);
+                }
 
+                // Assign games to first user
+                if (local_users.Count > 0 && local_games.Count > 0)
+                {
+                    foreach (var local_game in local_games)
+                    {
+                        local_users[0].OwnedGames.Add(local_game);
+                    }
+                }
+
+                var notOwnedGame = new Game()
+                {
+                    Name = $"Jeu RPG Aventure",
+                    Description = $"Un jeu d'aventure et de rôle passionnant.",
+                    Payload = Convert.ToBase64String(Encoding.UTF8.GetBytes($"Ceci est le payload du jeu RPG Aventure")),
+                    Price = 29.99,
+                    ImagePath = "/images/Goomba.png",
+                    Tags = new List<Tags>()
+                    {
+                        tagList.First(t => t.Name == "Aventure"),
+                        tagList.First(t => t.Name == "RPG")
+                    }
+                };
+                applicationDbContext.Games.Add(notOwnedGame);
                 applicationDbContext.SaveChanges();
 
                 return Task.CompletedTask;

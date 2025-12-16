@@ -38,7 +38,7 @@ namespace Gauniv.WebServer.Data
         [Required]
         public string Forname { get; set; }
         [Required]
-        public ICollection<Game> GamesOwned { get; set; } = new List<Game>();
+        public ICollection<Game> OwnedGames { get; set; } = new List<Game>();
     
     }
 }

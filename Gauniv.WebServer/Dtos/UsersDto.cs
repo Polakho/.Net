@@ -7,6 +7,6 @@ namespace Gauniv.WebServer.Dtos
         public string Email { get; set; }
         public string Name { get; set; }
         public string Forname { get; set; }
-        public ICollection<GameDto> GamesOwned { get; set; } = new List<GameDto>();   
+        public ICollection<GameDto> OwnedGames { get; set; } = new List<GameDto>();   
     }
 }

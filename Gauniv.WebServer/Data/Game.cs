@@ -43,9 +43,10 @@ namespace Gauniv.WebServer.Data
         [Required]
         public string Description { get; set; }
         [Required]
-        public string payload { get; set; } // Trouver une autre manière de faire pour le stockage binaire
+        public string Payload { get; set; } // Trouver une autre manière de faire pour le stockage binaire
         [Required]
         public double Price { get; set; }
+        public string ImagePath { get; set; }
         [Required]
         public ICollection<Tags> Tags { get; set; } = new List<Tags>();
     }

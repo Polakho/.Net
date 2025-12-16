@@ -35,8 +35,9 @@ namespace Gauniv.WebServer.Dtos
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string payload { get; set;}
+        public string Payload { get; set;}
         public double Price { get; set;}
+        public string ImagePath { get; set; }
         public ICollection<TagsDto> Tags { get; set; } = new List<TagsDto>();
     }
 }

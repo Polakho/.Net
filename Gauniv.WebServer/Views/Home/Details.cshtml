@@ -1,0 +1,47 @@
+@model Gauniv.WebServer.Data.Game
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@{
+    ViewData["Title"] = "Détail de jeux";
+}
+
+<p>
+    <a asp-action="Index">Back to List</a>
+</p>
+
+<h1>@Model.Name</h1>
+
+<div class="game-details-container">
+    <div class="game-image-section">
+        <img src="@Model.ImagePath" alt="@Model.Name" class="game-detail-image" height="200" width="200"/>
+    </div>
+    <div class="game-info-section">
+        <h2>@Model.Name</h2>
+        <p class="game-price-detail">Price: @Model.Price €</p>
+        <p class="game-description">@Model.Description</p>
+        <div class="game-tags">
+            <h3>Tags:</h3>
+            <ul>
+                @foreach (var tag in Model.Tags)
+                {
+                    <li>@tag.Name</li>
+                }
+            </ul>
+        </div>
+        @if (User?.Identity?.IsAuthenticated is not null or false)
+        {
+            bool local_userOwnsGame = (bool)ViewData["userOwnsGame"];
+            @if (local_userOwnsGame)
+            {
+                <p>You own this game.</p>
+            }
+            else
+            {
+                <form asp-action="Purchase" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-primary">Purchase Game</button>
+                </form>
+            }
+        }
+    </div>
+</div>

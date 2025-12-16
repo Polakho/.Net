@@ -1,13 +1,12 @@
-﻿@model List<Gauniv.WebServer.Data.Game>
+@model List<Gauniv.WebServer.Data.Game>
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @{
-    ViewData["Title"] = "Liste de jeux";
+    ViewData["Title"] = "Liste de jeux modifiables";
 }
 
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 <link href="~/css/gameList.css" rel="stylesheet" type="text/css" />
-
 
 <h1>Jeux disponibles</h1>
 
@@ -42,10 +41,10 @@
 
 <div class="games-container">
 @foreach (var item in Model) {
-    <a asp-action="Details" asp-route-id="@item.Id" class="game-card-link">
+    <a asp-action="EditGamePage" asp-route-id="@item.Id" class="game-card-link">
         <div class="game-card">
             <div class="game-image-placeholder">
-                <img src="@item.ImagePath" alt="@item.Name" class="game-image" />
+                <img src="@item.ImagePath" alt="@item.Name" class="game-image" height="200" width="200"/>
             </div>
             <div class="game-info">
                 <h3>@item.Name</h3>
