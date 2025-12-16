@@ -38,5 +38,15 @@ namespace Gauniv.WebServer.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public string Description { get; set; }
+        [Required]
+        public string payload { get; set; } // Trouver une autre manière de faire pour le stockage binaire
+        [Required]
+        public double Price { get; set; }
+        [Required]
+        public ICollection<Tags> Tags { get; set; } = new List<Tags>();
     }
 }

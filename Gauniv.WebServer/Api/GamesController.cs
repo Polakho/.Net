@@ -51,5 +51,21 @@ namespace Gauniv.WebServer.Api
         private readonly IMapper mapper = mapper;
         private readonly UserManager<User> userManager = userManager;
         private readonly MappingProfile mp = mp;
-    }
+
+        [HttpGet("list")]
+        public async Task<IActionResult> GetGames()
+        {
+            var games = await appDbContext.Games.Include(g => g.Tags).ToListAsync();
+            var gamesDto = mapper.Map<List<GameDto>>(games);
+            return Ok(gamesDto);
+        }
+
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = await userManager.Users.Include(u => u.GamesOwned).ThenInclude(g => g.Tags).ToListAsync();
+            var usersDto = mapper.Map<List<UsersDto>>(users);
+            return Ok(usersDto);
+        }
+    };
 }

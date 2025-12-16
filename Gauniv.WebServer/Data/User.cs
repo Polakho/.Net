@@ -33,5 +33,12 @@ namespace Gauniv.WebServer.Data
 {
     public class User : IdentityUser
     {
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public string Forname { get; set; }
+        [Required]
+        public ICollection<Game> GamesOwned { get; set; } = new List<Game>();
+    
     }
 }

@@ -56,17 +56,45 @@ namespace Gauniv.WebServer.Services
                 var userSignInManager = scope.ServiceProvider.GetService<UserManager<User>>();
                 var signInManager = scope.ServiceProvider.GetService<SignInManager<User>>();
 
+                var games = applicationDbContext?.Games;
+
                 if (applicationDbContext is null)
                 {
                     throw new Exception("ApplicationDbContext is null");
                 }
 
-                var r = userSignInManager?.CreateAsync(new User()
+                for (int i = 0; i < 10; i++)
                 {
-                    UserName = "test@test.com",
-                    Email = "test@test.com",
-                    EmailConfirmed = true
-                }, "password").Result;
+                    var r = userSignInManager?.CreateAsync(new User()
+                    {
+                        UserName = $"test{i}@test.com",
+                        Email = $"test{i}@test.com",
+                        EmailConfirmed = true,
+                        Forname = $"Test{i}",
+                        Name = $"User{i}"
+                    }, "password").Result;
+                }
+
+                for (int i=0; i < 10; i++)
+                {
+                    applicationDbContext.Games.Add(new Game()
+                    {
+                        Name = $"Game{i}",
+                        Description = $"This is the description of game {i}",
+                        payload = Convert.ToBase64String(Encoding.UTF8.GetBytes($"This is the payload of game {i}")),
+                        Price = i * 10.0
+                    });
+                }
+
+                var tagList = new List<Tags>()
+                {
+                    new Tags() { Name = "Action"},
+                    new Tags() { Name = "Aventure"},
+                    new Tags() { Name = "RPG"},
+                    new Tags() { Name = "Rythme"}
+                };
+
+                applicationDbContext.Tags.AddRange(tagList);
 
                 // ....
 
