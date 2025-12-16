@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://8px8enunwe5m"]
+
+[ext_resource type="Script" uid="uid://b3vfjney2w1tj" path="res://GoBoard.cs" id="1_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://bx8radcxn5vxc" path="res://stone_black.png" id="2_1bvp3"]
+[ext_resource type="Texture2D" uid="uid://xlicryfw1tcj" path="res://stone_white.png" id="3_lquwl"]
+[ext_resource type="Texture2D" uid="uid://dixqoqghq8yx6" path="res://board9x9.png" id="4_lquwl"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_0xm2m")
+StonesContainerPath = NodePath("Stones")
+BlackStoneTexture = ExtResource("2_1bvp3")
+WhiteStoneTexture = ExtResource("3_lquwl")
+InfoLabelPath = NodePath("Ui/InfoLabel")
+BackgroundPath = NodePath("Background")
+CameraPath = NodePath("Camera")
+BoardOrigin = Vector2(78, 78)
+CellSize = 130.375
+BoardSize = 9
+
+[node name="Background" type="Sprite2D" parent="."]
+texture = ExtResource("4_lquwl")
+centered = false
+
+[node name="Stones" type="Node2D" parent="."]
+
+[node name="Ui" type="CanvasLayer" parent="."]
+
+[node name="InfoLabel" type="Label" parent="Ui"]
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Camera" type="Camera2D" parent="."]
