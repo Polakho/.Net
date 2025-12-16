@@ -1,21 +1,23 @@
-﻿
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
+using Gauniv.GameServer.Service;
+using Gauniv.GameServer.Message;
+using MessagePack;
 
 namespace Gauniv.GameServer
 {
     public class Server
     {
-       
         private TcpListener _listener;
         private bool _isRunning;
         private List<TcpClient> _clients = new List<TcpClient>();
         private int port = 5000;
+        private readonly GameService _gameService;
         
         public Server(int port)
         {
             this.port = port;
+            _gameService = new GameService();
         }
         
         public async Task StartAsync()
@@ -24,7 +26,7 @@ namespace Gauniv.GameServer
             _listener.Start();
             _isRunning = true;
             
-            Console.WriteLine("Server started on port 5000");
+            Console.WriteLine($"Server started on port {port}");
 
             while (_isRunning)
             {
@@ -39,7 +41,7 @@ namespace Gauniv.GameServer
         private async Task HandleClientAsync(TcpClient client)
         {
             var stream = client.GetStream();
-            var buffer = new byte[1024];
+            var buffer = new byte[4096];
 
             try
             {
@@ -48,11 +50,16 @@ namespace Gauniv.GameServer
                     var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
                     if (bytesRead == 0) break;
 
-                    var message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Console.WriteLine($"Received: {message}");
+                    var message = MessagePackSerializer.Deserialize<MessageGeneric>(new ReadOnlyMemory<byte>(buffer, 0, bytesRead));
+                    Console.WriteLine($"Received message type: {message.Type}");
 
-                    // Echo back to client
-                    await stream.WriteAsync(buffer, 0, bytesRead);
+                    var response = await ProcessMessageAsync(message);
+                    
+                    if (response != null)
+                    {
+                        var responseBytes = MessagePackSerializer.Serialize(response);
+                        await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+                    }
                 }
             }
             catch (Exception ex)
@@ -65,6 +72,29 @@ namespace Gauniv.GameServer
                 client.Close();
                 Console.WriteLine("Client disconnected");
             }
+        }
+
+        private async Task<MessageGeneric?> ProcessMessageAsync(MessageGeneric message)
+        {
+            switch (message.Type)
+            {
+                case "CreateGame":
+                    var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
+                    Console.WriteLine($"Received data: {request.BoardSize}");
+                    var gameId = await _gameService.CreateGameAsync(request.BoardSize);
+                    var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
+                    return new MessageGeneric { Type = "GameCreated", Data = responseData };
+                
+                case "JoinGame":
+                    // À implémenter
+                    break;
+                    
+                case "PlayMove":
+                    // À implémenter
+                    break;
+            }
+            
+            return null;
         }
 
         public void Stop()

@@ -13,7 +13,16 @@ public class Game
     public Player Winner { get; set; }
     public GameState State { get; set; }
     
-    
+    public Game(int boardSize)
+    {
+        Id = Guid.NewGuid().ToString();
+        Created = DateTime.UtcNow;
+        Board = new Board(boardSize);
+        MoveHistory = new List<Move>();
+        Players = new List<Player>();
+        Spectators = new List<Player>();
+        State = GameState.WaitingForPlayers;
+    }
 }
 
 public enum GameState

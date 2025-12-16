@@ -1,11 +1,10 @@
-﻿/*
-using Gauniv.GameServer.Model;
+﻿using Gauniv.GameServer.Model;
 using MessagePack;
 
 namespace Gauniv.GameServer.Message;
 
 [MessagePackObject]
-public class Message
+public class MessageGeneric
 {
     [Key(0)]
     public string Type { get; set; }
@@ -31,13 +30,3 @@ public class JoinGameRequest
     public bool AsSpectator { get; set; }
 }
 
-[MessagePackObject]
-public class PlayMoveRequest
-{
-    [Key(0)]
-    public string GameId { get; set; }
-    
-    [Key(1)]
-    public Point? Position { get; set; }
-}
-*/

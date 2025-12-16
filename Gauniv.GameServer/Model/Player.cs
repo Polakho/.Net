@@ -12,5 +12,13 @@ namespace Gauniv.GameServer.Model
         public TcpClient Tcp { get; set; }
         public Stream Stream { get; set; }
         public StoneColor Color { get; set; }
+        
+        public Player(TcpClient tcp, string name)
+        {
+            Id = Guid.NewGuid();
+            Name = name;
+            Tcp = tcp;
+            Stream = tcp.GetStream();
+        }
     }
 }
