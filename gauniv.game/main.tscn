@@ -1,3 +1,24 @@
-[gd_scene format=3 uid="uid://d1jr6p7bwyvxi"]
+[gd_scene load_steps=5 format=3 uid="uid://d1jr6p7bwyvxi"]
+
+[ext_resource type="Script" uid="uid://brsty2icro0gg" path="res://GoBoard.cs" id="1_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://b0hki0rat4uuk" path="res://board.png" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://bjbsumw76728x" path="res://stone_black.png" id="2_1bvp3"]
+[ext_resource type="Texture2D" uid="uid://cp80ix4yfgsu" path="res://stone_white.png" id="3_lquwl"]
 
 [node name="Main" type="Node2D"]
+script = ExtResource("1_0xm2m")
+StonesContainerPath = NodePath("Stones")
+BlackStoneTexture = ExtResource("2_1bvp3")
+WhiteStoneTexture = ExtResource("3_lquwl")
+InfoLabelPath = NodePath("Ui/InfoLabel")
+
+[node name="Background" type="Sprite2D" parent="."]
+texture = ExtResource("1_ig7tw")
+
+[node name="Stones" type="Node2D" parent="."]
+
+[node name="Ui" type="CanvasLayer" parent="."]
+
+[node name="InfoLabel" type="Label" parent="Ui"]
+offset_right = 40.0
+offset_bottom = 23.0
