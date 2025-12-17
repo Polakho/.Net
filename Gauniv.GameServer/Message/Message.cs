@@ -30,3 +30,57 @@ public class JoinGameRequest
     public bool AsSpectator { get; set; }
 }
 
+[MessagePackObject]
+public class GetGameStateRequest 
+{
+    [Key(0)]
+    public string GameId { get; set; }
+}
+
+[MessagePackObject]
+public class GetGameStateResponse
+{
+    [Key(0)]
+    public string GameId { get; set; }
+    
+    [Key(1)]
+    public int BoardSize { get; set; }
+    
+    [Key(2)]
+    public String currentPlayer { get; set; }
+    
+    [Key(3)]
+    public StoneColor?[,] Board { get; set; }
+}
+
+[MessagePackObject]
+public class PlayerInfo
+{
+    [Key(0)]
+    public string Id { get; set; }
+    
+    [Key(1)]
+    public bool IsSpectator { get; set; }
+}
+
+[MessagePackObject]
+public class MakeMoveRequest
+{
+    [Key(0)]
+    public string GameId { get; set; }
+    
+    [Key(1)]
+    public int X { get; set; }
+    
+    [Key(2)]
+    public int Y { get; set; }
+
+    [Key(3)] public bool IsPass { get; set; }
+}
+
+[MessagePackObject]
+public class WrongMoveResponse
+{
+    [Key(0)]
+    public string Reason { get; set; }
+}

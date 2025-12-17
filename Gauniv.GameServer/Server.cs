@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Buffers;
+using System.Net;
 using System.Net.Sockets;
 using Gauniv.GameServer.Service;
 using Gauniv.GameServer.Message;
@@ -42,16 +43,16 @@ namespace Gauniv.GameServer
             var player = new Player(client);
             _players[player.Id.ToString()] = player;
             var stream = client.GetStream();
-            var buffer = new byte[4096];
+            MessagePackStreamReader reader = new MessagePackStreamReader(stream);
             Console.WriteLine($"{server}Client connected with ID: {player.Id}");
             try
             {
                 while (client.Connected)
                 {
-                    var bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                    if (bytesRead == 0) break;
-
-                    var message = MessagePackSerializer.Deserialize<MessageGeneric>(new ReadOnlyMemory<byte>(buffer, 0, bytesRead));
+                    var cancelToken = new CancellationTokenSource(TimeSpan.FromMinutes(30)).Token;
+                    var binaryData = await reader.ReadAsync(cancelToken);
+                    var message = MessagePackSerializer.Deserialize<MessageGeneric>(binaryData.Value, null, cancelToken);
+                    
                     Console.WriteLine($"{server}Received message type: {message.Type}");
 
                     var response = await ProcessMessageAsync(message, player);
@@ -79,25 +80,43 @@ namespace Gauniv.GameServer
         {
             switch (message.Type)
             {
-                case "CreateGame":
+                case MessageType.CreateGame:
                     var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {request.BoardSize}");
                     var gameId = await _gameService.CreateGameAsync(request.BoardSize);
                     var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
                     return new MessageGeneric { Type = "GameCreated", Data = responseData };
                 
-                case "JoinGame":
+                case MessageType.JoinGame:
                     var joinRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {joinRequest.GameId}, AsSpectator: {joinRequest.AsSpectator}");
                     var joinResult = await _gameService.JoinGameAsync(joinRequest.GameId, player, joinRequest.AsSpectator);
                     var joinResponseData = MessagePackSerializer.Serialize(new { Result = joinResult });
                     return new MessageGeneric { Type = "GameJoined", Data = joinResponseData };
                     
-                case "PlayMove":
-                    // À implémenter
+                case MessageType.GetGameState:
+                    var stateRequest = MessagePackSerializer.Deserialize<GetGameStateRequest>(message.Data);
+                    Console.WriteLine($"{server}Received data: {stateRequest.GameId}");
+                    var gameStateResponse = await _gameService.GetGameAsync(stateRequest.GameId);
+                    var stateResponseData = MessagePackSerializer.Serialize(gameStateResponse);
+                    return new MessageGeneric { Type = MessageType.GameState, Data = stateResponseData };
+                    
+                case MessageType.MakeMove:
+                    var moveRequest = MessagePackSerializer.Deserialize<MakeMoveRequest>(message.Data);
+                    var moveResult = await _gameService.MakeMoveAsync(moveRequest.GameId, player, moveRequest.X, moveRequest.Y, moveRequest.IsPass);
+                    if (moveResult is WrongMoveResponse wrongMove)
+                    {
+                        var wrongMoveData = MessagePackSerializer.Serialize(wrongMove);
+                        return new MessageGeneric { Type = MessageType.WrongMove, Data = wrongMoveData };
+                    }
+                    else if (moveResult is GetGameStateResponse gameState)
+                    {
+                        var gameStateData = MessagePackSerializer.Serialize(gameState);
+                        return new MessageGeneric { Type = MessageType.GameState, Data = gameStateData };
+                    }
                     break;
+                
             }
-            
             return null;
         }
 
