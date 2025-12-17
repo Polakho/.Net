@@ -1,0 +1,28 @@
+@model List<Gauniv.WebServer.Data.Tags>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@{
+    ViewData["Title"] = "Delete Tags";
+}
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+<h1>Choose Tags to Delete</h1> 
+
+<div class="tag-list-container">
+    <form asp-action="DeleteTag" method="post" class="tag-list-form">
+        <div class="tag-checkboxes">
+            @foreach (var tag in Model)
+            {
+                <div class="form-check">
+                    <input 
+                        type="checkbox" 
+                        name="SelectedTagIds" 
+                        value="@tag.Id" 
+                        id="tag_@tag.Id" />
+                    <label for="tag_@tag.Id">@tag.Name</label>
+                </div>
+            }
+        </div>
+        <button type="submit" class="btn btn-danger">Delete Selected Tags</button>
+    </form>
+</div>

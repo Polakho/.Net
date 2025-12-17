@@ -1,0 +1,17 @@
+@model Gauniv.WebServer.ViewModels.TagViewModel
+@{
+    ViewData["Title"] = "Edit Tag";
+}
+
+<h1>Edit Tag</h1>
+
+<div class="edit-tag-form-container">
+    <form asp-action="EditTag" method="post" class="edit-tag-form">
+        <input asp-for="Id" type="hidden" />
+        <div class="form-group">
+            <label asp-for="Name">Tag's Name</label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>

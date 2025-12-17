@@ -2,13 +2,13 @@
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @{
-    ViewData["Title"] = "Liste de jeux du joueur";
+    ViewData["Title"] = "Owned Games";
 }
 
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 <link href="~/css/gameList.css" rel="stylesheet" type="text/css" />
 
-<h1>Jeux possédés</h1>
+<h1>Owned Games</h1>
 
 <div class="games-container">
 @foreach(var item in Model) {

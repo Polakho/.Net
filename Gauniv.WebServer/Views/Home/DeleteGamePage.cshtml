@@ -2,16 +2,16 @@
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @{
-    ViewData["Title"] = "Suppression de jeux";
+    ViewData["Title"] = "Delete Games";
 }
 
 <link href="~/css/gameList.css" rel="stylesheet" type="text/css" />
 
-<h1>Choisissez un jeu à supprimer</h1>
+<h1>Choose games to delete</h1>
 
 <div class="game-filter-section">
     <form method="get" asp-action="Index" class="filter-form">
-        <label>Filtrer par tags:</label>
+        <label>Filter by tags:</label>
         <div class="tag-checkboxes">
             @foreach (var local_tag in (List<Gauniv.WebServer.Data.Tags>)ViewData["Tags"])
             {
@@ -33,8 +33,8 @@
                 </div>
             }
         </div>
-        <button type="submit" class="btn btn-primary">Filtrer</button>
-        <a href="@Url.Action("Index")" class="btn btn-secondary">Réinitialiser</a>
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">Reset</a>
     </form>
 </div>
 

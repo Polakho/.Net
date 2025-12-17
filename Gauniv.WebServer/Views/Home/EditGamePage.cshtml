@@ -2,23 +2,23 @@
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @{
-    ViewData["Title"] = "Création d'un jeu";
+    ViewData["Title"] = "Edit Game";
 }
 
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
-<h1>Jeux disponibles</h1>
+<h1>Edit Game</h1>
 
 <div class="create-game-form-container">
     <form asp-action="EditGame" method="post" enctype="multipart/form-data" class="create-game-form">
         <div class="form-group">
             <input type="hidden" asp-for="Id" value="@Model.Id" />
-            <label asp-for="Name">Nom du jeu</label>
+            <label asp-for="Name">Game's Name</label>
             <input asp-for="Name" class="form-control" value="@Model.Name" />
             <label asp-for="Description">Description</label>
             <textarea asp-for="Description" class="form-control">@Model.Description</textarea>
-            <label asp-for="Price">Prix (€)</label>
+            <label asp-for="Price">Price (€)</label>
             <input asp-for="Price" class="form-control" type="number" step="0.01" value="@Model.Price" />
-            <label asp-for="ImagePath">Image du jeu</label>
+            <label asp-for="ImagePath">Game's Image</label>
             <input asp-for="ImagePath" class="form-control" type="text" value="@Model.ImagePath" />
             <label>Tags</label>
             <div class="tag-checkboxes">
@@ -36,6 +36,6 @@
                 }
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Modifier le jeu</button>
+        <button type="submit" class="btn btn-primary">Edit Game</button>
     </form>
 </div>

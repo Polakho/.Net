@@ -26,8 +26,11 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
+using System.ComponentModel.Design;
+using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Text;
 using CommunityToolkit.HighPerformance;
 using Gauniv.WebServer.Data;
@@ -193,6 +196,43 @@ namespace Gauniv.WebServer.Controllers
             return View(local_viewModel);
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateTagPage()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteTagPage()
+        {
+            var local_tags = await applicationDbContext.Tags.ToListAsync();
+            return View(local_tags);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditTagListPage()
+        {
+            var local_tags = await applicationDbContext.Tags.ToListAsync();
+            return View(local_tags);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditTagPage(int id)
+        {
+            var tag = await applicationDbContext.Tags.FirstOrDefaultAsync(t => t.Id == id);
+            if (tag == null) { return NotFound();}
+
+            var local_viewModel = new TagViewModel
+            {
+                Id = tag.Id,
+                Name = tag.Name
+            };
+            return View(local_viewModel);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Purchase(int id)
@@ -287,6 +327,55 @@ namespace Gauniv.WebServer.Controllers
             }
 
             applicationDbContext.Games.Remove(local_game);
+            await applicationDbContext.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> CreateTag(TagListModel model)
+        {
+            string[] tagNames = model.List.Split(';');
+            foreach (var tagName in tagNames)
+            {
+                var newTag = new Tags{ Name = tagName.Trim() };
+                applicationDbContext.Tags.Add(newTag);
+            }
+
+            await applicationDbContext.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteTag(int[] SelectedTagIds)
+        {
+            
+            foreach (var id in SelectedTagIds)
+            {
+                var local_tag = await applicationDbContext.Tags.FindAsync(id);
+                if (local_tag != null)
+                {
+                    applicationDbContext.Tags.Remove(local_tag);
+                }
+            }
+            await applicationDbContext.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditTag(TagViewModel model)
+        {
+            var local_tag = await applicationDbContext.Tags.FirstOrDefaultAsync(t => t.Id == model.Id);
+            if (local_tag == null)
+            {
+                return NotFound();
+            }
+
+            local_tag.Name = model.Name;
+
+            applicationDbContext.Tags.Update(local_tag);
             await applicationDbContext.SaveChangesAsync();
             return RedirectToAction("Index");
         }
