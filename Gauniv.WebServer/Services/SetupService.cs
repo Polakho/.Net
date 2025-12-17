@@ -78,8 +78,6 @@ namespace Gauniv.WebServer.Services
                     UserName = "admin@test.com",
                     Email = "admin@test.com",
                     EmailConfirmed = true,
-                    Forname = "Admin",
-                    Name = "User"
                 };
 
                 var adminResult = userSignInManager?.CreateAsync(local_admin, "adminpassword").Result;
@@ -97,8 +95,6 @@ namespace Gauniv.WebServer.Services
                         UserName = $"test{i}@test.com",
                         Email = $"test{i}@test.com",
                         EmailConfirmed = true,
-                        Forname = $"Test{i}",
-                        Name = $"User{i}"
                     };
                     var r = userSignInManager?.CreateAsync(local_user, "password").Result;
                     local_users.Add(local_user);

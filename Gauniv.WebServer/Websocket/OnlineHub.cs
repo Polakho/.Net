@@ -52,10 +52,38 @@ namespace Gauniv.WebServer.Websocket
 
         public async override Task OnConnectedAsync()
         {
+            var httpContext = Context.GetHttpContext();
+            var userId = userManager.GetUserId(httpContext.User);
+            if (userId != null)
+            {
+                var user  = await userManager.FindByIdAsync(userId);
+                if (user != null)
+                {
+                    user.IsOnline = true;
+                    await userManager.UpdateAsync(user);
+                }
+            }
+            await base.OnConnectedAsync();
         }
 
         public async override Task OnDisconnectedAsync(Exception? exception)
         {
-        }
+            var httpContext = Context.GetHttpContext();
+            var userId = userManager.GetUserId(httpContext.User);
+            if (userId != null && ConnectedUsers.ContainsKey(userId))
+            {
+                ConnectedUsers[userId].Count -= 1;
+                if (ConnectedUsers[userId].Count <= 0)
+                {
+                    var user = await userManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        user.IsOnline = false;
+                        await userManager.UpdateAsync(user);
+                    }
+                                }
+            }
+             base.OnDisconnectedAsync(exception);
+        }    
     }
 }

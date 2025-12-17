@@ -34,9 +34,7 @@ namespace Gauniv.WebServer.Data
     public class User : IdentityUser
     {
         [Required]
-        public string Name { get; set; }
-        [Required]
-        public string Forname { get; set; }
+        public bool IsOnline { get; set;} = false;
         [Required]
         public ICollection<Game> OwnedGames { get; set; } = new List<Game>();
     

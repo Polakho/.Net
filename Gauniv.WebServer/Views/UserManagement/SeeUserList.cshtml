@@ -1,0 +1,39 @@
+@model IEnumerable<Gauniv.WebServer.Dtos.UsersDto>
+
+<h2>Utilisateurs Connectés</h2>
+
+@if (Model != null)
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom d'utilisateur</th>
+                <th>Email</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        @if (user.IsOnline)
+                        {
+                            <span class="badge bg-success">En ligne</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Hors ligne</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Aucun utilisateur connecté.</p>
+}
