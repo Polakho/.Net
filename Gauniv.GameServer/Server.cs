@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using Gauniv.GameServer.Service;
 using Gauniv.GameServer.Message;
+using Gauniv.GameServer.Model;
 using MessagePack;
 
 namespace Gauniv.GameServer
@@ -10,9 +11,10 @@ namespace Gauniv.GameServer
     {
         private TcpListener _listener;
         private bool _isRunning;
-        private List<TcpClient> _clients = new List<TcpClient>();
+        private Dictionary<string, Player> _players = new Dictionary<string, Player>();
         private int port = 5000;
         private readonly GameService _gameService;
+        private String server = "SERVER-";
         
         public Server(int port)
         {
@@ -26,23 +28,22 @@ namespace Gauniv.GameServer
             _listener.Start();
             _isRunning = true;
             
-            Console.WriteLine($"Server started on port {port}");
+            Console.WriteLine($"{server}Server started on port {port}");
 
             while (_isRunning)
             {
                 var client = await _listener.AcceptTcpClientAsync();
-                _clients.Add(client);
-                Console.WriteLine("Client connected");
-                
                 _ = HandleClientAsync(client);
             }
         }
         
         private async Task HandleClientAsync(TcpClient client)
         {
+            var player = new Player(client);
+            _players[player.Id.ToString()] = player;
             var stream = client.GetStream();
             var buffer = new byte[4096];
-
+            Console.WriteLine($"{server}Client connected with ID: {player.Id}");
             try
             {
                 while (client.Connected)
@@ -51,9 +52,9 @@ namespace Gauniv.GameServer
                     if (bytesRead == 0) break;
 
                     var message = MessagePackSerializer.Deserialize<MessageGeneric>(new ReadOnlyMemory<byte>(buffer, 0, bytesRead));
-                    Console.WriteLine($"Received message type: {message.Type}");
+                    Console.WriteLine($"{server}Received message type: {message.Type}");
 
-                    var response = await ProcessMessageAsync(message);
+                    var response = await ProcessMessageAsync(message, player);
                     
                     if (response != null)
                     {
@@ -64,30 +65,33 @@ namespace Gauniv.GameServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"{server}Error: {ex.Message}");
             }
             finally
             {
-                _clients.Remove(client);
+                _players.Remove(player.Id.ToString());
                 client.Close();
-                Console.WriteLine("Client disconnected");
+                Console.WriteLine($"{server}Client disconnected");
             }
         }
 
-        private async Task<MessageGeneric?> ProcessMessageAsync(MessageGeneric message)
+        private async Task<MessageGeneric?> ProcessMessageAsync(MessageGeneric message, Player player)
         {
             switch (message.Type)
             {
                 case "CreateGame":
                     var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
-                    Console.WriteLine($"Received data: {request.BoardSize}");
+                    Console.WriteLine($"{server}Received data: {request.BoardSize}");
                     var gameId = await _gameService.CreateGameAsync(request.BoardSize);
                     var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
                     return new MessageGeneric { Type = "GameCreated", Data = responseData };
                 
                 case "JoinGame":
-                    // À implémenter
-                    break;
+                    var joinRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
+                    Console.WriteLine($"{server}Received data: {joinRequest.GameId}, AsSpectator: {joinRequest.AsSpectator}");
+                    var joinResult = await _gameService.JoinGameAsync(joinRequest.GameId, player, joinRequest.AsSpectator);
+                    var joinResponseData = MessagePackSerializer.Serialize(new { Result = joinResult });
+                    return new MessageGeneric { Type = "GameJoined", Data = joinResponseData };
                     
                 case "PlayMove":
                     // À implémenter

@@ -10,10 +10,12 @@ public class GameClient
     private int _serverPort = 5000;
     private TcpClient _client;
     private NetworkStream _stream;
+    private string clientTag = "CLIENT-";
     
-    public GameClient()
+    public GameClient(string name)
     {
         _client = new TcpClient();
+        clientTag = "CLIENT-"+name+"-";
     }
     
     public async Task ConnectToServer()
@@ -22,22 +24,26 @@ public class GameClient
         {
             await _client.ConnectAsync(_serverIp, _serverPort);
             _stream = _client.GetStream();
-            Console.WriteLine("Connected to server");
-            
-            // Send a CreateGame message asa test
-            var createGameRequest = new CreateGameRequest { BoardSize = 19 };
-            var data = MessagePackSerializer.Serialize(createGameRequest);
-            var envelope = new MessageGeneric 
-            { 
-                Type = MessageType.CreateGame, 
-                Data = data 
-            };
-            var bytes = MessagePackSerializer.Serialize(envelope);
-            await _stream.WriteAsync(bytes);        
+            Console.WriteLine($"{clientTag}Connected to server");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error connecting to server: {ex.Message}");
+            Console.WriteLine($"{clientTag}Error connecting to server: {ex.Message}");
+        }
+    }
+    
+    public async Task SendMessageAsync(MessageGeneric message)
+    {
+        try
+        {
+            byte[] data = MessagePackSerializer.Serialize(message);
+            await _stream.WriteAsync(data, 0, data.Length);
+            Console.WriteLine($"{clientTag}Message sent to server");
+            // Send a CreateGame message asa test
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"{clientTag}Error sending message: {ex.Message}");
         }
     }
     

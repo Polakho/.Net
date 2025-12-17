@@ -12,7 +12,7 @@ public class Game
     public List<Player> Spectators { get; set; }
     public Player Winner { get; set; }
     public GameState State { get; set; }
-    
+
     public Game(int boardSize)
     {
         Id = Guid.NewGuid().ToString();
@@ -23,11 +23,20 @@ public class Game
         Spectators = new List<Player>();
         State = GameState.WaitingForPlayers;
     }
-}
 
-public enum GameState
-{
-    WaitingForPlayers,
-    InProgress,
-    Finished
+    public void UpdateGameState()
+    {
+        if (Players.Count == 2 && State == GameState.WaitingForPlayers)
+        {
+            State = GameState.InProgress;
+            Console.WriteLine($"Game {Id} started with players {Players[0].Id} and {Players[1].Id}");
+        }
+    }
+
+    public enum GameState
+    {
+        WaitingForPlayers,
+        InProgress,
+        Finished
+    }
 }
