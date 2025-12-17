@@ -1,6 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://dshyb7e1n6eg7"]
+[gd_scene load_steps=7 format=3 uid="uid://dshyb7e1n6eg7"]
 
 [ext_resource type="Script" uid="uid://b4bho62l4k6nq" path="res://Script/Screens/MatchScreen.cs" id="1_usroj"]
+[ext_resource type="Script" uid="uid://df76hnhgfkd63" path="res://Script/App/BoardController.cs" id="2_052ei"]
+[ext_resource type="Texture2D" uid="uid://b2np807x23p05" path="res://background.png" id="2_cxgpp"]
+[ext_resource type="Texture2D" uid="uid://bx8radcxn5vxc" path="res://stone_black.png" id="3_31k75"]
+[ext_resource type="Texture2D" uid="uid://cs6ej0yxy0wkx" path="res://board.png" id="3_052ei"]
+[ext_resource type="Texture2D" uid="uid://xlicryfw1tcj" path="res://stone_white.png" id="4_i8i8u"]
 
 [node name="MatchScreen" type="Control"]
 layout_mode = 3
@@ -11,18 +16,46 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_usroj")
 
-[node name="Label" type="Label" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "MATCH SCREEN"
+[node name="BoardRoot" type="Node2D" parent="."]
 
-[node name="BackButton" type="Button" parent="."]
+[node name="BoardController" type="Node2D" parent="BoardRoot"]
+script = ExtResource("2_052ei")
+StonesContainerPath = NodePath("../Stones")
+InfoLabelPath = NodePath("../../Ui/InfoLabel")
+CameraPath = NodePath("../Camera2D")
+GridSpritePath = NodePath("../GridSprite")
+BlackStoneTexture = ExtResource("3_31k75")
+WhiteStoneTexture = ExtResource("4_i8i8u")
+
+[node name="Background" type="Sprite2D" parent="BoardRoot"]
+texture = ExtResource("2_cxgpp")
+centered = false
+
+[node name="GridSprite" type="Sprite2D" parent="BoardRoot"]
+texture = ExtResource("3_052ei")
+centered = false
+offset = Vector2(64, 64)
+
+[node name="Stones" type="Node2D" parent="BoardRoot"]
+
+[node name="Camera2D" type="Camera2D" parent="BoardRoot"]
+
+[node name="Ui" type="Control" parent="."]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BackButton" type="Button" parent="Ui"]
 layout_mode = 0
-offset_left = 34.0
-offset_top = 26.0
-offset_right = 79.0
-offset_bottom = 57.0
+offset_left = 200.0
+offset_right = 245.0
+offset_bottom = 31.0
 text = "Back"
 
-[connection signal="pressed" from="BackButton" to="." method="OnBackPressed"]
+[node name="InfoLabel" type="Label" parent="Ui"]
+layout_mode = 0
+offset_left = 1.0
+offset_right = 41.0
+offset_bottom = 23.0
+
+[connection signal="pressed" from="Ui/BackButton" to="." method="OnBackPressed"]
