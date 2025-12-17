@@ -51,6 +51,7 @@ namespace Gauniv.WebServer.Controllers
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly UserManager<User> userManager = userManager;
 
+        [HttpGet]
         public async Task<IActionResult> Index(string? searchString,int[]? tagIds, double? minPrice = null, double? maxPrice = null, string? seeOwned = "true", string? notOwned = "true")
         {
             var local_query = applicationDbContext.Games.Include(g => g.Tags).AsQueryable();
@@ -153,7 +154,7 @@ namespace Gauniv.WebServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> OwnedGames()
+        public async Task<IActionResult> OwnedGames(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
         {
             if (User?.Identity?.IsAuthenticated is null or false)
             {
@@ -170,9 +171,42 @@ namespace Gauniv.WebServer.Controllers
                 return NotFound();
             }
 
-            var ownedGames = user.OwnedGames;
+            var local_query = user.OwnedGames.AsQueryable();
 
-            return View(ownedGames);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                local_query = local_query.Where(g => g.Name.Contains(searchString));
+            }
+
+            if (tagIds != null && tagIds.Length > 0)
+            {
+                local_query = local_query.Where(g => g.Tags.Any(t => tagIds.Contains(t.Id)));
+            }
+
+            if (minPrice.HasValue)
+            {
+                local_query = local_query.Where(g => g.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                local_query = local_query.Where(g => g.Price <= maxPrice.Value);
+            }
+            else
+            {
+                maxPrice = await applicationDbContext.Games.MaxAsync(g => g.Price);
+            }
+
+            var local_ownedGames = local_query.ToList();
+            var local_tags = await applicationDbContext.Tags.ToListAsync();
+
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["Tags"] = local_tags;
+            ViewData["SelectedTagIds"] = tagIds ?? new int[] { };
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = maxPrice;
+
+            return View(local_ownedGames);
         }
 
         [HttpPost]

@@ -32,7 +32,7 @@
                         @if(User?.Identity?.IsAuthenticated ?? false)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-action="OwnedGames">OwnedGames</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="OwnedGames">OwnedGames</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="UserManagement" asp-action="FriendList">Friend List</a>

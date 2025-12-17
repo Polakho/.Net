@@ -24,6 +24,41 @@ namespace Gauniv.WebServer.Controllers
         private readonly UserManager<User> userManager = userManager;
 
 
+        private async Task<(List<Game> games, List<Tags> tags, double maxPrice)> ApplyGameFilters(
+            string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
+        {
+            var local_query = applicationDbContext.Games.Include(g => g.Tags).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                local_query = local_query.Where(g => g.Name.Contains(searchString));
+            }
+
+            if (tagIds != null && tagIds.Length > 0)
+            {
+                local_query = local_query.Where(g => g.Tags.Any(t => tagIds.Contains(t.Id)));
+            }
+
+            if (minPrice.HasValue)
+            {
+                local_query = local_query.Where(g => g.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                local_query = local_query.Where(g => g.Price <= maxPrice.Value);
+            }
+            else
+            {
+                maxPrice = await applicationDbContext.Games.MaxAsync(g => g.Price);
+            }
+
+            var local_games = local_query.ToList();
+            var local_tags = await applicationDbContext.Tags.ToListAsync();
+
+            return (local_games, local_tags, maxPrice.Value);
+        }
+
         [HttpGet]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateGamePage(int[]? tagIds)
@@ -41,39 +76,30 @@ namespace Gauniv.WebServer.Controllers
 
         [HttpGet]
         [Authorize(Roles= "Admin")]
-        public async Task<IActionResult> DeleteGamePage(int[]? tagIds)
+        public async Task<IActionResult> DeleteGamePage(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
         {
-            var local_query = applicationDbContext.Games.Include(g => g.Tags).AsQueryable();
+            var (local_games, local_tags, local_maxPrice) = await ApplyGameFilters(searchString, tagIds, minPrice, maxPrice);
 
-            if (tagIds != null && tagIds.Length > 0)
-            {
-                local_query = local_query.Where(g => g.Tags.Any(t => tagIds.Contains(t.Id)));
-            }
-
-            var local_games = await local_query.ToListAsync();
-            var local_tags = await applicationDbContext.Tags.ToListAsync();
-
+            ViewData["CurrentFilter"] = searchString;
             ViewData["Tags"] = local_tags;
             ViewData["SelectedTagIds"] = tagIds ?? new int[] { };
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = local_maxPrice;
 
             return View(local_games);
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditGameListPage(int[]? tagIds)
+        public async Task<IActionResult> EditGameListPage(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
         {
-            var local_query = applicationDbContext.Games.Include(g => g.Tags).AsQueryable();
-            if (tagIds != null && tagIds.Length > 0)
-            {
-                local_query = local_query.Where(g => g.Tags.Any(t => tagIds.Contains(t.Id)));
-            }
+            var (local_games, local_tags, local_maxPrice) = await ApplyGameFilters(searchString, tagIds, minPrice, maxPrice);
 
-            var local_games = await local_query.ToListAsync();
-            var local_tags = await applicationDbContext.Tags.ToListAsync();
-
+            ViewData["CurrentFilter"] = searchString;
             ViewData["Tags"] = local_tags;
             ViewData["SelectedTagIds"] = tagIds ?? new int[] { };
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = local_maxPrice;
 
             return View(local_games);
         }

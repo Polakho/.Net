@@ -3,12 +3,22 @@
     ViewData["Title"] = "Create Tag";
 }
 
-<h1>Create new tags</h1>
-<p>Seperate each tag by a semi-colon (;)</p>
+<div class="create-tag-container">
+    <div class="create-tag-header">
+        <h1>Create New Tags</h1>
+        <p class="subtitle">Add new tags to your collection</p>
+    </div>
 
-<div class="create-tag-form-container">
     <form asp-action="CreateTag" method="post" enctype="multipart/form-data" class="create-tag-form">
-        <input asp-for="List" class="form-control" type="text" />
-        <button type="submit" class="btn btn-primary">Create Tags</button>
+        <div class="form-group">
+            <label class="form-label">Tag Names</label>
+            <input asp-for="List" class="form-input" type="text" placeholder="Separate each tag with a semi-colon (;)" />
+            <p class="form-hint">Example: RPG; Strategy; Multiplayer</p>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Tags</button>
+            <a asp-action="EditTagListPage" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>

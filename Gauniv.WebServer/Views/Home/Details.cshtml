@@ -5,43 +5,58 @@
     ViewData["Title"] = "Détail de jeux";
 }
 
-<p>
-    <a asp-action="Index">Back to List</a>
-</p>
+<link href="~/css/gameDetails.css" rel="stylesheet" type="text/css" />
 
-<h1>@Model.Name</h1>
+<div class="details-header">
+    <a asp-action="Index" class="back-link">← Back to Games</a>
+</div>
 
 <div class="game-details-container">
     <div class="game-image-section">
-        <img src="@Model.ImagePath" alt="@Model.Name" class="game-detail-image" height="200" width="200"/>
+        <img src="@Model.ImagePath" alt="@Model.Name" class="game-detail-image"/>
     </div>
+
     <div class="game-info-section">
-        <h2>@Model.Name</h2>
-        <p class="game-price-detail">Price: @Model.Price €</p>
-        <p class="game-description">@Model.Description</p>
-        <div class="game-tags">
-            <h3>Tags:</h3>
-            <ul>
-                @foreach (var tag in Model.Tags)
-                {
-                    <li>@tag.Name</li>
-                }
-            </ul>
+        <div class="game-header">
+            <h1>@Model.Name</h1>
+            <p class="game-price-detail">@Model.Price.ToString("F2") €</p>
         </div>
-        @if (User?.Identity?.IsAuthenticated is not null or false)
-        {
-            bool local_userOwnsGame = (bool)ViewData["userOwnsGame"];
-            @if (local_userOwnsGame)
+
+        <p class="game-description">@Model.Description</p>
+
+        <div class="game-tags">
+            <h3>Tags</h3>
+            <div class="tags-list">
+                @if (Model.Tags != null && Model.Tags.Any())
+                {
+                    @foreach (var tag in Model.Tags)
+                    {
+                        <span class="tag-badge">@tag.Name</span>
+                    }
+                }
+                else
+                {
+                    <p class="no-tags">No tags</p>
+                }
+            </div>
+        </div>
+
+        <div class="purchase-section">
+            @if (User?.Identity?.IsAuthenticated is not null or false)
             {
-                <p>You own this game.</p>
+                bool local_userOwnsGame = (bool)ViewData["userOwnsGame"];
+                @if (local_userOwnsGame)
+                {
+                    <div class="owned-badge">✓ You own this game</div>
+                }
+                else
+                {
+                    <form asp-action="Purchase" method="post" class="purchase-form">
+                        <input type="hidden" asp-for="Id" />
+                        <button type="submit" class="btn btn-primary btn-large">Purchase Game</button>
+                    </form>
+                }
             }
-            else
-            {
-                <form asp-action="Purchase" method="post">
-                    <input type="hidden" asp-for="Id" />
-                    <button type="submit" class="btn btn-primary">Purchase Game</button>
-                </form>
-            }
-        }
+        </div>
     </div>
 </div>

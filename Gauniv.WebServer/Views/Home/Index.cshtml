@@ -7,7 +7,7 @@
 
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 <link href="~/css/gameList.css" rel="stylesheet" type="text/css" />
-
+<script src="~/js/filterToggle.js"></script>
 
 <h1>Available Games</h1>
 
@@ -120,17 +120,6 @@
         </div>
     </form>
 </div>
-
-<script>
-    const filterToggle = document.getElementById('filterToggle');
-    const filterOptions = document.getElementById('filterOptions');
-
-    filterToggle.addEventListener('click', function(e) {
-        e.preventDefault();
-        filterOptions.classList.toggle('show');
-        filterToggle.classList.toggle('collapsed');
-    });
-</script>
 
 <div class="games-container">
 @foreach (var item in Model) {

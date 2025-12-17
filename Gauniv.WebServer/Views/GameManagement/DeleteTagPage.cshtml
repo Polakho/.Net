@@ -5,24 +5,40 @@
     ViewData["Title"] = "Delete Tags";
 }
 
-<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
-<h1>Choose Tags to Delete</h1> 
+<link href="~/css/deleteTag.css" rel="stylesheet" type="text/css" />
 
-<div class="tag-list-container">
-    <form asp-action="DeleteTag" method="post" class="tag-list-form">
+<div class="delete-tag-container">
+    <div class="delete-tag-header">
+        <h1>Delete Tags</h1>
+        <p class="subtitle">Select tags to remove</p>
+    </div>
+
+    <form asp-action="DeleteTag" method="post" class="delete-tag-form">
         <div class="tag-checkboxes">
-            @foreach (var tag in Model)
+            @if (Model.Any())
             {
-                <div class="form-check">
-                    <input 
-                        type="checkbox" 
-                        name="SelectedTagIds" 
-                        value="@tag.Id" 
-                        id="tag_@tag.Id" />
-                    <label for="tag_@tag.Id">@tag.Name</label>
-                </div>
+                @foreach (var tag in Model)
+                {
+                    <div class="tag-checkbox-item">
+                        <input 
+                            type="checkbox" 
+                            name="SelectedTagIds" 
+                            value="@tag.Id" 
+                            id="tag_@tag.Id"
+                            class="checkbox-input" />
+                        <label for="tag_@tag.Id" class="checkbox-label">@tag.Name</label>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="no-tags">No tags available</p>
             }
         </div>
-        <button type="submit" class="btn btn-danger">Delete Selected Tags</button>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-danger">Delete Selected Tags</button>
+            <a asp-action="EditTagListPage" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
