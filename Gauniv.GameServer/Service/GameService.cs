@@ -101,6 +101,11 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
                 {
                     return Task.FromResult<object>(new WrongMoveResponse { Reason = "Position already occupied" });
                 }
+
+                if (game.Board.KoPoint != null && game.Board.KoPoint.Value.Equals(point.Value))
+                {
+                    return Task.FromResult<object>(new WrongMoveResponse { Reason = "Ko rule violation" });
+                }
                 
                 // Place the stone
                 game.Board.Set(point.Value, player.Color);

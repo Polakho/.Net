@@ -11,11 +11,9 @@ public class Game
     public List<Player> Players { get; set; }
     public List<Player> Spectators { get; set; }
     public Player currentPlayer { get; set; }
-    public Player Winner { get; set; }
     public GameState State { get; set; }
+    public Player Winner { get; set; }
     
-    
-
     public Game(int boardSize)
     {
         Id = Guid.NewGuid().ToString();
