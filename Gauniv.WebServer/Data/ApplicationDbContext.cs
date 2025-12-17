@@ -56,6 +56,18 @@ namespace Gauniv.WebServer.Data
                 .HasMany(u => u.OwnedGames)
                 .WithMany()
                 .UsingEntity(j => j.ToTable("UserOwnedGames"));
+
+            // Configuration of the Many-to-Many relationship for Friends (accepted friends)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Friends)
+                .WithMany(u => u.FriendsOf)
+                .UsingEntity(j => j.ToTable("UserFriends"));
+
+            // Configuration of the Many-to-Many relationship for FriendApplications (pending requests)
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.FriendApplications)
+                .WithMany(u => u.FriendApplicationsReceivedFrom)
+                .UsingEntity(j => j.ToTable("UserFriendApplications"));
         }
     }
 }

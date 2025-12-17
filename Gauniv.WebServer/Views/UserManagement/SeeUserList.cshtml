@@ -1,15 +1,15 @@
 @model IEnumerable<Gauniv.WebServer.Dtos.UsersDto>
 
-<h2>Utilisateurs Connectés</h2>
+<h2>Connected Users</h2>
 
 @if (Model != null)
 {
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Nom d'utilisateur</th>
+                <th>Username</th>
                 <th>Email</th>
-                <th>Statut</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -21,11 +21,11 @@
                     <td>
                         @if (user.IsOnline)
                         {
-                            <span class="badge bg-success">En ligne</span>
+                            <span class="badge bg-success">Online</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">Hors ligne</span>
+                            <span class="badge bg-secondary">Offline</span>
                         }
                     </td>
                 </tr>
@@ -35,5 +35,5 @@
 }
 else
 {
-    <p>Aucun utilisateur connecté.</p>
+    <p>No connected users.</p>
 }

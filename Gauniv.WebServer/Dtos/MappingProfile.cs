@@ -40,6 +40,8 @@ namespace Gauniv.WebServer.Dtos
         {
             TypeAdapterConfig<Game, GameDto>.NewConfig();
             TypeAdapterConfig<GameDto, Game>.NewConfig();
+            TypeAdapterConfig<User, UsersDto>.NewConfig();
+            TypeAdapterConfig<UsersDto, User>.NewConfig();
         }
     }
 }

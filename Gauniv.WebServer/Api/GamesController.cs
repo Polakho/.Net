@@ -63,7 +63,9 @@ namespace Gauniv.WebServer.Api
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers()
         {
-            var users = await userManager.Users.Include(u => u.OwnedGames).ThenInclude(g => g.Tags).ToListAsync();
+            var users = await userManager.Users.Include(u => u.OwnedGames)
+                .ThenInclude(g => g.Tags)
+                .ToListAsync();
             var usersDto = mapper.Map<List<UsersDto>>(users);
             return Ok(usersDto);
         }
@@ -78,6 +80,26 @@ namespace Gauniv.WebServer.Api
             }
             var gameDto = mapper.Map<GameDto>(game);
             return Ok(gameDto);
+        }
+
+
+        [HttpGet("{userId}/friends")]
+        public async Task<IActionResult> GetUserFriends(string userId)
+        {
+            var user = await appDbContext.Users
+                .Include(u => u.Friends)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            
+            if (user == null) return NotFound();
+            
+            var friendsDto = user.Friends.Select(f => new UserBasicDto
+            {
+                Id = f.Id,
+                UserName = f.UserName,
+                Email = f.Email
+            }).ToList();
+            
+            return Ok(friendsDto);
         }
 
         [HttpGet("Tags")]
