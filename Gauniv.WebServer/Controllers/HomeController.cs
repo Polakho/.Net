@@ -51,20 +51,73 @@ namespace Gauniv.WebServer.Controllers
         private readonly ApplicationDbContext applicationDbContext = applicationDbContext;
         private readonly UserManager<User> userManager = userManager;
 
-        public async Task<IActionResult> Index(int[]? tagIds)
+        public async Task<IActionResult> Index(string? searchString,int[]? tagIds, double? minPrice = null, double? maxPrice = null, string? seeOwned = "true", string? notOwned = "true")
         {
             var local_query = applicationDbContext.Games.Include(g => g.Tags).AsQueryable();
 
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                local_query = local_query.Where(g => g.Name.Contains(searchString));
+            }
             if (tagIds != null && tagIds.Length > 0)
             {
                 local_query = local_query.Where(g => g.Tags.Any(t => tagIds.Contains(t.Id)));
             }
 
+            if (minPrice.HasValue)
+            {
+                local_query = local_query.Where(g => g.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                local_query = local_query.Where(g => g.Price <= maxPrice.Value);
+            } else {
+                // We set the max price to the highest value in games if not specified
+                maxPrice = await applicationDbContext.Games.MaxAsync(g => g.Price);
+            }
+
+            // Filter by ownership - by default both are shown (true), uncheck to exclude
+            if (User?.Identity?.IsAuthenticated is true)
+            {
+                var user = await userManager.Users
+                    .Include(u => u.OwnedGames)
+                    .FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+
+                if (user != null)
+                {
+                    bool local_seeOwnedBool = seeOwned == "true";
+                    bool local_notOwnedBool = notOwned == "true";
+                    var ownedGameIds = user.OwnedGames.Select(g => g.Id).ToList();
+                    
+                    // If seeOwned is false, exclude owned games
+                    // If notOwned is false, exclude not owned games
+                    if (!local_seeOwnedBool && !local_notOwnedBool)
+                    {
+                        local_query = local_query.Where(g => false); // Show nothing
+                    }
+                    else if (!local_seeOwnedBool)
+                    {
+                        local_query = local_query.Where(g => !ownedGameIds.Contains(g.Id));
+                    }
+                    else if (!local_notOwnedBool)
+                    {
+                        local_query = local_query.Where(g => ownedGameIds.Contains(g.Id));
+                    }
+                    // If both are true or not specified, show all
+                }
+            }
+
             var local_games = await local_query.ToListAsync();
             var local_tags = await applicationDbContext.Tags.ToListAsync();
 
+            ViewData["CurrentFilter"] = searchString;
             ViewData["Tags"] = local_tags;
             ViewData["SelectedTagIds"] = tagIds ?? new int[] { };
+            ViewData["MinPrice"] = minPrice;
+            ViewData["MaxPrice"] = maxPrice;
+            ViewData["SeeOwned"] = seeOwned == "true";
+            ViewData["NotOwned"] = notOwned == "true";
 
             return View(local_games);
         }

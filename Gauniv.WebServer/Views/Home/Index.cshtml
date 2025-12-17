@@ -13,32 +13,124 @@
 
 <div class="game-filter-section">
     <form method="get" asp-action="Index" class="filter-form">
-        <label>Filter by tags:</label>
-        <div class="tag-checkboxes">
-            @foreach (var local_tag in (List<Gauniv.WebServer.Data.Tags>)ViewData["Tags"])
+        <div class="search-bar-container">
+            <input type="text" name="searchString" class="form-control" placeholder="Search by name..." value="@ViewData["CurrentFilter"]" />
+            <button type="button" class="filter-toggle-btn collapsed" id="filterToggle">More Filters</button>
+        </div>
+
+        <div class="filter-options" id="filterOptions">
+            <div>
+                <label>Filter by tags:</label>
+                <div class="tag-checkboxes">
+                    @foreach (var local_tag in (List<Gauniv.WebServer.Data.Tags>)ViewData["Tags"])
+                    {
+                        int[] local_selectedTagIds = (int[])ViewData["SelectedTagIds"];
+                        var local_isChecked = local_selectedTagIds.Contains(local_tag.Id);
+                        
+                        <div class="form-check">
+                            <input 
+                                type="checkbox" 
+                                name="tagIds" 
+                                value="@local_tag.Id" 
+                                id="tag_@local_tag.Id" 
+                                class="form-check-input"
+                                @(local_isChecked ? "checked" : "")
+                            />
+                            <label class="form-check-label" for="tag_@local_tag.Id">
+                                @local_tag.Name
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div>
+                <label>Filter by price range:</label>
+                <div class="price-filter">
+                    <div class="price-input-group">
+                        <label for="minPrice">Min Price (€):</label>
+                        <input 
+                            type="number" 
+                            name="minPrice" 
+                            id="minPrice" 
+                            class="form-control" 
+                            placeholder="0"
+                            value="@ViewData["MinPrice"]"
+                            step="0.01"
+                            min="0"
+                        />
+                    </div>
+                    <div class="price-input-group">
+                        <label for="maxPrice">Max Price (€):</label>
+                        <input 
+                            type="number" 
+                            name="maxPrice" 
+                            id="maxPrice" 
+                            class="form-control" 
+                            placeholder="∞"
+                            value="@ViewData["MaxPrice"]"
+                            step="0.01"
+                            min="0"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            @if(User.Identity.IsAuthenticated)
             {
-                var local_selectedTagIds = (int[])ViewData["SelectedTagIds"];
-                var local_isChecked = local_selectedTagIds.Contains(local_tag.Id);
-                
-                <div class="form-check">
-                    <input 
-                        type="checkbox" 
-                        name="tagIds" 
-                        value="@local_tag.Id" 
-                        id="tag_@local_tag.Id" 
-                        class="form-check-input"
-                        @(local_isChecked ? "checked" : "")
-                    />
-                    <label class="form-check-label" for="tag_@local_tag.Id">
-                        @local_tag.Name
-                    </label>
+                <div>
+                    <label>Filter by ownership:</label>
+                    <div class="ownership-filter">
+                        <div class="form-check">
+                            <input 
+                                type="checkbox" 
+                                name="seeOwned" 
+                                id="seeOwned" 
+                                value="true"
+                                class="form-check-input"
+                                @(ViewData["SeeOwned"] != null && (bool)ViewData["SeeOwned"] ? "checked" : "")
+                            />
+                            <input type="hidden" name="seeOwned" value="false" />
+                            <label class="form-check-label" for="seeOwned">
+                                Show owned games
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input 
+                                type="checkbox" 
+                                name="notOwned" 
+                                id="notOwned" 
+                                value="true"
+                                class="form-check-input"
+                                @(ViewData["NotOwned"] != null && (bool)ViewData["NotOwned"] ? "checked" : "")
+                            />
+                            <input type="hidden" name="notOwned" value="false" />
+                            <label class="form-check-label" for="notOwned">
+                                Show not owned games
+                            </label>
+                        </div>
+                    </div>
                 </div>
             }
         </div>
-        <button type="submit" class="btn btn-primary">Filter</button>
-        <a href="@Url.Action("Index")" class="btn btn-secondary">Reset</a>
+
+        <div class="filter-buttons">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">Reset</a>
+        </div>
     </form>
 </div>
+
+<script>
+    const filterToggle = document.getElementById('filterToggle');
+    const filterOptions = document.getElementById('filterOptions');
+
+    filterToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        filterOptions.classList.toggle('show');
+        filterToggle.classList.toggle('collapsed');
+    });
+</script>
 
 <div class="games-container">
 @foreach (var item in Model) {
