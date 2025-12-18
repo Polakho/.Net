@@ -6,6 +6,13 @@ public partial class ScreenManager : Control
 
 	public override void _Ready()
 	{
+		// Force ScreenManager à remplir le viewport
+		SetAnchorsPreset(LayoutPreset.FullRect);
+		OffsetLeft = 0;
+		OffsetTop = 0;
+		OffsetRight = 0;
+		OffsetBottom = 0;
+
 		GoTo("res://Scenes/Screens/main_menu_screen.tscn");
 	}
 
@@ -20,10 +27,18 @@ public partial class ScreenManager : Control
 
 		var screen = packed.Instantiate<Control>();
 
-		if (_current != null)
-			_current.QueueFree();
-
+		_current?.QueueFree();
 		_current = screen;
 		AddChild(_current);
+
+		// Force l’écran à remplir ScreenManager
+		_current.SetAnchorsPreset(LayoutPreset.FullRect);
+		_current.OffsetLeft = 0;
+		_current.OffsetTop = 0;
+		_current.OffsetRight = 0;
+		_current.OffsetBottom = 0;
+
+		_current.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill;
+		_current.SizeFlagsVertical = Control.SizeFlags.ExpandFill;
 	}
 }

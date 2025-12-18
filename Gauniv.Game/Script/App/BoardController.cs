@@ -1,28 +1,29 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class BoardController : Node2D
 {
-	// Références scène (à renseigner idéalement dans l’Inspecteur)
+	// --- Références scène (renseigne via Inspecteur si possible) ---
 	[Export] public NodePath StonesContainerPath;
 	[Export] public NodePath InfoLabelPath;
 	[Export] public NodePath CameraPath;
 	[Export] public NodePath GridSpritePath;
 
-	// Textures (prototype)
+	// --- Textures (prototype) ---
 	[Export] public Texture2D BlackStoneTexture;
 	[Export] public Texture2D WhiteStoneTexture;
 
-	// Paramètres plateau
-	[Export] public int BoardSize = 9;                 // 9x9 pour tester
-	[Export] public float BackgroundSizePx = 640f;     // fond (monde) 640x640
-	[Export] public float StoneScaleInCell = 0.90f;    // 90% de la cellule
+	// --- Paramètres plateau ---
+	[Export] public int BoardSize = 9;
+	[Export] public float BackgroundSizePx = 640f;
+	[Export] public float StoneScaleInCell = 0.90f;
 
-	// Grille calculée depuis GridSprite (exporté pour debug dans l’inspecteur)
-	[Export] public Vector2 BoardOrigin = new Vector2(64, 64); // coin haut-gauche en monde
+	// --- Calibrage (debug) ---
+	[Export] public Vector2 BoardOrigin = new Vector2(64, 64);
 	[Export] public float CellSize = 64f;
 
-	// Caméra
+	// --- Caméra ---
 	[Export] public float CameraMarginPx = 40f;
 
 	private Node2D _stones;
@@ -30,14 +31,43 @@ public partial class BoardController : Node2D
 	private Camera2D _camera;
 	private Sprite2D _gridSprite;
 
-	private int[,] _grid; // 0 vide, 1 noir, 2 blanc
-	private int _currentPlayer = 1;
+	// Etat local (prototype). Plus tard : l’état viendra uniquement du serveur.
+	private int[,] _grid;        // 0 vide, 1 noir, 2 blanc
+	private int _currentPlayer;  // 1 noir, 2 blanc
+
+	// ============================
+	// Types “contrat” (simple)
+	// ============================
+
+	public readonly struct StoneState
+	{
+		public readonly int X;
+		public readonly int Y;
+		public readonly int Player; // 1 noir, 2 blanc
+
+		public StoneState(int x, int y, int player)
+		{
+			X = x;
+			Y = y;
+			Player = player;
+		}
+	}
+
+	public sealed class GameState
+	{
+		public int BoardSize;
+		public int CurrentPlayer; // 1 noir, 2 blanc
+		public List<StoneState> Stones = new();
+	}
+
+	// ============================
+	// Godot lifecycle
+	// ============================
 
 	public override void _Ready()
 	{
 		ResolveReferences();
 
-		// Si on ne peut pas fonctionner, on stoppe proprement.
 		if (_stones == null || _infoLabel == null || _camera == null || _gridSprite == null || _gridSprite.Texture == null)
 		{
 			GD.PushError("BoardController: références manquantes. Vérifie Stones, InfoLabel, Camera2D, GridSprite (+ texture).");
@@ -47,8 +77,12 @@ public partial class BoardController : Node2D
 
 		RecomputeGridFromSprite();
 
+		// Init local
 		_grid = new int[BoardSize, BoardSize];
-		UpdateUi();
+		_currentPlayer = 1;
+
+		// Applique un état initial “comme si serveur”
+		ApplyGameState(BuildLocalGameState());
 
 		FitCameraToBackground();
 	}
@@ -68,43 +102,100 @@ public partial class BoardController : Node2D
 			return;
 
 		Vector2 worldPos = GetGlobalMousePosition();
-
 		if (TryWorldToIntersection(worldPos, out int ix, out int iy))
 		{
-			// Prototype : on “demande” un coup, et on l’applique localement.
-			// Plus tard : RequestPlayMove enverra au serveur, puis on appliquera via ApplyMove/GameState.
-			RequestPlayMove(ix, iy);
+			// Intention de coup (plus tard : envoi au serveur)
+			SendMoveRequest(ix, iy);
 		}
 	}
 
-	// ----------------------------
-	// Flux "serveur-like" (proto)
-	// ----------------------------
+	// ============================
+	// API “prête serveur”
+	// ============================
 
-	private void RequestPlayMove(int x, int y)
+	/// <summary>
+	/// Intention : le joueur veut jouer en (x,y).
+	/// Plus tard : envoi au serveur. Pour l’instant : simulation locale.
+	/// </summary>
+	public void SendMoveRequest(int x, int y)
 	{
-		// Plus tard : envoyer une requête au serveur.
-		// Là : on valide minimalement local et on applique.
-		if (!IsCellEmpty(x, y))
+		// Simulation “serveur local” (proto) :
+		// 1) Vérif minimaliste
+		if (_grid[x, y] != 0)
 			return;
 
-		ApplyMove(x, y, _currentPlayer);
-
+		// 2) “Serveur” applique
+		_grid[x, y] = _currentPlayer;
 		_currentPlayer = (_currentPlayer == 1) ? 2 : 1;
+
+		// 3) “Serveur” renvoie l’état complet -> client applique
+		ApplyGameState(BuildLocalGameState());
+	}
+
+	/// <summary>
+	/// Applique un état complet (comme si reçu du serveur).
+	/// C’est CETTE méthode qui deviendra centrale.
+	/// </summary>
+	public void ApplyGameState(GameState state)
+	{
+		if (state == null) return;
+
+		// Si BoardSize peut varier, tu peux gérer un resize ici.
+		if (state.BoardSize != BoardSize)
+		{
+			BoardSize = state.BoardSize;
+			_grid = new int[BoardSize, BoardSize];
+			RecomputeGridFromSprite();
+		}
+
+		// Reconstruire état local à partir du state (source de vérité)
+		Array.Clear(_grid, 0, _grid.Length);
+		foreach (var s in state.Stones)
+		{
+			if (s.X < 0 || s.Y < 0 || s.X >= BoardSize || s.Y >= BoardSize)
+				continue;
+
+			_grid[s.X, s.Y] = s.Player;
+		}
+
+		_currentPlayer = state.CurrentPlayer;
+
+		// Reconstruire le visuel (simple/robuste)
+		ClearBoardVisual();
+		foreach (var s in state.Stones)
+		{
+			SpawnStoneVisual(s.X, s.Y, s.Player);
+		}
+
 		UpdateUi();
 	}
 
-	private void ApplyMove(int x, int y, int player)
+	// ============================
+	// Construction “local server” (proto)
+	// ============================
+
+	private GameState BuildLocalGameState()
 	{
-		_grid[x, y] = player;
-		SpawnStone(x, y, player);
+		var state = new GameState
+		{
+			BoardSize = BoardSize,
+			CurrentPlayer = _currentPlayer
+		};
+
+		for (int x = 0; x < BoardSize; x++)
+		for (int y = 0; y < BoardSize; y++)
+		{
+			int p = _grid[x, y];
+			if (p != 0)
+				state.Stones.Add(new StoneState(x, y, p));
+		}
+
+		return state;
 	}
 
-	private bool IsCellEmpty(int x, int y) => _grid[x, y] == 0;
-
-	// ----------------------------
-	// UI
-	// ----------------------------
+	// ============================
+	// UI / Visuel
+	// ============================
 
 	private void UpdateUi()
 	{
@@ -112,29 +203,33 @@ public partial class BoardController : Node2D
 		_infoLabel.Text = _currentPlayer == 1 ? "Tour: Noir" : "Tour: Blanc";
 	}
 
-	// ----------------------------
-	// Placement / rendu
-	// ----------------------------
+	private void ClearBoardVisual()
+	{
+		if (_stones == null) return;
 
-	private void SpawnStone(int x, int y, int player)
+		foreach (var child in _stones.GetChildren())
+		{
+			if (child is Node n)
+				n.QueueFree();
+		}
+	}
+
+	private void SpawnStoneVisual(int x, int y, int player)
 	{
 		if (_stones == null) return;
 
 		Texture2D tex = (player == 1) ? BlackStoneTexture : WhiteStoneTexture;
-		if (tex == null)
-		{
-			GD.PushError("BoardController: texture de pierre manquante (BlackStoneTexture / WhiteStoneTexture).");
-			return;
-		}
+		if (tex == null) return;
 
 		var sprite = new Sprite2D
 		{
 			Texture = tex,
-			Position = IntersectionToWorld(x, y),
 			ZIndex = 10
 		};
 
-		// Mise à l’échelle : StoneScaleInCell * CellSize
+		// IMPORTANT : on place en monde pour éviter les surprises de transforms
+		sprite.GlobalPosition = IntersectionToWorld(x, y);
+
 		float targetPx = CellSize * Mathf.Clamp(StoneScaleInCell, 0.1f, 1.2f);
 		float basePx = Mathf.Max(tex.GetWidth(), tex.GetHeight());
 		float s = (basePx <= 0.0f) ? 1.0f : (targetPx / basePx);
@@ -151,11 +246,9 @@ public partial class BoardController : Node2D
 	{
 		Vector2 local = worldPos - BoardOrigin;
 
-		// On “snap” à la grille : arrondi à l’intersection la plus proche
 		x = (int)Mathf.Round(local.X / CellSize);
 		y = (int)Mathf.Round(local.Y / CellSize);
 
-		// Tolérance de clic autour de l’intersection
 		Vector2 snapped = new Vector2(x * CellSize, y * CellSize);
 		float dist = (local - snapped).Length();
 		float tolerance = CellSize * 0.35f;
@@ -166,9 +259,9 @@ public partial class BoardController : Node2D
 		return true;
 	}
 
-	// ----------------------------
-	// Grille : calcul depuis GridSprite
-	// ----------------------------
+	// ============================
+	// Calibrage grille depuis GridSprite
+	// ============================
 
 	private void RecomputeGridFromSprite()
 	{
@@ -179,23 +272,20 @@ public partial class BoardController : Node2D
 		Vector2 scale = _gridSprite.GlobalScale.Abs();
 		Vector2 displayedSize = texSize * scale;
 
-		// Top-left de la texture dans l'espace LOCAL du Sprite2D
-		// Centered=false => base = (0,0)
-		// Centered=true  => base = (-size/2)
+		// Base top-left en local
 		Vector2 topLeftLocal = _gridSprite.Centered ? -(displayedSize / 2f) : Vector2.Zero;
 
-		// Offset se rajoute au dessin de la texture (signe +)
+		// Offset se rajoute au dessin (signe +) — c’est la version qui marche dans ton setup
 		topLeftLocal += _gridSprite.Offset;
 
-		// Convertir en monde (prend en compte transforms parents)
 		BoardOrigin = _gridSprite.ToGlobal(topLeftLocal);
 
 		CellSize = displayedSize.X / Mathf.Max(1, BoardSize - 1);
 	}
 
-	// ----------------------------
-	// Caméra : fit background
-	// ----------------------------
+	// ============================
+	// Caméra
+	// ============================
 
 	private void FitCameraToBackground()
 	{
@@ -219,33 +309,26 @@ public partial class BoardController : Node2D
 		_camera.Zoom = new Vector2(z, z);
 	}
 
-	// ----------------------------
-	// Résolution des références
-	// ----------------------------
+	// ============================
+	// Résolution références
+	// ============================
 
 	private void ResolveReferences()
 	{
-		// 1) Via NodePath exporté
 		_stones = GetNodeOrNull<Node2D>(StonesContainerPath);
 		_infoLabel = GetNodeOrNull<Label>(InfoLabelPath);
 		_camera = GetNodeOrNull<Camera2D>(CameraPath);
 		_gridSprite = GetNodeOrNull<Sprite2D>(GridSpritePath);
 
-		// 2) Fallbacks “intelligents” selon ton arbre actuel
-		// BoardController est sous BoardRoot : on peut chercher en relatif.
+		// Fallbacks selon ton arbre :
 		_stones ??= GetNodeOrNull<Node2D>("../Stones");
 		_gridSprite ??= GetNodeOrNull<Sprite2D>("../GridSprite");
 		_camera ??= GetNodeOrNull<Camera2D>("../Camera2D");
-
-		// InfoLabel est sous MatchScreen/Ui/InfoLabel.
-		// Depuis BoardController (MatchScreen/BoardRoot/BoardController), le chemin relatif est:
-		// ../../Ui/InfoLabel
 		_infoLabel ??= GetNodeOrNull<Label>("../../Ui/InfoLabel");
 
-		// Logs utiles
-		if (_stones == null) GD.PushError("BoardController: Stones introuvable (renseigne StonesContainerPath ou vérifie ../Stones).");
-		if (_gridSprite == null) GD.PushError("BoardController: GridSprite introuvable (renseigne GridSpritePath ou vérifie ../GridSprite).");
-		if (_camera == null) GD.PushError("BoardController: Camera2D introuvable (renseigne CameraPath ou vérifie ../Camera2D).");
-		if (_infoLabel == null) GD.PushError("BoardController: InfoLabel introuvable (renseigne InfoLabelPath ou vérifie ../../Ui/InfoLabel).");
+		if (_stones == null) GD.PushError("BoardController: Stones introuvable (../Stones).");
+		if (_gridSprite == null) GD.PushError("BoardController: GridSprite introuvable (../GridSprite).");
+		if (_camera == null) GD.PushError("BoardController: Camera2D introuvable (../Camera2D).");
+		if (_infoLabel == null) GD.PushError("BoardController: InfoLabel introuvable (../../Ui/InfoLabel).");
 	}
 }
