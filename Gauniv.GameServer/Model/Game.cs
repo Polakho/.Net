@@ -39,6 +39,44 @@ public class Game
             currentPlayer = black;
             Console.WriteLine($"Game {Id} started with players {Players[0].Id} and {Players[1].Id}");
         }
+
+        if (State == GameState.InProgress && MoveHistory.Count >= 2)
+        {
+            // check for two consecutive passes
+            var lastMove = MoveHistory[MoveHistory.Count - 1];
+            var secondLastMove = MoveHistory[MoveHistory.Count - 2];
+            if (lastMove.IsPass && secondLastMove.IsPass)
+            {
+                State = GameState.Finished;
+                Console.WriteLine($"Game {Id} finished");
+                //Check for winner (simplified, real scoring is more complex)
+                int blackStones = 0;
+                int whiteStones = 0;
+                for (int x = 0; x < Board.Size; x++)
+                {
+                    for (int y = 0; y < Board.Size; y++)
+                    {
+                        var stone = Board.Grid[x, y];
+                        if (stone == StoneColor.Black) blackStones++;
+                        else if (stone == StoneColor.White) whiteStones++;
+                    }
+                }
+                blackStones += Board.blackScore;
+                whiteStones += Board.whiteScore;
+                if (blackStones > whiteStones)
+                {
+                    Winner = Players.Find(p => p.Color == StoneColor.Black);
+                }
+                else if (whiteStones > blackStones)
+                {
+                    Winner = Players.Find(p => p.Color == StoneColor.White);
+                }
+                else
+                {
+                    Winner = null; // Tie
+                }
+            }
+        }
     }
 
     public enum GameState

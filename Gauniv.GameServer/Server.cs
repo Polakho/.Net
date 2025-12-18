@@ -102,6 +102,7 @@ namespace Gauniv.GameServer
                     return new MessageGeneric { Type = MessageType.GameState, Data = stateResponseData };
                     
                 case MessageType.MakeMove:
+                    Console.Write($"{server}Processing MakeMove request from player {player.Id}...");
                     var moveRequest = MessagePackSerializer.Deserialize<MakeMoveRequest>(message.Data);
                     var moveResult = await _gameService.MakeMoveAsync(moveRequest.GameId, player, moveRequest.X, moveRequest.Y, moveRequest.IsPass);
                     if (moveResult is WrongMoveResponse wrongMove)

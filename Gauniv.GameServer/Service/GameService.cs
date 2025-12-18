@@ -109,6 +109,9 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
                 
                 // Place the stone
                 game.Board.Set(point.Value, player.Color);
+                game.UpdateGameState();
+                // Check score 
+                Console.WriteLine($"Scores - Black: {game.Board.blackScore}, White: {game.Board.whiteScore}");
             }
             else
             {
@@ -127,7 +130,7 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
             
             // Switch current player
             var nextPlayer = game.Players.Find(p => p.Id != player.Id);
-            game.currentPlayer = nextPlayer!;
+            game.currentPlayer = nextPlayer;
             
             Console.WriteLine($"Player {player.Id} made a move in game {gameId} at ({x}, {y}), Pass: {isPass}");
             return Task.FromResult<object>(new GetGameStateResponse

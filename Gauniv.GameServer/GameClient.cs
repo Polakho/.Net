@@ -70,7 +70,7 @@ public class GameClient
             if (MessageType.WrongMove == message.Type)
             {
                 var moveResult = MessagePackSerializer.Deserialize<WrongMoveResponse>(message.Data);
-                Console.WriteLine($"{clientTag}Move Result: {moveResult}");
+                Console.WriteLine($"{clientTag}Move Result: {moveResult.Reason}");
             }
         }
     }
