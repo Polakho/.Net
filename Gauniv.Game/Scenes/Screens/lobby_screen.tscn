@@ -1,0 +1,111 @@
+[gd_scene load_steps=3 format=3 uid="uid://ctv34ks22fjdb"]
+
+[ext_resource type="Script" uid="uid://bavg0yqbh4k2n" path="res://Script/Screens/LobbyScreen.cs" id="1_ydnej"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ydnej"]
+bg_color = Color(0.6784314, 0.6784314, 0.6784314, 1)
+
+[node name="LobbyScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ydnej")
+StatusLabelPath = NodePath("Root/Center/Card/CardMargin/MainLayout/Footer/StatusLabel")
+GameListPath = NodePath("Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel/GameList")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.6784314, 0.6784314, 0.6784314, 1)
+
+[node name="Root" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Center" type="CenterContainer" parent="Root"]
+layout_mode = 2
+
+[node name="Card" type="PanelContainer" parent="Root/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ydnej")
+
+[node name="CardMargin" type="MarginContainer" parent="Root/Center/Card"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="MainLayout" type="VBoxContainer" parent="Root/Center/Card/CardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Root/Center/Card/CardMargin/MainLayout"]
+layout_mode = 2
+text = "Lobby"
+horizontal_alignment = 1
+
+[node name="Content" type="HBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="LeftPanel" type="VBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout/Content"]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="GamesLabel" type="Label" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
+layout_mode = 2
+text = "Games"
+
+[node name="GameList" type="ItemList" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
+layout_mode = 2
+
+[node name="RightPanel" type="VBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout/Content"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_constants/separation = 8
+
+[node name="CreateButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Create"
+
+[node name="JoinButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Join"
+
+[node name="SpectateButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+text = "Spectate"
+
+[node name="Footer" type="HBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BackButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Footer"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Back"
+
+[node name="StatusLabel" type="Label" parent="Root/Center/Card/CardMargin/MainLayout/Footer"]
+layout_mode = 2
+text = "Status: Disconnected"
+
+[connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/CreateButton" to="." method="OnCreatePressed"]
+[connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/JoinButton" to="." method="OnJoinPressed"]
+[connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/SpectateButton" to="." method="OnSpectatePressed"]
+[connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Footer/BackButton" to="." method="OnBackPressed"]

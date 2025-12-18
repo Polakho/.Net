@@ -1,0 +1,28 @@
+[gd_scene load_steps=2 format=3 uid="uid://dml6k7if1na5f"]
+
+[ext_resource type="Script" uid="uid://be4b56asp73x0" path="res://Script/Screens/SpectateScreen.cs" id="1_ak40o"]
+
+[node name="SpectateScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ak40o")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "Spectate"
+
+[node name="BackButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 11.0
+offset_top = 25.0
+offset_right = 56.0
+offset_bottom = 56.0
+text = "Back"
+
+[connection signal="pressed" from="BackButton" to="." method="OnBackPressed"]
