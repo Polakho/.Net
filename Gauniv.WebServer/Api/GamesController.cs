@@ -51,5 +51,84 @@ namespace Gauniv.WebServer.Api
         private readonly IMapper mapper = mapper;
         private readonly UserManager<User> userManager = userManager;
         private readonly MappingProfile mp = mp;
-    }
+
+        [HttpGet("tags")]
+        public async Task<IActionResult> GetGameTags()
+        {
+            var tags = await appDbContext.Tags.ToListAsync();
+            var tagsDto = mapper.Map<List<TagsDto>>(tags);
+            return Ok(tagsDto);
+        }
+
+        [HttpGet("game")]
+        public async Task<IActionResult> GetGames([FromQuery] int offset = 0, [FromQuery] int limit = 50, [FromQuery] string[] TagNames = null)
+        {
+            var games = await appDbContext.Games.Include(g => g.Tags).ToListAsync();
+            if (TagNames != null && TagNames.Length > 0)
+            {
+                games = games.Where(g => g.Tags.Any(t => TagNames.Contains(t.Name))).ToList();
+            }
+            games = games.Skip(offset).Take(limit).ToList();
+            var gamesDto = mapper.Map<List<GameDto>>(games);
+            return Ok(gamesDto);
+        }
+
+        [HttpGet("ownedGames")]
+        [Authorize]
+        public async Task<IActionResult> GetOwnedGames([FromQuery] int offset = 0, [FromQuery] int limit = 50, [FromQuery] string[] TagNames = null)
+        {
+            var local_user = await userManager.GetUserAsync(User);
+            if (local_user == null)
+            {
+                return Unauthorized();
+            }
+
+            var userWithOwnedGames = await appDbContext.Users
+                .Include(u => u.OwnedGames)
+                .ThenInclude(g => g.Tags)
+                .FirstOrDefaultAsync(u => u.Id == local_user.Id);
+
+            if (userWithOwnedGames == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var ownedGames = userWithOwnedGames.OwnedGames
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
+
+            var ownedGamesDto = mapper.Map<List<GameDto>>(ownedGames);
+            return Ok(ownedGamesDto);
+        }
+
+        [HttpGet("download")]
+        [Authorize]
+        public async Task<IActionResult> DownloadBinaryFile([FromQuery] int gameId = 0)
+        {
+            var game = await appDbContext.Games.FirstOrDefaultAsync(g => g.Id == gameId);
+            if (game == null) return NotFound("Game not found");
+
+            var local_user = await userManager.GetUserAsync(User);
+            if (local_user == null) return Unauthorized();
+
+            var userWithOwnedGames = await appDbContext.Users
+                .Include(u => u.OwnedGames)
+                .FirstOrDefaultAsync(u => u.Id == local_user.Id);
+
+            if (userWithOwnedGames == null || !userWithOwnedGames.OwnedGames.Any(g => g.Id == gameId))
+                return Forbid("You do not own this game");
+
+            if (!System.IO.File.Exists(game.BinaryFilePath))
+                return NotFound("File not found");
+
+            var fileInfo = new FileInfo(game.BinaryFilePath);
+            var fileName = Path.GetFileName(game.BinaryFilePath);
+            var contentType = "application/octet-stream";
+
+            Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
+            Response.Headers.Add("Content-Length", fileInfo.Length.ToString());
+            return PhysicalFile(game.BinaryFilePath, contentType, enableRangeProcessing: true);
+        }
+    };
 }

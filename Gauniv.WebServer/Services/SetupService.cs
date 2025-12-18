@@ -42,37 +42,135 @@ namespace Gauniv.WebServer.Services
         private ApplicationDbContext? applicationDbContext;
         private readonly IServiceProvider serviceProvider;
         private Task? task;
+        private RoleManager<IdentityRole>? roleManager;
 
         public SetupService(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             using (var scope = serviceProvider.CreateScope()) // this will use `IServiceScopeFactory` internally
             {
                 applicationDbContext = scope.ServiceProvider.GetService<ApplicationDbContext>();
                 var userSignInManager = scope.ServiceProvider.GetService<UserManager<User>>();
                 var signInManager = scope.ServiceProvider.GetService<SignInManager<User>>();
+                roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+
+                roleManager?.CreateAsync(new IdentityRole("Admin")).Wait();
+                roleManager?.CreateAsync(new IdentityRole("User")).Wait();
+
+                if (roleManager is null)
+                {
+                    throw new Exception("RoleManager is null");
+                }
+
+                var games = applicationDbContext?.Games;
 
                 if (applicationDbContext is null)
                 {
                     throw new Exception("ApplicationDbContext is null");
                 }
 
-                var r = userSignInManager?.CreateAsync(new User()
+                User local_admin = new User()
                 {
-                    UserName = "test@test.com",
-                    Email = "test@test.com",
-                    EmailConfirmed = true
-                }, "password").Result;
+                    UserName = "admin@test.com",
+                    Email = "admin@test.com",
+                    EmailConfirmed = true,
+                };
 
-                // ....
+                var adminResult = userSignInManager?.CreateAsync(local_admin, "adminpassword").Result;
+                if (adminResult != null && adminResult.Succeeded)
+                {
+                    userSignInManager?.AddToRoleAsync(local_admin, "Admin").Wait();
+                }
 
+                // Create users
+                List<User> local_users = new List<User>();
+                for (int i = 0; i < 10; i++)
+                {
+                    var local_user = new User()
+                    {
+                        UserName = $"test{i}@test.com",
+                        Email = $"test{i}@test.com",
+                        EmailConfirmed = true,
+                    };
+                    var r = userSignInManager?.CreateAsync(local_user, "password").Result;
+                    local_users.Add(local_user);
+                }
+
+                var tagList = new List<Tags>()
+                {
+                    new Tags() { Name = "Action"},
+                    new Tags() { Name = "Aventure"},
+                    new Tags() { Name = "RPG"},
+                    new Tags() { Name = "Rythme"}
+                };
+
+                applicationDbContext.Tags.AddRange(tagList);
                 applicationDbContext.SaveChanges();
 
-                return Task.CompletedTask;
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "BinaryFilesGames");
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                }
+                
+
+              // Create games
+                List<Game> local_games = new List<Game>();
+                for (int i = 0; i < 10; i++)
+                {
+
+                    var gameContent = $"This is the binary content of the game {i}";
+                    var gameFileName = $"text.txt";
+                    var gameFilePath = Path.Combine(uploadsPath, gameFileName);
+
+                    await File.WriteAllBytesAsync(gameFilePath, Encoding.UTF8.GetBytes(gameContent));
+
+                    var local_game = new Game()
+                    {
+                        Name = $"Game{i}",
+                        Description = $"This is the description of game {i}",
+                        Price = i * 10.0,
+                        BinaryFilePath = gameFilePath,  
+                        ImagePath = "/images/Goomba.png",
+                        Tags = new List<Tags>()
+                        {
+                            tagList[i % tagList.Count]
+                        }
+                    };
+                    applicationDbContext.Games.Add(local_game);
+                    local_games.Add(local_game);
+                }
+
+                // Assign games to first user
+                if (local_users.Count > 0 && local_games.Count > 0)
+                {
+                    foreach (var local_game in local_games)
+                    {
+                        local_users[0].OwnedGames.Add(local_game);
+                    }
+                }
+
+                var notOwnedGame = new Game()
+                {
+                    Name = $"Jeu RPG Aventure",
+                    Description = $"Un jeu d'aventure et de rôle passionnant.",
+                    BinaryFilePath = "/BinaryFilesGames/text.txt",
+                    Price = 29.99,
+                    ImagePath = "/images/Goomba.png",
+                    Tags = new List<Tags>()
+                    {
+                        tagList.First(t => t.Name == "Aventure"),
+                        tagList.First(t => t.Name == "RPG")
+                    }
+                };
+                applicationDbContext.Games.Add(notOwnedGame);
+                applicationDbContext.SaveChanges();
+
+                return;
             }
         }
 

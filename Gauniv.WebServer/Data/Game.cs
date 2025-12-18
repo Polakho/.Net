@@ -38,5 +38,17 @@ namespace Gauniv.WebServer.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public int Id { get; set; }
+        [Required]
+        public string Name { get; set; }
+        [Required]
+        public string Description { get; set; }
+        [Required]
+        public string BinaryFilePath { get; set; } 
+        
+        [Required]
+        public double Price { get; set; }
+        public string ImagePath { get; set; }
+        [Required]
+        public ICollection<Tags> Tags { get; set; } = new List<Tags>();
     }
 }

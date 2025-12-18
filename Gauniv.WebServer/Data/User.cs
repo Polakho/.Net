@@ -33,5 +33,15 @@ namespace Gauniv.WebServer.Data
 {
     public class User : IdentityUser
     {
+        [Required]
+        public bool IsOnline { get; set;} = false;
+        [Required]
+        public ICollection<Game> OwnedGames { get; set; } = new List<Game>();
+        
+        public ICollection<User> Friends { get; set; } = new List<User>();
+        public ICollection<User> FriendsOf { get; set; } = new List<User>();
+        
+        public ICollection<User> FriendApplications { get; set; } = new List<User>();
+        public ICollection<User> FriendApplicationsReceivedFrom { get; set; } = new List<User>();
     }
 }

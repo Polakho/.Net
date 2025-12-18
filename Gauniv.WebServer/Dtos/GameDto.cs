@@ -26,18 +26,23 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
-using Elfie.Serialization;
-using Gauniv.WebServer.Data;
-using Gauniv.WebServer.Dtos;
-using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
-
+using System.Text.Json.Serialization;
 
 namespace Gauniv.WebServer.Dtos
 {
     public class GameDto
     {
         public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        [JsonIgnore]
+        public string BinaryFilePath { get; set;}
+        
+        public double Price { get; set;}
+
+        [JsonIgnore]
+        public string ImagePath { get; set; }
+        public ICollection<TagsDto> Tags { get; set; } = new List<TagsDto>();
     }
 }

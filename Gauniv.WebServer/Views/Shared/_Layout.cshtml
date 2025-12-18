@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Gauniv.WebServer</title>
+    <title>@ViewData["Title"]</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    @if(User?.Identity?.IsAuthenticated is not null or false)
+    @if(User?.Identity?.IsAuthenticated ?? false)
     {
         <script src="~/js/signalr/dist/browser/signalr.js"></script>
             <script src="~/js/online.js"></script>
@@ -19,7 +19,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Gauniv.WebServer</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Plasma</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -29,6 +29,34 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        @if(User?.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="OwnedGames">OwnedGames</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="UserManagement" asp-action="FriendList">Friend List</a>
+                            </li>
+                        }
+                        @if(User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="GameManagement" asp-action="CreateGamePage">Create new game</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="GameManagement" asp-action="DeleteGamePage">Delete a game</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="GameManagement" asp-action="EditGameListPage">Edit a game</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="GameManagement" asp-action="CreateTagPage">Create a tag</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="GameManagement" asp-action="DeleteTagPage">Delete a tag</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="GameManagement" asp-action="EditTagListPage">Edit a tag</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="UserManagement" asp-action="SeeUserList">See user list</a></li>
+                                </ul>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="swagger" asp-action="index">Swagger</a>
                         </li>

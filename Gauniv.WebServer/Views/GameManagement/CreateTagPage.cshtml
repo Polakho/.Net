@@ -1,0 +1,24 @@
+@model Gauniv.WebServer.ViewModels.TagListModel
+@{
+    ViewData["Title"] = "Create Tag";
+}
+
+<div class="create-tag-container">
+    <div class="create-tag-header">
+        <h1>Create New Tags</h1>
+        <p class="subtitle">Add new tags to your collection</p>
+    </div>
+
+    <form asp-action="CreateTag" method="post" enctype="multipart/form-data" class="create-tag-form">
+        <div class="form-group">
+            <label class="form-label">Tag Names</label>
+            <input asp-for="List" class="form-input" type="text" placeholder="Separate each tag with a semi-colon (;)" />
+            <p class="form-hint">Example: RPG; Strategy; Multiplayer</p>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Tags</button>
+            <a asp-action="EditTagListPage" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

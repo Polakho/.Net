@@ -1,0 +1,206 @@
+@using Gauniv.WebServer.ViewModels
+@model FriendListViewModel
+
+<div class="container mt-5">
+    <h1>Friend List</h1>
+
+    <!-- Button to search/add friends -->
+    <div class="mt-4">
+        <form method="get" asp-action="FriendList" class="d-flex gap-2">
+            <input type="text" name="query" class="form-control" placeholder="Search users..." value="@Model.SearchQuery" />
+            <button type="submit" class="btn btn-primary">Search</button>
+            @if (!string.IsNullOrEmpty(Model.SearchQuery))
+            {
+                <a href="@Url.Action("FriendList")" class="btn btn-secondary">Clear</a>
+            }
+        </form>
+    </div>
+
+    <!-- Search results -->
+    @if (!string.IsNullOrEmpty(Model.SearchQuery) && Model.SearchResults.Any())
+    {
+        <div class="card mt-4">
+            <div class="card-header bg-info">
+                <h5 class="mb-0 text-white">Search Results (@Model.SearchResults.Count)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.SearchResults)
+                            {
+                                <tr>
+                                    <td>@user.UserName</td>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        @if (user.IsOnline)
+                                        {
+                                            <span class="badge bg-success">Online</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Offline</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form method="post" class="d-inline">
+                                            <button type="submit" 
+                                                    asp-action="SendFriendRequest" 
+                                                    asp-route-friendId="@user.Id"
+                                                    class="btn btn-sm btn-primary"
+                                                    title="Send a friend request">
+                                                <i class="bi bi-person-plus"></i> Add Friend
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Pending friend requests -->
+    <div class="card mt-4">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Pending Friend Requests</h5>
+        </div>
+        <div class="card-body">
+            @if (Model?.FriendApplications != null && Model.FriendApplications.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var application in Model.FriendApplications)
+                            {
+                                <tr>
+                                    <td>@application.UserName</td>
+                                    <td>@application.Email</td>
+                                    <td>
+                                        <form method="post" class="d-inline">
+                                            <button type="submit" 
+                                                    asp-action="AcceptFriendRequest" 
+                                                    asp-route-friendId="@application.Id"
+                                                    class="btn btn-sm btn-success"
+                                                    title="Accepter la demande">
+                                                <i class="bi bi-check-circle"></i> Accept
+                                            </button>
+                                        </form>
+                                        <form method="post" class="d-inline">
+                                            <button type="submit" 
+                                                    asp-action="DeclineFriendRequest" 
+                                                    asp-route-friendId="@application.Id"
+                                                    class="btn btn-sm btn-danger"
+                                                    title="Refuser la demande">
+                                                <i class="bi bi-x-circle"></i> Refuse
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No pending friend requests.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Friend list -->
+    <div class="card mt-5">
+        <div class="card-header bg-primary">
+            <h5 class="mb-0 text-white">Friends (@(Model?.Friends?.Count ?? 0))</h5>
+        </div>
+        <div class="card-body">
+            @if (Model?.Friends != null && Model.Friends.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var friend in Model.Friends)
+                            {
+                                <tr>
+                                    <td>@friend.UserName</td>
+                                    <td>@friend.Email</td>
+                                    <td>
+                                        @if (friend.IsOnline)
+                                        {
+                                            <span class="badge bg-success">Online</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Offline</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-warning"
+                                                title="Supprimer de la liste d'amis">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+                    <i class="bi bi-heart-break"></i> You don't have any friends yet.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-left: 4px solid;
+    }
+    
+    .card .card-header.bg-warning {
+        border-left-color: #ffc107;
+    }
+    
+    .card .card-header.bg-primary {
+        border-left-color: #0d6efd;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-group-sm {
+        gap: 0.25rem;
+    }
+</style>

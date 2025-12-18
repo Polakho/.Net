@@ -1,18 +1,18 @@
-﻿@model IPagedList<Gauniv.WebServer.Data.Game>
+@model IPagedList<Gauniv.WebServer.Data.Game>
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @{
-    ViewData["Title"] = "Game List";
+    ViewData["Title"] = "Owned Games";
 }
 
 <link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
 <link href="~/css/gameList.css" rel="stylesheet" type="text/css" />
 <script src="~/js/filterToggle.js"></script>
 
-<h1>Available Games</h1>
+<h1>Owned Games</h1>
 
 <div class="game-filter-section">
-    <form method="get" asp-action="Index" class="filter-form">
+    <form method="get" asp-action="OwnedGames" class="filter-form">
         <div class="search-bar-container">
             <input type="text" name="searchString" class="form-control" placeholder="Search by name..." value="@ViewData["CurrentFilter"]" />
             <button type="button" class="filter-toggle-btn collapsed" id="filterToggle">More Filters</button>
@@ -75,43 +75,6 @@
                     </div>
                 </div>
             </div>
-
-            @if(User.Identity.IsAuthenticated)
-            {
-                <div>
-                    <label>Filter by ownership:</label>
-                    <div class="ownership-filter">
-                        <div class="form-check">
-                            <input 
-                                type="checkbox" 
-                                name="seeOwned" 
-                                id="seeOwned" 
-                                value="true"
-                                class="form-check-input"
-                                @(ViewData["SeeOwned"] != null && (bool)ViewData["SeeOwned"] ? "checked" : "")
-                            />
-                            <input type="hidden" name="seeOwned" value="false" />
-                            <label class="form-check-label" for="seeOwned">
-                                Show owned games
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input 
-                                type="checkbox" 
-                                name="notOwned" 
-                                id="notOwned" 
-                                value="true"
-                                class="form-check-input"
-                                @(ViewData["NotOwned"] != null && (bool)ViewData["NotOwned"] ? "checked" : "")
-                            />
-                            <input type="hidden" name="notOwned" value="false" />
-                            <label class="form-check-label" for="notOwned">
-                                Show not owned games
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            }
         </div>
 
         <div class="filter-buttons">
@@ -121,12 +84,13 @@
     </form>
 </div>
 
+
 <div class="games-container">
-@foreach (var item in Model) {
+@foreach(var item in Model) {
     <a asp-action="Details" asp-route-id="@item.Id" class="game-card-link">
         <div class="game-card">
             <div class="game-image-placeholder">
-                <img src="@item.ImagePath" alt="@item.Name" class="game-image" />
+                <img src="@item.ImagePath" alt="@item.Name" class="game-image" height="200" width="200" />
             </div>
             <div class="game-info">
                 <h3>@item.Name</h3>

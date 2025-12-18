@@ -1,0 +1,23 @@
+@model List<Gauniv.WebServer.Data.Tags>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@{
+    ViewData["Title"] = "Edit Tags";
+}
+
+<link rel="stylesheet" href="~/css/tagList.css">
+
+<h1>Edit Tags</h1>
+
+<div class="tag-list-container">
+    @foreach (var tag in Model)
+    {
+        <a asp-action="EditTagPage" asp-route-id="@tag.Id" class="tag-list-form">
+            <div class="tag-card">
+                <div class="tag-info">
+                    <h3>@tag.Name</h3>
+                </div>
+            </div>
+        </a>
+    }
+</div>

@@ -1,0 +1,77 @@
+@model Gauniv.WebServer.ViewModels.CreateGameViewModel
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+@{
+    ViewData["Title"] = "Game Creation";
+}
+
+<link href="~/css/createGame.css" rel="stylesheet" type="text/css" />
+
+<div class="create-game-container">
+    <div class="create-game-header">
+        <h1>Create a New Game</h1>
+        <p class="subtitle">Fill in the details to add your game</p>
+    </div>
+
+    <form asp-action="CreateGame" method="post" enctype="multipart/form-data" class="create-game-form">
+        @Html.AntiForgeryToken()
+        <div class="form-section">
+            <h2 class="section-title">Game Information</h2>
+            
+            <div class="form-group">
+                <label asp-for="Name" class="form-label">Game Name</label>
+                <input asp-for="Name" class="form-input" placeholder="Enter game name" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-textarea" placeholder="Enter game description"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label asp-for="Price" class="form-label">Price (€)</label>
+                    <input asp-for="Price" class="form-input" type="number" step="0.01" placeholder="0.00" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ImagePath" class="form-label">Image URL</label>
+                    <input asp-for="ImagePath" class="form-input" type="text" placeholder="https://..." />
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="BinaryFile" class="form-label">Game Binary File</label>
+                <input asp-for="BinaryFile" class="form-input" type="file" />
+            </div>
+        </div>
+        <div class="form-section">
+            <h2 class="section-title">Tags</h2>
+            <div class="tag-checkboxes">
+                @if (Model.AvailableTags.Any())
+                {
+                    @foreach (var tag in Model.AvailableTags)
+                    {
+                        <div class="tag-checkbox-item">
+                            <input 
+                                type="checkbox" 
+                                name="SelectedTagIds" 
+                                value="@tag.Id" 
+                                id="tag_@tag.Id"
+                                class="checkbox-input" />
+                            <label class="checkbox-label" for="tag_@tag.Id">@tag.Name</label>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="no-tags">No tags available</p>
+                }
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Game</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
