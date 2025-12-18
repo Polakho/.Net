@@ -1,4 +1,4 @@
-﻿@model List<Gauniv.WebServer.Data.Game>
+﻿@model IPagedList<Gauniv.WebServer.Data.Game>
 @using X.PagedList.Mvc.Core;
 @using X.PagedList;
 @{
@@ -135,4 +135,14 @@
         </div>
     </a>
 }
+</div>
+
+<div class="pagination-container" style="text-align: center; margin-top: 30px;">
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { 
+        page, 
+        searchString = ViewData["CurrentFilter"],
+        tagIds = ViewData["SelectedTagIds"],
+        minPrice = ViewData["MinPrice"],
+        maxPrice = ViewData["MaxPrice"]
+    }))
 </div>

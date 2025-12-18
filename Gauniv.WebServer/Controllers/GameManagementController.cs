@@ -76,7 +76,7 @@ namespace Gauniv.WebServer.Controllers
 
         [HttpGet]
         [Authorize(Roles= "Admin")]
-        public async Task<IActionResult> DeleteGamePage(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
+        public async Task<IActionResult> DeleteGamePage(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null, int page = 1)
         {
             var (local_games, local_tags, local_maxPrice) = await ApplyGameFilters(searchString, tagIds, minPrice, maxPrice);
 
@@ -86,12 +86,13 @@ namespace Gauniv.WebServer.Controllers
             ViewData["MinPrice"] = minPrice;
             ViewData["MaxPrice"] = local_maxPrice;
 
-            return View(local_games);
+            var local_gamesPaged = local_games.ToPagedList(page, 12);
+            return View(local_gamesPaged);
         }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> EditGameListPage(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
+        public async Task<IActionResult> EditGameListPage(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null, int page = 1)
         {
             var (local_games, local_tags, local_maxPrice) = await ApplyGameFilters(searchString, tagIds, minPrice, maxPrice);
 
@@ -101,7 +102,8 @@ namespace Gauniv.WebServer.Controllers
             ViewData["MinPrice"] = minPrice;
             ViewData["MaxPrice"] = local_maxPrice;
 
-            return View(local_games);
+            var local_gamesPaged = local_games.ToPagedList(page, 12);
+            return View(local_gamesPaged);
         }
 
         [HttpGet]

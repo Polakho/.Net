@@ -52,7 +52,7 @@ namespace Gauniv.WebServer.Controllers
         private readonly UserManager<User> userManager = userManager;
 
         [HttpGet]
-        public async Task<IActionResult> Index(string? searchString,int[]? tagIds, double? minPrice = null, double? maxPrice = null, string? seeOwned = "true", string? notOwned = "true")
+        public async Task<IActionResult> Index(string? searchString,int[]? tagIds, double? minPrice = null, double? maxPrice = null, string? seeOwned = "true", string? notOwned = "true", int page = 1)
         {
             var local_query = applicationDbContext.Games.Include(g => g.Tags).AsQueryable();
 
@@ -109,7 +109,9 @@ namespace Gauniv.WebServer.Controllers
                 }
             }
 
+            int pageSize = 12;
             var local_games = await local_query.ToListAsync();
+            var local_gamesPaged = local_games.ToPagedList(page, pageSize);
             var local_tags = await applicationDbContext.Tags.ToListAsync();
 
             ViewData["CurrentFilter"] = searchString;
@@ -120,7 +122,7 @@ namespace Gauniv.WebServer.Controllers
             ViewData["SeeOwned"] = seeOwned == "true";
             ViewData["NotOwned"] = notOwned == "true";
 
-            return View(local_games);
+            return View(local_gamesPaged);
         }
 
 
@@ -154,7 +156,7 @@ namespace Gauniv.WebServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> OwnedGames(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null)
+        public async Task<IActionResult> OwnedGames(string? searchString, int[]? tagIds, double? minPrice = null, double? maxPrice = null, int page = 1)
         {
             if (User?.Identity?.IsAuthenticated is null or false)
             {
@@ -198,6 +200,7 @@ namespace Gauniv.WebServer.Controllers
             }
 
             var local_ownedGames = local_query.ToList();
+            var local_ownedGamesPaged = local_ownedGames.ToPagedList(page, 12);
             var local_tags = await applicationDbContext.Tags.ToListAsync();
 
             ViewData["CurrentFilter"] = searchString;
@@ -206,7 +209,7 @@ namespace Gauniv.WebServer.Controllers
             ViewData["MinPrice"] = minPrice;
             ViewData["MaxPrice"] = maxPrice;
 
-            return View(local_ownedGames);
+            return View(local_ownedGamesPaged);
         }
 
         [HttpPost]
