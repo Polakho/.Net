@@ -26,7 +26,7 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
-
+using System.Text.Json.Serialization;
 
 namespace Gauniv.WebServer.Dtos
 {
@@ -35,8 +35,13 @@ namespace Gauniv.WebServer.Dtos
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Payload { get; set;}
+
+        [JsonIgnore]
+        public string BinaryFilePath { get; set;}
+        
         public double Price { get; set;}
+
+        [JsonIgnore]
         public string ImagePath { get; set; }
         public ICollection<TagsDto> Tags { get; set; } = new List<TagsDto>();
     }

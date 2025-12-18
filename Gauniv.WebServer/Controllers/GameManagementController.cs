@@ -164,24 +164,38 @@ namespace Gauniv.WebServer.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateGame(CreateGameViewModel model, int[] selectedTagIds)
+        public async Task<IActionResult> CreateGame(CreateGameViewModel model)
         {
-            var local_game = new Game
+            
+            var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "BinaryFilesGames");
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
+
+            var fileName = $"{Guid.NewGuid()}_{model.BinaryFile.FileName}";
+            var filePath = Path.Combine(uploadsPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await model.BinaryFile.CopyToAsync(stream);
+            }
+
+            var game = new Game
             {
                 Name = model.Name,
                 Description = model.Description,
                 Price = model.Price,
                 ImagePath = model.ImagePath,
-                Payload = Convert.ToBase64String(Encoding.UTF8.GetBytes("Placeholder payload"))
+                BinaryFilePath = filePath
             };
 
             var local_selectedTags = await applicationDbContext.Tags
-                .Where(t => selectedTagIds.Contains(t.Id))
+                .Where(t => model.SelectedTagIds.Contains(t.Id))
                 .ToListAsync();
 
-            local_game.Tags = local_selectedTags;
-
-            applicationDbContext.Games.Add(local_game);
+            game.Tags = local_selectedTags;
+            applicationDbContext.Games.Add(game);
             await applicationDbContext.SaveChangesAsync();
             return RedirectToAction("Index", "Home");
         }
@@ -220,6 +234,12 @@ namespace Gauniv.WebServer.Controllers
             if (local_game == null)
             {
                 return NotFound();
+            }
+
+            // We delete the file from the server
+            if (System.IO.File.Exists(local_game.BinaryFilePath))
+            {
+                System.IO.File.Delete(local_game.BinaryFilePath);
             }
 
             applicationDbContext.Games.Remove(local_game);

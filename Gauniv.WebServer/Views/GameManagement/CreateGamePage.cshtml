@@ -14,6 +14,7 @@
     </div>
 
     <form asp-action="CreateGame" method="post" enctype="multipart/form-data" class="create-game-form">
+        @Html.AntiForgeryToken()
         <div class="form-section">
             <h2 class="section-title">Game Information</h2>
             
@@ -38,8 +39,11 @@
                     <input asp-for="ImagePath" class="form-input" type="text" placeholder="https://..." />
                 </div>
             </div>
+            <div class="form-group">
+                <label asp-for="BinaryFile" class="form-label">Game Binary File</label>
+                <input asp-for="BinaryFile" class="form-input" type="file" />
+            </div>
         </div>
-
         <div class="form-section">
             <h2 class="section-title">Tags</h2>
             <div class="tag-checkboxes">

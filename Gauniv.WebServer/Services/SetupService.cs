@@ -49,7 +49,7 @@ namespace Gauniv.WebServer.Services
             this.serviceProvider = serviceProvider;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             using (var scope = serviceProvider.CreateScope()) // this will use `IServiceScopeFactory` internally
             {
@@ -111,16 +111,30 @@ namespace Gauniv.WebServer.Services
                 applicationDbContext.Tags.AddRange(tagList);
                 applicationDbContext.SaveChanges();
 
+                var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "BinaryFilesGames");
+                if (!Directory.Exists(uploadsPath))
+                {
+                    Directory.CreateDirectory(uploadsPath);
+                }
+                
+
               // Create games
                 List<Game> local_games = new List<Game>();
                 for (int i = 0; i < 10; i++)
                 {
+
+                    var gameContent = $"This is the binary content of the game {i}";
+                    var gameFileName = $"text.txt";
+                    var gameFilePath = Path.Combine(uploadsPath, gameFileName);
+
+                    await File.WriteAllBytesAsync(gameFilePath, Encoding.UTF8.GetBytes(gameContent));
+
                     var local_game = new Game()
                     {
                         Name = $"Game{i}",
                         Description = $"This is the description of game {i}",
-                        Payload = Convert.ToBase64String(Encoding.UTF8.GetBytes($"This is the payload of game {i}")),
                         Price = i * 10.0,
+                        BinaryFilePath = gameFilePath,  
                         ImagePath = "/images/Goomba.png",
                         Tags = new List<Tags>()
                         {
@@ -144,7 +158,7 @@ namespace Gauniv.WebServer.Services
                 {
                     Name = $"Jeu RPG Aventure",
                     Description = $"Un jeu d'aventure et de rôle passionnant.",
-                    Payload = Convert.ToBase64String(Encoding.UTF8.GetBytes($"Ceci est le payload du jeu RPG Aventure")),
+                    BinaryFilePath = "/BinaryFilesGames/text.txt",
                     Price = 29.99,
                     ImagePath = "/images/Goomba.png",
                     Tags = new List<Tags>()
@@ -156,7 +170,7 @@ namespace Gauniv.WebServer.Services
                 applicationDbContext.Games.Add(notOwnedGame);
                 applicationDbContext.SaveChanges();
 
-                return Task.CompletedTask;
+                return;
             }
         }
 
