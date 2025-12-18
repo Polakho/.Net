@@ -16,7 +16,19 @@ namespace Gauniv.GameServer
             await GameClient2.ConnectToServer();
             await GameClient.ConnectToServer();
             await GameClient3.ConnectToServer();
-
+            
+            // Set player names
+            var setNameRequest1 = new Message.SetPlayerNameRequest
+            {
+                Name = "Clément"
+            };
+            var setNameMessage1 = new Message.MessageGeneric
+            {
+                Type = Message.MessageType.SetPlayerName,
+                Data = MessagePack.MessagePackSerializer.Serialize(setNameRequest1)
+            };
+            await GameClient.SendMessageAsync(setNameMessage1);
+            
             var createGameRequest = new Message.CreateGameRequest
             {
                 BoardSize = 19
@@ -54,7 +66,7 @@ namespace Gauniv.GameServer
             await Task.Delay(3000);
 
             testCaptures(gameId, GameClient, GameClient2);
-            
+
             await Task.Delay(-1);
         }
 
@@ -134,6 +146,49 @@ namespace Gauniv.GameServer
                 await move.client.SendMessageAsync(makeMoveMessage);
                 await Task.Delay(1000);
             }
+        }
+
+        static async void testDoublePass(string gameId, GameClient gameClient, GameClient gameClient2)
+        {
+            //Both players pass consecutively
+            for (int i = 0; i < 4; i++)
+            {
+                var makeMoveRequest1 = new Message.MakeMoveRequest
+                {
+                    GameId = gameId,
+                    IsPass = true
+                };
+                var makeMoveMessage1 = new Message.MessageGeneric
+                {
+                    Type = Message.MessageType.MakeMove,
+                    Data = MessagePack.MessagePackSerializer.Serialize(makeMoveRequest1)
+                };
+                await gameClient.SendMessageAsync(makeMoveMessage1);
+                await Task.Delay(1000);
+
+                var makeMoveRequest2 = new Message.MakeMoveRequest
+                {
+                    GameId = gameId,
+                    IsPass = true
+                };
+                var makeMoveMessage2 = new Message.MessageGeneric
+                {
+                    Type = Message.MessageType.MakeMove,
+                    Data = MessagePack.MessagePackSerializer.Serialize(makeMoveRequest2)
+                };
+                await gameClient2.SendMessageAsync(makeMoveMessage2);
+                await Task.Delay(1000);
+            }
+        }
+
+        static async void getListOfGames(GameClient gameClient)
+        {
+            var getGamesMessage = new Message.MessageGeneric
+            {
+                Type = Message.MessageType.GetGameList,
+                Data = MessagePack.MessagePackSerializer.Serialize("hello")
+            };
+            await gameClient.SendMessageAsync(getGamesMessage);
         }
     }
 }

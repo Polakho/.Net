@@ -14,6 +14,13 @@ public class MessageGeneric
 }
 
 [MessagePackObject]
+public class SetPlayerNameRequest
+{
+    [Key(0)]
+    public string Name { get; set; }
+}
+
+[MessagePackObject]
 public class CreateGameRequest
 {
     [Key(0)]
@@ -83,4 +90,11 @@ public class WrongMoveResponse
 {
     [Key(0)]
     public string Reason { get; set; }
+}
+
+[MessagePackObject]
+public class GetListGamesResponse
+{
+    [Key(0)]
+    public List<string> GameIds { get; set; }
 }

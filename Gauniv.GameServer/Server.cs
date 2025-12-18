@@ -16,6 +16,7 @@ namespace Gauniv.GameServer
         private int port = 5000;
         private readonly GameService _gameService;
         private String server = "SERVER-";
+        private String name = "SERVER MASTER OF GAMES";
         
         public Server(int port)
         {
@@ -80,19 +81,27 @@ namespace Gauniv.GameServer
         {
             switch (message.Type)
             {
+                case MessageType.SetPlayerName:
+                    var nameRequest = MessagePackSerializer.Deserialize<SetPlayerNameRequest>(message.Data);
+                    Console.WriteLine($"{server}Received data: {nameRequest.Name} for player {player.Id}");
+                    player.Name = nameRequest.Name;
+                    // Send name of server back to client
+                    var nameResponseData = MessagePack.MessagePackSerializer.Serialize(new Message.SetPlayerNameRequest { Name = name });
+                    return new MessageGeneric { Type = MessageType.SetPlayerName, Data = nameResponseData };
+                
                 case MessageType.CreateGame:
                     var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {request.BoardSize}");
                     var gameId = await _gameService.CreateGameAsync(request.BoardSize);
                     var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
-                    return new MessageGeneric { Type = "GameCreated", Data = responseData };
+                    return new MessageGeneric { Type = MessageType.CreateGame, Data = responseData };
                 
                 case MessageType.JoinGame:
                     var joinRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {joinRequest.GameId}, AsSpectator: {joinRequest.AsSpectator}");
                     var joinResult = await _gameService.JoinGameAsync(joinRequest.GameId, player, joinRequest.AsSpectator);
                     var joinResponseData = MessagePackSerializer.Serialize(new { Result = joinResult });
-                    return new MessageGeneric { Type = "GameJoined", Data = joinResponseData };
+                    return new MessageGeneric { Type = MessageType.JoinGame, Data = joinResponseData };
                     
                 case MessageType.GetGameState:
                     var stateRequest = MessagePackSerializer.Deserialize<GetGameStateRequest>(message.Data);
