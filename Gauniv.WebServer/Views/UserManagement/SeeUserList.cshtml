@@ -1,8 +1,13 @@
-@model IEnumerable<Gauniv.WebServer.Dtos.UsersDto>
+@model IPagedList<Gauniv.WebServer.Dtos.UsersDto>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+<link href="~/css/gameList.css" rel="stylesheet" type="text/css" />
 
 <h2>Connected Users</h2>
 
-@if (Model != null)
+@if (Model != null && Model.Any())
 {
     <table class="table table-striped">
         <thead>
@@ -32,8 +37,13 @@
             }
         </tbody>
     </table>
+
+    <div class="pagination-container">
+        @Html.PagedListPager(Model, page => Url.Action("SeeUserList", new { page }))
+    </div>
 }
 else
 {
     <p>No connected users.</p>
 }
+

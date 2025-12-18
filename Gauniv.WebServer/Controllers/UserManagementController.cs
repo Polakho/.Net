@@ -27,7 +27,7 @@ namespace Gauniv.WebServer.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SeeUserList()
+        public async Task<IActionResult> SeeUserList(int page = 1)
         {
             var users = await userManager.Users.ToListAsync();
             var usersDto = users.Select(user => new UsersDto
@@ -43,7 +43,9 @@ namespace Gauniv.WebServer.Controllers
                     Description = game.Description
                 }).ToList()
             }).ToList();
-            return View(usersDto);
+
+            var pagedUsers = usersDto.ToPagedList(page, 10); // 10 users per page
+            return View(pagedUsers);
         }
 
         public async Task<IActionResult> FriendList(string query = null)
