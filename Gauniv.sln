@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauniv.Network", "Gauniv.Ne
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{4B8B6402-5A73-498B-941D-4F02233547C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gauniv.GameServer", "Gauniv.GameServer\Gauniv.GameServer.csproj", "{B088240D-376D-46C7-98BA-7BD67C3A7D38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,14 @@ Global
 		{4B8B6402-5A73-498B-941D-4F02233547C7}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
 		{4B8B6402-5A73-498B-941D-4F02233547C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B8B6402-5A73-498B-941D-4F02233547C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.ExportRelease|Any CPU.ActiveCfg = Debug|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.ExportRelease|Any CPU.Build.0 = Debug|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B088240D-376D-46C7-98BA-7BD67C3A7D38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
