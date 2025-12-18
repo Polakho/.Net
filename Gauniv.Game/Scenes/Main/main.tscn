@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://8px8enunwe5m"]
+[gd_scene load_steps=3 format=3 uid="uid://8px8enunwe5m"]
 
 [ext_resource type="Script" uid="uid://dqwkckv5sgixq" path="res://Script/App/ScreenManager.cs" id="1_1r6ip"]
+[ext_resource type="Script" uid="uid://dpktvaihx605g" path="res://Script/Network/GameServerClient.cs" id="2_lixft"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -22,3 +23,4 @@ script = ExtResource("1_1r6ip")
 [node name="PopupLayer" type="CanvasLayer" parent="."]
 
 [node name="NetClient" type="Node" parent="."]
+script = ExtResource("2_lixft")

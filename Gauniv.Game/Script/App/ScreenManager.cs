@@ -3,6 +3,8 @@ using Godot;
 public partial class ScreenManager : Control
 {
 	private Control _current;
+	
+	public GameServerClient NetClient { get; private set; }
 
 	public override void _Ready()
 	{
@@ -12,6 +14,16 @@ public partial class ScreenManager : Control
 		OffsetTop = 0;
 		OffsetRight = 0;
 		OffsetBottom = 0;
+		
+		var parent = GetParent();
+		if (parent != null && parent.HasNode("NetClient"))
+		{
+			NetClient = parent.GetNode<GameServerClient>("NetClient");
+		}
+		else
+		{
+			GD.PrintErr("[ScreenManager] NetClient introuvable dans le parent.");
+		}
 
 		GoTo("res://Scenes/Screens/main_menu_screen.tscn");
 	}

@@ -67,11 +67,6 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Play"
 
-[node name="SpectateButton" type="Button" parent="Root/CenterContainer/Card/CardMargin/Layout"]
-custom_minimum_size = Vector2(0, 44)
-layout_mode = 2
-text = "Spectate"
-
 [node name="QuitButton" type="Button" parent="Root/CenterContainer/Card/CardMargin/Layout"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
