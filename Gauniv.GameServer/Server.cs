@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using Gauniv.GameServer.Service;
 using Gauniv.GameServer.Message;
@@ -115,9 +114,9 @@ namespace Gauniv.GameServer
                     var joinRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {joinRequest.GameId}, AsSpectator: {joinRequest.AsSpectator}");
                     var joinResult = await _gameService.JoinGameAsync(joinRequest.GameId, player, joinRequest.AsSpectator);
-                    var joinResponseData = MessagePackSerializer.Serialize(new { Result = joinResult });
+                    var joinResponseData = MessagePackSerializer.Serialize(new JoinGameResponse { Result = joinResult, GameId = joinRequest.GameId});
                     return new MessageGeneric { Type = MessageType.JoinGame, Data = joinResponseData };
-                    
+
                 case MessageType.GetGameState:
                     var stateRequest = MessagePackSerializer.Deserialize<GetGameStateRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {stateRequest.GameId}");
@@ -137,7 +136,32 @@ namespace Gauniv.GameServer
                     else if (moveResult is GetGameStateResponse gameState)
                     {
                         var gameStateData = MessagePackSerializer.Serialize(gameState);
-                        return new MessageGeneric { Type = MessageType.GameState, Data = gameStateData };
+                        var broadcastMessage = new MessageGeneric { Type = MessageType.GameState, Data = gameStateData };
+                        byte[] data = MessagePackSerializer.Serialize(broadcastMessage);
+                        // Récupérer la partie
+                        Game game =  _gameService.GetGameById(moveRequest.GameId);
+        
+                        // Envoyer à tous les joueurs et spectateurs
+                        var recipients = game.Players.Concat(game.Spectators);
+                        
+                        foreach (var recipient in recipients)
+                        {
+                            if (_players.TryGetValue(recipient.Id.ToString(), out var recipientPlayer))
+                            {
+                                try
+                                {
+                                    Console.WriteLine($"{server}Sending to player {recipient.Id}: {recipientPlayer.Name}");
+                                    var recipientStream = recipientPlayer.Stream;
+                                    await recipientStream.WriteAsync(data, 0, data.Length);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine($"{server}Failed to send update to player {recipient.Id}: {ex.Message}");
+                                }
+                            }
+                        }
+        
+                        return null;
                     }
                     break;
                 

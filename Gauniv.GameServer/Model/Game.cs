@@ -77,6 +77,10 @@ public class Game
                 {
                     Winner = null; // Tie
                 }
+                
+                Console.WriteLine(Winner != null
+                    ? $"Winner is Player {Winner.Id} with color {Winner.Color}"
+                    : "The game ended in a tie");
             }
         }
     }

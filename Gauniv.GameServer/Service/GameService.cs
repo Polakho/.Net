@@ -8,6 +8,11 @@ public class GameService
 {
     private readonly ConcurrentDictionary<string, Game> _games = new();
 
+    public Game GetGameById(string gameId)
+    {
+        _games.TryGetValue(gameId, out var game);
+        return game;
+    }
     public void listGames()
     {
         foreach (var game in _games)
@@ -46,7 +51,7 @@ public class GameService
 
             Console.WriteLine($"Player {player.Id}, name {player.Name} joined game {gameId} as {(asSpectator ? "spectator" : "player")}");
             listGames();
-            return Task.FromResult("Joined successfully");
+            return Task.FromResult("Joined game successfully");
         }
         else
         {
@@ -109,7 +114,6 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
                 
                 // Place the stone
                 game.Board.Set(point.Value, player.Color);
-                game.UpdateGameState();
                 // Check score 
                 Console.WriteLine($"Scores - Black: {game.Board.blackScore}, White: {game.Board.whiteScore}");
             }
@@ -127,7 +131,8 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
                 Timestamp = DateTime.UtcNow
             };
             game.MoveHistory.Add(move);
-            
+            game.UpdateGameState();
+
             // Switch current player
             var nextPlayer = game.Players.Find(p => p.Id != player.Id);
             game.currentPlayer = nextPlayer;

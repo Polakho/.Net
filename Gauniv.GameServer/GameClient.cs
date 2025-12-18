@@ -72,6 +72,20 @@ public class GameClient
                 var moveResult = MessagePackSerializer.Deserialize<WrongMoveResponse>(message.Data);
                 Console.WriteLine($"{clientTag}Move Result: {moveResult.Reason}");
             }
+
+            if (MessageType.JoinGame == message.Type)
+            {
+                try
+                {
+                    var joinResponse = MessagePackSerializer.Deserialize<JoinGameResponse>(message.Data);
+                    Console.WriteLine($"{clientTag}Join Game Response: Message={joinResponse.Result}");       
+                } 
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{clientTag}Error deserializing join game response: {ex.Message}");
+                }
+            }
+
             
             if(MessageType.GetGameList == message.Type)
             {
@@ -87,7 +101,7 @@ public class GameClient
                         Console.Write("Players: ");
                         foreach (var player in game.Players)
                         {
-                            Console.Write($"{player.Name} ");
+                            Console.Write($"{player.Name} - {player.Id} ");
                         }
 
                         Console.WriteLine();
@@ -95,7 +109,7 @@ public class GameClient
                         Console.Write("Spectators: ");
                         foreach (var spectator in game.Spectators)
                         {
-                            Console.Write($"{spectator.Name} ");
+                            Console.Write($"{spectator.Name} - {spectator.Id} ");
                         }
                         Console.WriteLine();
                     }

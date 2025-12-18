@@ -72,7 +72,24 @@ namespace Gauniv.GameServer
                 Data = MessagePack.MessagePackSerializer.Serialize("hello")
             };
             await GameClient3.SendMessageAsync(getGamesMessage);
+            
+            var joinGameRequestSpectate = new Message.JoinGameRequest
+            {
+                GameId = gameId,
+                AsSpectator = true
+            };
 
+            var joinMessageSpectatete = new Message.MessageGeneric
+            {
+                Type = Message.MessageType.JoinGame,
+                Data = MessagePack.MessagePackSerializer.Serialize(joinGameRequestSpectate)
+            };
+
+            await GameClient3.SendMessageAsync(joinMessageSpectatete);
+            await Task.Delay(3000);
+
+            testCaptures(gameId, GameClient, GameClient2);
+            
             await Task.Delay(-1);
         }
 
@@ -80,7 +97,7 @@ namespace Gauniv.GameServer
         {
             var random = new Random();
             //Random move from random client 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 int client = random.Next(1, 3);
                 int x = random.Next(0, 18);
