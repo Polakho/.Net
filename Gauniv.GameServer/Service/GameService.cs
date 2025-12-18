@@ -16,12 +16,12 @@ public class GameService
         }
     }
 
-    public Task<string> CreateGameAsync(int boardSize)
+    public Task<string> CreateGameAsync(string gameName, int boardSize)
     {
         var gameId = Guid.NewGuid().ToString();
-        var game = new Game(boardSize);
+        var game = new Game(gameName, boardSize);
         _games.TryAdd(gameId, game);
-        Console.WriteLine($"Created game with id {gameId}");
+        Console.WriteLine($"Created game with id {gameId} and name {gameName}");
         listGames();
         return Task.FromResult(gameId);
     }
@@ -44,7 +44,7 @@ public class GameService
                 // TODO: could add logic to handle joining full/in-progress games
             }
 
-            Console.WriteLine($"Player {player.Id} joined game {gameId} as {(asSpectator ? "spectator" : "player")}");
+            Console.WriteLine($"Player {player.Id}, name {player.Name} joined game {gameId} as {(asSpectator ? "spectator" : "player")}");
             listGames();
             return Task.FromResult("Joined successfully");
         }

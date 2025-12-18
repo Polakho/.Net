@@ -25,6 +25,8 @@ public class CreateGameRequest
 {
     [Key(0)]
     public int BoardSize { get; set; } = 19;
+    [Key(1)]
+    public string GameName { get; set; }
 }
 
 [MessagePackObject]

@@ -31,7 +31,8 @@ namespace Gauniv.GameServer
             
             var createGameRequest = new Message.CreateGameRequest
             {
-                BoardSize = 19
+                BoardSize = 19,
+                GameName = "Test Game"
             };
             var message = new Message.MessageGeneric
             {

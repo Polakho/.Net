@@ -92,7 +92,7 @@ namespace Gauniv.GameServer
                 case MessageType.CreateGame:
                     var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {request.BoardSize}");
-                    var gameId = await _gameService.CreateGameAsync(request.BoardSize);
+                    var gameId = await _gameService.CreateGameAsync(request.GameName, request.BoardSize);
                     var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
                     return new MessageGeneric { Type = MessageType.CreateGame, Data = responseData };
                 

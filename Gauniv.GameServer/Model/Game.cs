@@ -5,6 +5,7 @@ namespace Gauniv.GameServer.Model;
 public class Game
 {
     public string Id { get; set; }
+    public string Name { get; set; }
     public DateTime Created { get; set; }
     public Board Board { get; set; }
     public List<Move> MoveHistory { get; set; }
@@ -14,8 +15,9 @@ public class Game
     public GameState State { get; set; }
     public Player Winner { get; set; }
     
-    public Game(int boardSize)
+    public Game(string name, int boardSize)
     {
+        Name = name;
         Id = Guid.NewGuid().ToString();
         Created = DateTime.UtcNow;
         Board = new Board(boardSize);
