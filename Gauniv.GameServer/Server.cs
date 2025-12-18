@@ -89,6 +89,21 @@ namespace Gauniv.GameServer
                     var nameResponseData = MessagePack.MessagePackSerializer.Serialize(new Message.SetPlayerNameRequest { Name = name });
                     return new MessageGeneric { Type = MessageType.SetPlayerName, Data = nameResponseData };
                 
+                case MessageType.GetGameList:
+                    var games = await _gameService.ListGamesAsync();
+                    var gameInfos = games.Select(g => new GameInfo
+                    {
+                        Id = g.Id,
+                        Name = g.Name,
+                        Players = g.Players.Select(p => new PlayerInfo { Id = p.Id.ToString(), Name = p.Name }).ToList(),
+                        Spectators = g.Spectators.Select(s => new PlayerInfo { Id = s.Id.ToString(), Name = s.Name }).ToList(),
+                        State = g.State,
+                        BoardSize = g.Board.Size
+                    }).ToList();
+                    var listResponse = new GetListGamesResponse { Games = gameInfos };
+                    var listResponseData = MessagePackSerializer.Serialize(listResponse);
+                    return new MessageGeneric { Type = MessageType.GetGameList, Data = listResponseData };
+                
                 case MessageType.CreateGame:
                     var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {request.BoardSize}");

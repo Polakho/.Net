@@ -66,7 +66,12 @@ namespace Gauniv.GameServer
 
             await Task.Delay(3000);
 
-            testCaptures(gameId, GameClient, GameClient2);
+            var getGamesMessage = new Message.MessageGeneric
+            {
+                Type = Message.MessageType.GetGameList,
+                Data = MessagePack.MessagePackSerializer.Serialize("hello")
+            };
+            await GameClient3.SendMessageAsync(getGamesMessage);
 
             await Task.Delay(-1);
         }

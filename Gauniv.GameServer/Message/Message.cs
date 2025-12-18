@@ -21,6 +21,35 @@ public class SetPlayerNameRequest
 }
 
 [MessagePackObject]
+public class GameInfo
+{
+    [Key(0)]
+    public string Id { get; set; }
+
+    [Key(1)]
+    public string Name { get; set; }
+
+    [Key(2)]
+    public List<PlayerInfo> Players { get; set; }
+
+    [Key(3)]
+    public List<PlayerInfo> Spectators { get; set; }
+
+    [Key(4)]
+    public Game.GameState State { get; set; }
+    
+    [Key(5)]
+    public int BoardSize { get; set; }
+}
+
+[MessagePackObject]
+public class GetListGamesResponse
+{
+    [Key(0)]
+    public List<GameInfo> Games { get; set; }
+}
+
+[MessagePackObject]
 public class CreateGameRequest
 {
     [Key(0)]
@@ -69,6 +98,9 @@ public class PlayerInfo
     public string Id { get; set; }
     
     [Key(1)]
+    public string Name { get; set; }
+    
+    [Key(2)]
     public bool IsSpectator { get; set; }
 }
 
@@ -92,11 +124,4 @@ public class WrongMoveResponse
 {
     [Key(0)]
     public string Reason { get; set; }
-}
-
-[MessagePackObject]
-public class GetListGamesResponse
-{
-    [Key(0)]
-    public List<string> GameIds { get; set; }
 }

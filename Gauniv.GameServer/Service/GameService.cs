@@ -145,7 +145,11 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
         
         return Task.FromResult<object>(new WrongMoveResponse { Reason = "Game not found" });
     }
-    
+
+    public async Task<List<Game>> ListGamesAsync()
+    {
+        return  await Task.FromResult(_games.Values.ToList());
+    }
 }
 
 

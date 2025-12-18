@@ -72,6 +72,40 @@ public class GameClient
                 var moveResult = MessagePackSerializer.Deserialize<WrongMoveResponse>(message.Data);
                 Console.WriteLine($"{clientTag}Move Result: {moveResult.Reason}");
             }
+            
+            if(MessageType.GetGameList == message.Type)
+            {
+                try
+                {
+                    var gameListResponse = MessagePackSerializer.Deserialize<GetListGamesResponse>(message.Data);
+                    Console.WriteLine($"{clientTag}Available Games:");
+                    foreach (var game in gameListResponse.Games)
+                    {
+                        Console.WriteLine(
+                            $"Game ID: {game.Id}, Name: {game.Name}, Board Size: {game.BoardSize}, State: {game.State}");
+                        // List players
+                        Console.Write("Players: ");
+                        foreach (var player in game.Players)
+                        {
+                            Console.Write($"{player.Name} ");
+                        }
+
+                        Console.WriteLine();
+                        // List spectators
+                        Console.Write("Spectators: ");
+                        foreach (var spectator in game.Spectators)
+                        {
+                            Console.Write($"{spectator.Name} ");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{clientTag}Error deserializing game list: {ex.Message}");
+                }
+            }
+
         }
     }
     
