@@ -120,6 +120,22 @@ public partial class GameServerClient : Node
 						foreach (var g in list.Games)
 						{
 							GD.Print($"[NET]   - Game ID: {g.Id}, Name: {g.Name}");
+							GD.Print($"[NET]     Players count: {g.Players?.Count ?? 0}");
+							if (g.Players != null)
+							{
+								foreach (var p in g.Players)
+								{
+									GD.Print($"[NET]       - Player: {p.Name} ({p.Id})");
+								}
+							}
+							GD.Print($"[NET]     Spectators count: {g.Spectators?.Count ?? 0}");
+							if (g.Spectators != null)
+							{
+								foreach (var s in g.Spectators)
+								{
+									GD.Print($"[NET]       - Spectator: {s.Name} ({s.Id})");
+								}
+							}
 						}
 					}
 				}

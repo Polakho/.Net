@@ -48,6 +48,16 @@ public partial class GameList : ItemList
 		GD.Print("[GameList] En attente de l'appel de SetGameServerClient() depuis LobbyScreen");
 	}
 
+	public override void _ExitTree()
+	{
+		// Déabonner l'événement quand le nœud est supprimé
+		if (_net != null)
+		{
+			GD.Print("[GameList] ✓ Nœud GameList supprimé, déabonnement de l'événement GameListReceived");
+			_net.GameListReceived -= OnGameListReceived;
+		}
+	}
+
 	private void OnGameListReceived(GetListGamesResponse gameList)
 	{
 		GD.Print("===== [GameList.OnGameListReceived] ÉVÉNEMENT DÉCLENCHÉ =====");
@@ -66,6 +76,14 @@ public partial class GameList : ItemList
 	private void DisplayGames(GetListGamesResponse gameList)
 	{
 		GD.Print("===== [GameList.DisplayGames] APPELÉE =====");
+		
+		// Vérifier si le nœud est encore valide avant d'accéder à ses propriétés
+		if (!IsNodeReady() || IsQueuedForDeletion())
+		{
+			GD.PrintErr("[GameList] ✗ Le nœud GameList a été supprimé, arrêt de DisplayGames");
+			return;
+		}
+		
 		GD.Print($"[GameList] ItemList avant Clear() contient {ItemCount} items");
 		
 		Clear();
@@ -101,9 +119,24 @@ public partial class GameList : ItemList
 		int itemIndex = 0;
 		foreach (var game in gameList.Games)
 		{
+			GD.Print($"[GameList] --- Affichage du game ---");
+			GD.Print($"[GameList] Game ID: {game.Id}");
+			GD.Print($"[GameList] Game Name: {game.Name}");
+			GD.Print($"[GameList] Game.Players: {game.Players}");
+			GD.Print($"[GameList] Game.Players.Count: {game.Players?.Count ?? -1}");
+			if (game.Players != null)
+			{
+				foreach (var p in game.Players)
+				{
+					GD.Print($"[GameList]   - Player: {p.Name} ({p.Id})");
+				}
+			}
+			GD.Print($"[GameList] Board Size: {game.BoardSize}");
+			
 			string displayText = $"[{game.Id}] {game.Name} ({game.Players.Count} players, {game.BoardSize}x{game.BoardSize})";
 			AddItem(displayText);
 			GD.Print($"[GameList] ✓ Item #{itemIndex} ajouté: {displayText}");
+			GD.Print($"[GameList] ItemList contient maintenant {ItemCount} items");
 			itemIndex++;
 		}
 

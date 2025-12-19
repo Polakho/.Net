@@ -71,10 +71,7 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Quit"
 
-<<<<<<< Updated upstream
-=======
 [node name="GameServerClient" type="Node" parent="."]
 
->>>>>>> Stashed changes
 [connection signal="pressed" from="Root/CenterContainer/Card/CardMargin/Layout/PlayButton" to="." method="OnPlayPressed"]
 [connection signal="pressed" from="Root/CenterContainer/Card/CardMargin/Layout/QuitButton" to="." method="OnQuitPressed"]

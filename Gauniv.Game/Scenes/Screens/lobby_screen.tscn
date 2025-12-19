@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://ctv34ks22fjdb"]
 
-[ext_resource type="Script" uid="uid://bavg0yqbh4k2n" path="res://Script/Screens/LobbyScreen.cs" id="1_ydnej"]
-[ext_resource type="Script" uid="uid://c7m1l9pf8kdxl" path="res://Script/Screens/GameList.cs" id="2_gameL"]
+[ext_resource type="Script" path="res://Script/Screens/LobbyScreen.cs" id="1_ydnej"]
+[ext_resource type="Script" path="res://Script/Screens/GameList.cs" id="2_gameL"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ydnej"]
 bg_color = Color(0.6784314, 0.6784314, 0.6784314, 1)
@@ -70,9 +70,7 @@ text = "Games"
 
 [node name="GameList" type="ItemList" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
 layout_mode = 2
-<<<<<<< Updated upstream
 script = ExtResource("2_gameL")
-=======
 auto_width = true
 auto_height = true
 item_count = 1
@@ -84,7 +82,6 @@ size_flags_vertical = 8
 text = "Refresh"
 icon_alignment = 1
 vertical_icon_alignment = 2
->>>>>>> Stashed changes
 
 [node name="RightPanel" type="VBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout/Content"]
 layout_mode = 2
@@ -116,7 +113,7 @@ layout_mode = 2
 size_flags_horizontal = 0
 text = "Back"
 
-[connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel/Refresh" to="." method="OnRefreshPress"]
+[connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel/Refresh" to="." method="OnRefreshPressed"]
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/CreateButton" to="." method="OnCreatePressed"]
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/JoinButton" to="." method="OnJoinPressed"]
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/SpectateButton" to="." method="OnSpectatePressed"]

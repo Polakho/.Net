@@ -1,4 +1,4 @@
-﻿using System.Net;
+﻿﻿using System.Net;
 using System.Net.Sockets;
 using Gauniv.GameServer.Service;
 using Gauniv.GameServer.Message;
@@ -100,6 +100,24 @@ namespace Gauniv.GameServer
                         State = g.State,
                         BoardSize = g.Board.Size
                     }).ToList();
+                    
+                    // Log détaillé des games
+                    Console.WriteLine($"{server}[GetGameList] Nombre total de games: {gameInfos.Count}");
+                    foreach (var gameInfo in gameInfos)
+                    {
+                        Console.WriteLine($"{server}[GetGameList] Game ID: {gameInfo.Id}, Name: {gameInfo.Name}");
+                        Console.WriteLine($"{server}[GetGameList]   - Nombre de players: {gameInfo.Players.Count}");
+                        foreach (var plr in gameInfo.Players)
+                        {
+                            Console.WriteLine($"{server}[GetGameList]     - Player: {plr.Name} ({plr.Id})");
+                        }
+                        Console.WriteLine($"{server}[GetGameList]   - Nombre de spectators: {gameInfo.Spectators.Count}");
+                        foreach (var spectator in gameInfo.Spectators)
+                        {
+                            Console.WriteLine($"{server}[GetGameList]     - Spectator: {spectator.Name} ({spectator.Id})");
+                        }
+                    }
+                    
                     var listResponse = new GetListGamesResponse { Games = gameInfos };
                     var listResponseData = MessagePackSerializer.Serialize(listResponse);
                     return new MessageGeneric { Type = MessageType.GetGameList, Data = listResponseData };
@@ -108,6 +126,10 @@ namespace Gauniv.GameServer
                     var request = MessagePackSerializer.Deserialize<CreateGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {request.BoardSize}");
                     var gameId = await _gameService.CreateGameAsync(request.GameName, request.BoardSize);
+                    
+                    // Broadcast updated list to everyone
+                    await BroadcastGameListAsync();
+                    
                     var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
                     return new MessageGeneric { Type = MessageType.CreateGame, Data = responseData };
                 
@@ -115,6 +137,10 @@ namespace Gauniv.GameServer
                     var joinRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {joinRequest.GameId}, AsSpectator: {joinRequest.AsSpectator}");
                     var joinResult = await _gameService.JoinGameAsync(joinRequest.GameId, player, joinRequest.AsSpectator);
+                    
+                    // Broadcast updated list to everyone
+                    await BroadcastGameListAsync();
+                    
                     var joinResponseData = MessagePackSerializer.Serialize(new JoinGameResponse { Result = joinResult, GameId = joinRequest.GameId});
                     return new MessageGeneric { Type = MessageType.JoinGame, Data = joinResponseData };
 
@@ -174,6 +200,39 @@ namespace Gauniv.GameServer
         {
             _isRunning = false;
             _listener?.Stop();
+        }
+
+        private async Task BroadcastGameListAsync()
+        {
+            var games = await _gameService.ListGamesAsync();
+            var gameInfos = games.Select(g => new GameInfo
+            {
+                Id = g.Id,
+                Name = g.Name,
+                Players = g.Players.Select(p => new PlayerInfo { Id = p.Id.ToString(), Name = p.Name }).ToList(),
+                Spectators = g.Spectators.Select(s => new PlayerInfo { Id = s.Id.ToString(), Name = s.Name }).ToList(),
+                State = g.State,
+                BoardSize = g.Board.Size
+            }).ToList();
+
+            var listResponse = new GetListGamesResponse { Games = gameInfos };
+            var listResponseData = MessagePackSerializer.Serialize(listResponse);
+            var broadcastMessage = new MessageGeneric { Type = MessageType.GetGameList, Data = listResponseData };
+            byte[] data = MessagePackSerializer.Serialize(broadcastMessage);
+
+            Console.WriteLine($"{server}Broadcasting updated game list to {_players.Count} players");
+
+            foreach (var p in _players.Values)
+            {
+                try
+                {
+                    await p.Stream.WriteAsync(data, 0, data.Length);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"{server}Failed to send game list update to player {p.Id}: {ex.Message}");
+                }
+            }
         }
     }
 }
