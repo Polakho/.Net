@@ -58,6 +58,29 @@ public class GameService
             return Task.FromResult("Game not found");
         }
     }
+    
+    public Task<string> LeaveGameAsync(string gameId, Player player)
+    {
+        if (_games.TryGetValue(gameId, out var game))
+        {
+            if (game.Players.RemoveAll(p => p.Id == player.Id) > 0 || 
+                game.Spectators.RemoveAll(s => s.Id == player.Id) > 0)
+            {
+                game.UpdateGameState();
+                Console.WriteLine($"Player {player.Id} left game {gameId}");
+                listGames();
+                return Task.FromResult("Left game successfully");
+            }
+            else
+            {
+                return Task.FromResult("Player not found in game");
+            }
+        }
+        else
+        {
+            return Task.FromResult("Game not found");
+        }
+    }
 
     public Task<GetGameStateResponse?> GetGameAsync(string gameId)
     {

@@ -147,6 +147,13 @@ namespace Gauniv.GameServer
                     var joinResponseData = MessagePackSerializer.Serialize(new JoinGameResponse { Result = joinResult, GameId = joinRequest.GameId});
                     return new MessageGeneric { Type = MessageType.JoinGame, Data = joinResponseData };
 
+                case MessageType.LeaveGame:
+                    var leaveRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
+                    Console.WriteLine($"{server}Received data: {leaveRequest.GameId}");
+                    var leaveResult = await _gameService.LeaveGameAsync(leaveRequest.GameId, player);
+                    var leaveResponseData = MessagePackSerializer.Serialize(new LeaveGameResponse { Result = leaveResult, GameId = leaveRequest.GameId});
+                    return new MessageGeneric { Type = MessageType.LeaveGame, Data = leaveResponseData };
+                
                 case MessageType.GetGameState:
                     var stateRequest = MessagePackSerializer.Deserialize<GetGameStateRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {stateRequest.GameId}");
