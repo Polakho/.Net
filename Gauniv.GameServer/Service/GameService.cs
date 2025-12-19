@@ -23,12 +23,11 @@ public class GameService
 
     public Task<string> CreateGameAsync(string gameName, int boardSize)
     {
-        var gameId = Guid.NewGuid().ToString();
         var game = new Game(gameName, boardSize);
-        _games.TryAdd(gameId, game);
-        Console.WriteLine($"Created game with id {gameId} and name {gameName}");
+        _games.TryAdd(game.Id, game);
+        Console.WriteLine($"Created game with id {game.Id} and name {gameName}");
         listGames();
-        return Task.FromResult(gameId);
+        return Task.FromResult(game.Id);
     }
 
     public Task<String> JoinGameAsync(string gameId, Player player, bool asSpectator)

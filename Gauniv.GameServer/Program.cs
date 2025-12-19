@@ -8,6 +8,7 @@ namespace Gauniv.GameServer
         {
             var server = new Server(5000);
             _ = Task.Run(() => server.StartAsync());
+            /*
             await Task.Delay(1000);
 
             var GameClient = new GameClient("1");
@@ -89,6 +90,7 @@ namespace Gauniv.GameServer
             await Task.Delay(3000);
 
             testCaptures(gameId, GameClient, GameClient2);
+            */
             
             await Task.Delay(-1);
         }

@@ -62,7 +62,8 @@ namespace Gauniv.GameServer
                         var responseBytes = MessagePackSerializer.Serialize(response);
                         await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
                     }
-                }
+                } 
+                
             }
             catch (Exception ex)
             {
