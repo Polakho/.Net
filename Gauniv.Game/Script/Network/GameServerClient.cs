@@ -109,8 +109,22 @@ public partial class GameServerClient : Node
 			{
 				var list = MessagePackSerializer.Deserialize<GetListGamesResponse>(message.Data);
 				LastGameList = list;
-				GD.Print($"[NET] Received {list.Games.Count} games");
-				CallDeferred(nameof(EmitGameListReceived));
+				GD.Print($"===== [NET.GetGameList] MESSAGE REÇU =====");
+				GD.Print($"[NET] LastGameList assigné, list est null? {list == null}");
+				if (list != null)
+				{
+					GD.Print($"[NET] list.Games est null? {list.Games == null}");
+					if (list.Games != null)
+					{
+						GD.Print($"[NET] Nombre de games: {list.Games.Count}");
+						foreach (var g in list.Games)
+						{
+							GD.Print($"[NET]   - Game ID: {g.Id}, Name: {g.Name}");
+						}
+					}
+				}
+				GD.Print($"[NET] Appel de CallDeferred(EmitGameListReceived)");
+				CallDeferred(nameof(EmitGameListReceived));  // ← UI plus tard
 				break;
 			}
 			case MessageType.GameState:
@@ -211,7 +225,16 @@ public partial class GameServerClient : Node
 
 	private void EmitGameListReceived()
 	{
+		GD.Print("===== [NET.EmitGameListReceived] APPELÉE =====");
+		GD.Print($"[NET] LastGameList est null? {LastGameList == null}");
+		GD.Print($"[NET] Nombre de souscripteurs à GameListReceived: {GameListReceived?.GetInvocationList().Length ?? 0}");
+		if (LastGameList != null && LastGameList.Games != null)
+		{
+			GD.Print($"[NET] LastGameList contient {LastGameList.Games.Count} games");
+		}
+		GD.Print($"[NET] Invocation de l'événement GameListReceived");
 		GameListReceived?.Invoke(LastGameList);
+		GD.Print($"[NET] Événement GameListReceived invoqué");
 	}
 
 	private void EmitGameCreated()

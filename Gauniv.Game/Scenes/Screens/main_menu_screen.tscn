@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://bvfqv77pn3jfj"]
+[gd_scene load_steps=3 format=3 uid="uid://bvfqv77pn3jfj"]
 
 [ext_resource type="Script" uid="uid://drsxnjt8jk105" path="res://Script/Screens/MainMenuScreen.cs" id="1_rhm1l"]
-[ext_resource type="Script" uid="uid://dpktvaihx605g" path="res://Script/Network/GameServerClient.cs" id="2_mdeqe"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mdeqe"]
 bg_color = Color(0.6784314, 0.6784314, 0.6784314, 1)
@@ -72,8 +71,10 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Quit"
 
+<<<<<<< Updated upstream
+=======
 [node name="GameServerClient" type="Node" parent="."]
-script = ExtResource("2_mdeqe")
 
+>>>>>>> Stashed changes
 [connection signal="pressed" from="Root/CenterContainer/Card/CardMargin/Layout/PlayButton" to="." method="OnPlayPressed"]
 [connection signal="pressed" from="Root/CenterContainer/Card/CardMargin/Layout/QuitButton" to="." method="OnQuitPressed"]
