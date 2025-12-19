@@ -44,10 +44,10 @@ namespace Gauniv.Client.Services
         public static NetworkService Instance { get; private set; } = new NetworkService();
         [ObservableProperty]
         private string token;
-        public HttpClient httpClient;
+        public HttpClient HttpClient;
 
         public NetworkService() {
-            httpClient = new HttpClient();
+            HttpClient = new HttpClient();
             Token = null;
         }
 
