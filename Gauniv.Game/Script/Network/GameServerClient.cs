@@ -85,12 +85,13 @@ public partial class GameServerClient : Node
 			}
 			case MessageType.CreateGame:
 			{
-				var dict = MessagePackSerializer.Deserialize<Dictionary<string, string>>(message.Data);
-				if (dict.TryGetValue("GameId", out var gameId))
+				var response = MessagePackSerializer.Deserialize<JoinGameResponse>(message.Data);
+				if (response != null && !string.IsNullOrEmpty(response.GameId))
 				{
-					GD.Print($"[NET] Game created with id: {gameId}");
-					CurrentGameId = gameId;
-					CallDeferred(nameof(EmitGameCreated));  // ← UI plus tard
+					GD.Print($"[NET] Game created and joined with id: {response.GameId}");
+					CurrentGameId = response.GameId;
+					LastJoinResult = response.Result;
+					CallDeferred(nameof(EmitGameCreated));
 				}
 				break;
 			}

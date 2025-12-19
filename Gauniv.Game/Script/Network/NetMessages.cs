@@ -90,6 +90,13 @@ public class PlayerInfo
 }
 
 [MessagePackObject]
+public class JoinGameResponse
+{
+	[Key(0)] public string GameId { get; set; }
+	[Key(1)] public string Result { get; set; }
+}
+
+[MessagePackObject]
 public class MakeMoveRequest
 {
 	[Key(0)] public string GameId { get; set; }

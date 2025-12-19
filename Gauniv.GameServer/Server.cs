@@ -127,10 +127,13 @@ namespace Gauniv.GameServer
                     Console.WriteLine($"{server}Received data: {request.BoardSize}");
                     var gameId = await _gameService.CreateGameAsync(request.GameName, request.BoardSize);
                     
+                    // Automatically join the game as the creator
+                    await _gameService.JoinGameAsync(gameId, player, false);
+                    
                     // Broadcast updated list to everyone
                     await BroadcastGameListAsync();
                     
-                    var responseData = MessagePackSerializer.Serialize(new { GameId = gameId });
+                    var responseData = MessagePackSerializer.Serialize(new JoinGameResponse { GameId = gameId, Result = "Joined game successfully" });
                     return new MessageGeneric { Type = MessageType.CreateGame, Data = responseData };
                 
                 case MessageType.JoinGame:
