@@ -68,6 +68,12 @@ public class GameService
             {
                 game.UpdateGameState();
                 Console.WriteLine($"Player {player.Id} left game {gameId}");
+                // If last player left, remove the game
+                if (game.Players.Count == 0)
+                {
+                    _games.TryRemove(gameId, out _);
+                    Console.WriteLine($"Game {gameId} removed due to no players/spectators");
+                }
                 listGames();
                 return Task.FromResult("Left game successfully");
             }
