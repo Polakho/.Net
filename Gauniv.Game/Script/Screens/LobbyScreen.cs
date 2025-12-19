@@ -10,8 +10,12 @@ public partial class LobbyScreen : Control
 	[Export] public NodePath GameListPath;
 	[Export] public NodePath StatusLabelPath;
 
+<<<<<<< Updated upstream
 	private Label _statusLabel;
 	private ItemList _gameListUI;
+=======
+	private ItemList _gameList;
+>>>>>>> Stashed changes
 
 	private string _selectedGameId;
 
@@ -36,12 +40,20 @@ public partial class LobbyScreen : Control
 			GD.PrintErr("[LobbyScreen] ✗ ERREUR: Impossible de trouver NetClient!");
 		}
 
+<<<<<<< Updated upstream
 		_statusLabel = GetNode<Label>("Root/Center/Card/CardMargin/MainLayout/Footer/StatusLabel");
 		GD.Print($"[LobbyScreen] StatusLabel trouvé? {_statusLabel != null}");
 
 		_gameListUI = GetNode<ItemList>(GameListPath);
 		GD.Print($"[LobbyScreen] GameListUI trouvé via NodePath '{GameListPath}'? {_gameListUI != null}");
 		GD.Print($"[LobbyScreen] GameListUI est de type GameList? {_gameListUI is GameList}");
+=======
+		// Initialiser la liste de jeux depuis le NodePath exporté
+		if (!GameListPath.IsEmpty)
+		{
+			_gameList = GetNode<ItemList>(GameListPath);
+		}
+>>>>>>> Stashed changes
 
 		if (_net != null)
 		{
@@ -90,6 +102,16 @@ public partial class LobbyScreen : Control
 		}
 	}
 
+	public override void _ExitTree()
+	{
+		if (_net != null)
+		{
+			_net.GameListReceived -= OnGameListReceived;
+			_net.GameCreated -= OnGameCreated;
+			_net.JoinResultReceived -= OnJoinResultReceived;
+		}
+	}
+
 	public void OnBackPressed()
 	{
 		_screenManager.GoTo("res://Scenes/Screens/main_menu_screen.tscn");
@@ -125,8 +147,32 @@ public partial class LobbyScreen : Control
 	}
 
 	// --- Callback de la liste (signal Godot) ---
+<<<<<<< Updated upstream
 
 	// --- Events réseau ---
+=======
+	public void OnGameSelected(long index)
+	{
+		if (_gameList == null) return;
+
+		// On a stocké l'ID dans Metadata
+		_selectedGameId = _gameList.GetItemMetadata((int)index).AsString();
+	}
+
+	// --- Events réseau ---
+	private void OnGameListReceived(GetListGamesResponse list)
+	{
+		if (_gameList == null) return;
+
+		_gameList.Clear();
+		foreach (var game in list.Games)
+		{
+			int idx = _gameList.AddItem($"{game.Name} ({game.Players.Count}p)");
+			_gameList.SetItemMetadata(idx, Variant.From(game.Id));
+		}
+		
+	}
+>>>>>>> Stashed changes
 
 	private void OnGameCreated(string gameId)
 	{
