@@ -154,7 +154,7 @@ public partial class LobbyScreen : Control
 	private void OnJoinResultReceived(string result)
 	{
 		// Si le join est OK, on va en match (tu peux affiner plus tard)
-		if (result.Contains("success", StringComparison.OrdinalIgnoreCase))
+		if (!string.IsNullOrEmpty(result) && (result.Contains("success", StringComparison.OrdinalIgnoreCase) || result.Contains("Joined", StringComparison.OrdinalIgnoreCase)))
 			_screenManager.GoTo("res://Scenes/Screens/match_screen.tscn");
 	}
 

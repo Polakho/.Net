@@ -31,7 +31,12 @@ public partial class BoardController : Node2D
 	private Camera2D _camera;
 	private Sprite2D _gridSprite;
 
-	// Etat local (prototype). Plus tard : l’état viendra uniquement du serveur.
+	// Référence au client réseau
+	private GameServerClient _netClient;
+	private string _currentPlayerId;
+	private string _gameState = "Pending"; // "Pending", "InProgress", "Finished"
+
+	// Etat local (prototype). Plus tard : l'état viendra uniquement du serveur.
 	private int[,] _grid;        // 0 vide, 1 noir, 2 blanc
 	private int _currentPlayer;  // 1 noir, 2 blanc
 
@@ -58,6 +63,16 @@ public partial class BoardController : Node2D
 		public int BoardSize;
 		public int CurrentPlayer; // 1 noir, 2 blanc
 		public List<StoneState> Stones = new();
+		public string GameStateStatus = "Pending"; // "Pending", "InProgress", "Finished"
+	}
+
+	// ============================
+	// Setter pour le NetworkClient
+	// ============================
+
+	public void SetNetworkClient(GameServerClient netClient)
+	{
+		_netClient = netClient;
 	}
 
 	// ============================
@@ -115,21 +130,39 @@ public partial class BoardController : Node2D
 
 	/// <summary>
 	/// Intention : le joueur veut jouer en (x,y).
-	/// Plus tard : envoi au serveur. Pour l’instant : simulation locale.
+	/// Envoie le coup au serveur après validation locale.
 	/// </summary>
 	public void SendMoveRequest(int x, int y)
 	{
-		// Simulation “serveur local” (proto) :
-		// 1) Vérif minimaliste
+		// 1) Vérifications locales minimales
 		if (_grid[x, y] != 0)
+		{
+			GD.PrintErr("[BoardController] Case occupée!");
 			return;
+		}
 
-		// 2) “Serveur” applique
-		_grid[x, y] = _currentPlayer;
-		_currentPlayer = (_currentPlayer == 1) ? 2 : 1;
+		// 2) Vérifier que la partie est en cours
+		if (_gameState != "InProgress")
+		{
+			GD.PrintErr("[BoardController] La partie n'est pas en cours!");
+			return;
+		}
 
-		// 3) “Serveur” renvoie l’état complet -> client applique
-		ApplyGameState(BuildLocalGameState());
+		// 3) Vérifier que c'est le tour du joueur
+		// Le serveur nous envoie le joueur courant (1=Noir, 2=Blanc)
+		// On doit identifier qui on est (Noir ou Blanc)
+		// Note: pour l'instant, on assume que c'est notre tour si c'est notre couleur
+		// A améliorer avec un vrai ID de joueur du serveur
+		if (_netClient == null)
+		{
+			GD.PrintErr("[BoardController] Client réseau non défini!");
+			return;
+		}
+
+		// 4) Envoyer le coup au serveur
+		_ = _netClient.SendMakeMove(_netClient.CurrentGameId, x, y, false);
+
+		GD.Print($"[BoardController] Coup envoyé au serveur: ({x}, {y})");
 	}
 
 	/// <summary>
@@ -155,6 +188,9 @@ public partial class BoardController : Node2D
 			RecomputeGridFromSprite();
 		}
 
+		// Mettre à jour l'état de la partie
+		_gameState = state.GameStateStatus;
+
 		// Reconstruire état local à partir du state (source de vérité)
 		Array.Clear(_grid, 0, _grid.Length);
 		foreach (var s in state.Stones)
@@ -166,6 +202,9 @@ public partial class BoardController : Node2D
 		}
 
 		_currentPlayer = state.CurrentPlayer;
+
+		// Désactiver/activer les inputs selon l'état de la partie
+		SetProcessUnhandledInput(_gameState == "InProgress");
 
 		// Reconstruire le visuel (simple/robuste)
 		ClearBoardVisual();
@@ -186,7 +225,8 @@ public partial class BoardController : Node2D
 		var state = new GameState
 		{
 			BoardSize = BoardSize,
-			CurrentPlayer = _currentPlayer
+			CurrentPlayer = _currentPlayer,
+			GameStateStatus = _gameState
 		};
 
 		for (int x = 0; x < BoardSize; x++)

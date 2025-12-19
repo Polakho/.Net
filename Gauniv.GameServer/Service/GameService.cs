@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿﻿using System.Collections.Concurrent;
 using Gauniv.GameServer.Message;
 using Gauniv.GameServer.Model;
 
@@ -98,7 +98,9 @@ public class GameService
                 BoardSize = game.Board.Size,
                 // currentPlayer can be null while waiting for players; avoid NRE
                 currentPlayer = game.currentPlayer != null ? game.currentPlayer.Id.ToString() : string.Empty,
-                Board = game.Board.Grid
+                Board = game.Board.Grid,
+                GameState = game.State.ToString(),
+                PlayerCount = game.Players.Count
             };
 
             return Task.FromResult<GetGameStateResponse?>(response);
