@@ -1,6 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://ctv34ks22fjdb"]
 
 [ext_resource type="Script" uid="uid://bavg0yqbh4k2n" path="res://Script/Screens/LobbyScreen.cs" id="1_ydnej"]
+[ext_resource type="Script" uid="uid://c7m1l9pf8kdxl" path="res://Script/Screens/GameList.cs" id="2_gameL"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ydnej"]
 bg_color = Color(0.6784314, 0.6784314, 0.6784314, 1)
@@ -70,6 +71,7 @@ text = "Games"
 
 [node name="GameList" type="ItemList" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
 layout_mode = 2
+script = ExtResource("2_gameL")
 
 [node name="RightPanel" type="VBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout/Content"]
 layout_mode = 2
@@ -109,3 +111,4 @@ text = "Status: Disconnected"
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/JoinButton" to="." method="OnJoinPressed"]
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/SpectateButton" to="." method="OnSpectatePressed"]
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Footer/BackButton" to="." method="OnBackPressed"]
+[connection signal="item_selected" from="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel/GameList" to="." method="OnGameSelected"]

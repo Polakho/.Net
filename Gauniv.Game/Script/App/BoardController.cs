@@ -134,10 +134,17 @@ public partial class BoardController : Node2D
 
 	/// <summary>
 	/// Applique un état complet (comme si reçu du serveur).
-	/// C’est CETTE méthode qui deviendra centrale.
+	/// C'est CETTE méthode qui deviendra centrale.
 	/// </summary>
 	public void ApplyGameState(GameState state)
 	{
+		// Vérification que le nœud est toujours valide
+		if (IsQueuedForDeletion())
+		{
+			GD.PrintErr("ApplyGameState: BoardController node is no longer valid");
+			return;
+		}
+
 		if (state == null) return;
 
 		// Si BoardSize peut varier, tu peux gérer un resize ici.
@@ -205,18 +212,27 @@ public partial class BoardController : Node2D
 
 	private void ClearBoardVisual()
 	{
-		if (_stones == null) return;
+		if (_stones == null || _stones.IsQueuedForDeletion())
+			return;
 
-		foreach (var child in _stones.GetChildren())
+		try
 		{
-			if (child is Node n)
-				n.QueueFree();
+			foreach (var child in _stones.GetChildren())
+			{
+				if (child is Node n && !n.IsQueuedForDeletion())
+					n.QueueFree();
+			}
+		}
+		catch (ObjectDisposedException)
+		{
+			GD.PrintErr("ClearBoardVisual: Node has been disposed");
 		}
 	}
 
 	private void SpawnStoneVisual(int x, int y, int player)
 	{
-		if (_stones == null) return;
+		if (_stones == null || _stones.IsQueuedForDeletion())
+			return;
 
 		Texture2D tex = (player == 1) ? BlackStoneTexture : WhiteStoneTexture;
 		if (tex == null) return;
