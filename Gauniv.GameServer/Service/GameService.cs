@@ -68,7 +68,8 @@ public class GameService
             {
                 GameId = gameId,
                 BoardSize = game.Board.Size,
-                currentPlayer = game.currentPlayer.Id.ToString(),
+                // currentPlayer can be null while waiting for players; avoid NRE
+                currentPlayer = game.currentPlayer != null ? game.currentPlayer.Id.ToString() : string.Empty,
                 Board = game.Board.Grid
             };
 
