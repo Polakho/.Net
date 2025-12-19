@@ -1,4 +1,4 @@
-﻿﻿using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using Gauniv.GameServer.Message;
 using Gauniv.GameServer.Model;
 
@@ -68,11 +68,11 @@ public class GameService
             {
                 game.UpdateGameState();
                 Console.WriteLine($"Player {player.Id} left game {gameId}");
-                // If last player left, remove the game
-                if (game.Players.Count == 0)
+                // If nobody remains, remove the game
+                if (game.Players.Count == 0 && game.Spectators.Count == 0)
                 {
                     _games.TryRemove(gameId, out _);
-                    Console.WriteLine($"Game {gameId} removed due to no players/spectators");
+                    Console.WriteLine($"Game {gameId} removed due to no players and no spectators");
                 }
                 listGames();
                 return Task.FromResult("Left game successfully");

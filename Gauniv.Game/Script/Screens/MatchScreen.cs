@@ -10,10 +10,22 @@ public partial class MatchScreen : Control
 	[Export] public string PlayerCountLabelPath = "Ui/PlayerCountLabel";
 	[Export] public float RefreshIntervalSeconds = 1.0f;
 
+	// Overlay d'attente (bloque les inputs tant que la partie n'est pas prête)
+	[Export] public string WaitingOverlayPath = "WaitingOverlay";
+	[Export] public string OverlayGameStateLabelPath = "WaitingOverlay/Content/VBox/OverlayGameStateLabel";
+	[Export] public string OverlayPlayerCountLabelPath = "WaitingOverlay/Content/VBox/OverlayPlayerCountLabel";
+
 	private BoardController _board;
 	private Label _gameStateLabel;
 	private Label _playerCountLabel;
 	private Timer _refreshTimer;
+
+	private Control _waitingOverlay;
+	private Label _overlayGameStateLabel;
+	private Label _overlayPlayerCountLabel;
+
+	// Node racine du plateau (pour désactiver les clics sans bloquer l'UI)
+	private CanvasItem _boardRoot;
 
 	public override void _Ready()
 	{
@@ -33,6 +45,15 @@ public partial class MatchScreen : Control
 		if (_playerCountLabel == null)
 			GD.PrintErr("[MatchScreen] PlayerCountLabel introuvable.");
 
+		// Overlay d'attente
+		_waitingOverlay = GetNodeOrNull<Control>(WaitingOverlayPath);
+		_overlayGameStateLabel = GetNodeOrNull<Label>(OverlayGameStateLabelPath);
+		_overlayPlayerCountLabel = GetNodeOrNull<Label>(OverlayPlayerCountLabelPath);
+		if (_waitingOverlay == null)
+			GD.PrintErr("[MatchScreen] WaitingOverlay introuvable.");
+
+		_boardRoot = GetNodeOrNull<CanvasItem>("BoardRoot");
+
 		if (_net != null)
 		{
 			_net.GameStateReceived += OnGameStateReceived;
@@ -46,6 +67,7 @@ public partial class MatchScreen : Control
 
 			// Mettre à jour les labels avec les infos actuelles
 			UpdateLabels();
+			UpdateWaitingOverlay();
 
 			// Si on connaît déjà la game courante, on demande son état
 			if (!string.IsNullOrEmpty(_net.CurrentGameId))
@@ -55,6 +77,11 @@ public partial class MatchScreen : Control
 
 			// Démarrer le timer de refresh automatique
 			StartRefreshTimer();
+		}
+		else
+		{
+			// Pas de réseau => on bloque le plateau par sécurité
+			UpdateWaitingOverlay();
 		}
 	}
 
@@ -132,8 +159,9 @@ public partial class MatchScreen : Control
 
 		_board.ApplyGameState(localState);
 
-		// Mettre à jour les labels
+		// Mettre à jour les labels + overlay
 		UpdateLabels();
+		UpdateWaitingOverlay();
 	}
 
 	private void UpdateLabels()
@@ -149,6 +177,36 @@ public partial class MatchScreen : Control
 		}
 	}
 
+	private bool ShouldShowWaitingOverlay()
+	{
+		// Règle principale demandée: tant que 2 joueurs ne sont pas connectés
+		if (_net == null) return true;
+		return _net.CurrentPlayerCount < 2;
+	}
+
+	private void UpdateWaitingOverlay()
+	{
+		if (_waitingOverlay == null)
+			return;
+
+		bool show = ShouldShowWaitingOverlay();
+		_waitingOverlay.Visible = show;
+
+		// Quand on attend, on empêche juste d'interagir avec le plateau, mais on laisse l'UI (Back) accessible.
+		if (_boardRoot != null)
+			_boardRoot.Visible = !show;
+
+		// Synchroniser les textes avec les labels existants (si possible)
+		if (_overlayGameStateLabel != null)
+		{
+			_overlayGameStateLabel.Text = _gameStateLabel?.Text ?? $"État: {_net?.CurrentGameState}";
+		}
+		if (_overlayPlayerCountLabel != null)
+		{
+			_overlayPlayerCountLabel.Text = _playerCountLabel?.Text ?? $"Joueurs: {_net?.CurrentPlayerCount ?? 0}/2";
+		}
+	}
+
 	private void OnWrongMoveReceived(string reason)
 	{
 		GD.PrintErr($"[MatchScreen] Coup invalide: {reason}");
@@ -157,5 +215,6 @@ public partial class MatchScreen : Control
 		{
 			_gameStateLabel.Text = $"Erreur: {reason}";
 		}
+		UpdateWaitingOverlay();
 	}
 }

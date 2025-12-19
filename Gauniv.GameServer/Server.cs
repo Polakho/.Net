@@ -1,4 +1,4 @@
-﻿﻿using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using Gauniv.GameServer.Service;
 using Gauniv.GameServer.Message;
@@ -148,9 +148,13 @@ namespace Gauniv.GameServer
                     return new MessageGeneric { Type = MessageType.JoinGame, Data = joinResponseData };
 
                 case MessageType.LeaveGame:
-                    var leaveRequest = MessagePackSerializer.Deserialize<JoinGameRequest>(message.Data);
+                    var leaveRequest = MessagePackSerializer.Deserialize<LeaveGameRequest>(message.Data);
                     Console.WriteLine($"{server}Received data: {leaveRequest.GameId}");
                     var leaveResult = await _gameService.LeaveGameAsync(leaveRequest.GameId, player);
+
+                    // Broadcast updated list to everyone
+                    await BroadcastGameListAsync();
+
                     var leaveResponseData = MessagePackSerializer.Serialize(new LeaveGameResponse { Result = leaveResult, GameId = leaveRequest.GameId});
                     return new MessageGeneric { Type = MessageType.LeaveGame, Data = leaveResponseData };
                 

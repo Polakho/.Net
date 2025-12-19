@@ -75,4 +75,56 @@ offset_right = 300.0
 offset_bottom = 105.0
 text = "Joueurs: 0/2"
 
+[node name="WaitingOverlay" type="Control" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Dimmer" type="ColorRect" parent="WaitingOverlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+mouse_filter = 2
+
+[node name="Content" type="Panel" parent="WaitingOverlay"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -70.0
+offset_right = 180.0
+offset_bottom = 70.0
+mouse_filter = 2
+
+[node name="VBox" type="VBoxContainer" parent="WaitingOverlay/Content"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TitleLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+text = "En attente d'un joueur..."
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="OverlayGameStateLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+text = "État: ..."
+horizontal_alignment = 1
+mouse_filter = 2
+
+[node name="OverlayPlayerCountLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+text = "Joueurs: 0/2"
+horizontal_alignment = 1
+mouse_filter = 2
+
 [connection signal="pressed" from="Ui/BackButton" to="." method="OnBackPressed"]
