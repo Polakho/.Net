@@ -1,4 +1,4 @@
-﻿﻿using Gauniv.GameServer.Model;
+﻿﻿﻿using Gauniv.GameServer.Model;
 using MessagePack;
 
 namespace Gauniv.GameServer.Message;
@@ -128,6 +128,15 @@ public class GetGameStateResponse
 
     [Key(5)]
     public int PlayerCount { get; set; }
+    
+    [Key(6)]
+    public string WinnerId { get; set; }
+    
+    [Key(7)]
+    public int BlackScore { get; set; }
+    
+    [Key(8)]
+    public int WhiteScore { get; set; }
 }
 
 [MessagePackObject]

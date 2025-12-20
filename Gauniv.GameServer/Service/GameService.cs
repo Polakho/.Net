@@ -106,6 +106,21 @@ public class GameService
     {
         if (_games.TryGetValue(gameId, out var game))
         {
+            // Calculer les scores
+            int blackStones = 0;
+            int whiteStones = 0;
+            for (int x = 0; x < game.Board.Size; x++)
+            {
+                for (int y = 0; y < game.Board.Size; y++)
+                {
+                    var stone = game.Board.Grid[x, y];
+                    if (stone == StoneColor.Black) blackStones++;
+                    else if (stone == StoneColor.White) whiteStones++;
+                }
+            }
+            int blackScore = blackStones + game.Board.blackScore;
+            int whiteScore = whiteStones + game.Board.whiteScore;
+            
             var response = new GetGameStateResponse
             {
                 GameId = gameId,
@@ -114,7 +129,10 @@ public class GameService
                 currentPlayer = game.currentPlayer != null ? game.currentPlayer.Id.ToString() : string.Empty,
                 Board = game.Board.Grid,
                 GameState = game.State.ToString(),
-                PlayerCount = game.Players.Count
+                PlayerCount = game.Players.Count,
+                WinnerId = game.Winner?.Id.ToString() ?? string.Empty,
+                BlackScore = blackScore,
+                WhiteScore = whiteScore
             };
 
             return Task.FromResult<GetGameStateResponse?>(response);
@@ -182,13 +200,33 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
             var nextPlayer = game.Players.Find(p => p.Id != player.Id);
             game.currentPlayer = nextPlayer;
             
+            // Calculer les scores
+            int blackStones = 0;
+            int whiteStones = 0;
+            for (int i = 0; i < game.Board.Size; i++)
+            {
+                for (int j = 0; j < game.Board.Size; j++)
+                {
+                    var stone = game.Board.Grid[i, j];
+                    if (stone == StoneColor.Black) blackStones++;
+                    else if (stone == StoneColor.White) whiteStones++;
+                }
+            }
+            int blackScore = blackStones + game.Board.blackScore;
+            int whiteScore = whiteStones + game.Board.whiteScore;
+            
             Console.WriteLine($"Player {player.Id} made a move in game {gameId} at ({x}, {y}), Pass: {isPass}");
             return Task.FromResult<object>(new GetGameStateResponse
             {
                 GameId = gameId,
                 BoardSize = game.Board.Size,
                 currentPlayer = game.currentPlayer.Id.ToString(),
-                Board = game.Board.Grid
+                Board = game.Board.Grid,
+                GameState = game.State.ToString(),
+                PlayerCount = game.Players.Count,
+                WinnerId = game.Winner?.Id.ToString() ?? string.Empty,
+                BlackScore = blackScore,
+                WhiteScore = whiteScore
             });
             
         }

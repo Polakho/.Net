@@ -18,6 +18,12 @@ public partial class MatchScreen : Control
 	[Export] public string OverlayGameStateLabelPath = "WaitingOverlay/Content/VBox/OverlayGameStateLabel";
 	[Export] public string OverlayPlayerCountLabelPath = "WaitingOverlay/Content/VBox/OverlayPlayerCountLabel";
 
+	// Popup de fin de partie
+	[Export] public string GameOverPopupPath = "GameOverLayer";
+	[Export] public string GameOverTitleLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/TitleLabel";
+	[Export] public string GameOverScoreLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/ScoreLabel";
+	[Export] public string GameOverButtonPath = "GameOverLayer/GameOverPopup/Panel/VBox/BackButton";
+
 	private BoardController _board;
 	private Label _gameStateLabel;
 	private Label _playerCountLabel;
@@ -30,6 +36,12 @@ public partial class MatchScreen : Control
 	private Label _overlayGameStateLabel;
 	private Label _overlayPlayerCountLabel;
 
+	// Popup de fin de partie
+	private CanvasLayer _gameOverPopup;
+	private Label _gameOverTitleLabel;
+	private Label _gameOverScoreLabel;
+	private Button _gameOverButton;
+
 	// Node racine du plateau (pour désactiver les clics sans bloquer l'UI)
 	private CanvasItem _boardRoot;
 	private Node2D _boardRootNode;
@@ -38,6 +50,7 @@ public partial class MatchScreen : Control
 
 	// Flag pour éviter de réafficher l'overlay après le début de partie
 	private bool _gameHasStarted = false;
+	private bool _gameOverShown = false;
 
 	public override void _Ready()
 	{
@@ -72,6 +85,19 @@ public partial class MatchScreen : Control
 		_overlayPlayerCountLabel = GetNodeOrNull<Label>(OverlayPlayerCountLabelPath);
 		if (_waitingOverlay == null)
 			GD.PrintErr("[MatchScreen] WaitingOverlay introuvable.");
+
+		// Popup de fin de partie
+		_gameOverPopup = GetNodeOrNull<CanvasLayer>(GameOverPopupPath);
+		_gameOverTitleLabel = GetNodeOrNull<Label>(GameOverTitleLabelPath);
+		_gameOverScoreLabel = GetNodeOrNull<Label>(GameOverScoreLabelPath);
+		_gameOverButton = GetNodeOrNull<Button>(GameOverButtonPath);
+		if (_gameOverPopup == null)
+			GD.PrintErr("[MatchScreen] GameOverPopup introuvable.");
+		else
+			_gameOverPopup.Visible = false; // Masquer au démarrage
+		
+		if (_gameOverButton != null)
+			_gameOverButton.Pressed += OnGameOverBackPressed;
 
 		_boardRoot = GetNodeOrNull<CanvasItem>("BoardRoot");
 		_boardRootNode = GetNodeOrNull<Node2D>("BoardRoot");
@@ -266,6 +292,13 @@ public partial class MatchScreen : Control
 		// Mettre à jour les labels + overlay
 		UpdateLabels();
 		UpdateWaitingOverlay();
+
+		// Vérifier si la partie est terminée et afficher le popup
+		if (gameStateStatus == "Finished" && !_gameOverShown)
+		{
+			ShowGameOverPopup(state);
+			_gameOverShown = true;
+		}
 	}
 
 	private void UpdateLabels()
@@ -381,5 +414,48 @@ public partial class MatchScreen : Control
 		}
 		
 		UpdateWaitingOverlay();
+	}
+
+	private void ShowGameOverPopup(GetGameStateResponse state)
+	{
+		if (_gameOverPopup == null) return;
+
+		// Déterminer si le joueur local a gagné, perdu ou match nul
+		string resultText;
+		if (string.IsNullOrEmpty(state.WinnerId))
+		{
+			resultText = "Match Nul !";
+		}
+		else if (state.WinnerId == _net.LocalPlayerId)
+		{
+			resultText = "Victoire !";
+		}
+		else
+		{
+			resultText = "Défaite !";
+		}
+
+		// Afficher le titre et les scores
+		if (_gameOverTitleLabel != null)
+			_gameOverTitleLabel.Text = resultText;
+
+		if (_gameOverScoreLabel != null)
+		{
+			_gameOverScoreLabel.Text = $"Score Final:\nNoir: {state.BlackScore}\nBlanc: {state.WhiteScore}";
+		}
+
+		// Afficher le popup
+		_gameOverPopup.Visible = true;
+		GD.Print($"[MatchScreen] Affichage du popup de fin de partie: {resultText}");
+	}
+
+	private void OnGameOverBackPressed()
+	{
+		// Masquer le popup
+		if (_gameOverPopup != null)
+			_gameOverPopup.Visible = false;
+
+		// Retourner au lobby
+		OnBackPressed();
 	}
 }

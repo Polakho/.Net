@@ -63,6 +63,9 @@ public class GetGameStateResponse
 	[Key(3)] public StoneColor?[,] Board { get; set; }
 	[Key(4)] public string GameState { get; set; }
 	[Key(5)] public int PlayerCount { get; set; }
+	[Key(6)] public string WinnerId { get; set; }
+	[Key(7)] public int BlackScore { get; set; }
+	[Key(8)] public int WhiteScore { get; set; }
 }
 
 // Enum local identique à celui du serveur
