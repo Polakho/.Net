@@ -7,7 +7,6 @@ public partial class BoardController : Node2D
 	// --- Références scène (renseigne via Inspecteur si possible) ---
 	[Export] public NodePath StonesContainerPath;
 	[Export] public NodePath InfoLabelPath;
-	[Export] public NodePath CameraPath;
 	[Export] public NodePath GridSpritePath;
 
 	// --- Textures (prototype) ---
@@ -23,12 +22,8 @@ public partial class BoardController : Node2D
 	[Export] public Vector2 BoardOrigin = new Vector2(64, 64);
 	[Export] public float CellSize = 64f;
 
-	// --- Caméra ---
-	[Export] public float CameraMarginPx = 40f;
-
 	private Node2D _stones;
 	private Label _infoLabel;
-	private Camera2D _camera;
 	private Sprite2D _gridSprite;
 
 	// Référence au client réseau
@@ -83,9 +78,9 @@ public partial class BoardController : Node2D
 	{
 		ResolveReferences();
 
-		if (_stones == null || _infoLabel == null || _camera == null || _gridSprite == null || _gridSprite.Texture == null)
+		if (_stones == null || _infoLabel == null || _gridSprite == null || _gridSprite.Texture == null)
 		{
-			GD.PushError("BoardController: références manquantes. Vérifie Stones, InfoLabel, Camera2D, GridSprite (+ texture).");
+			GD.PushError("BoardController: références manquantes. Vérifie Stones, InfoLabel, GridSprite (+ texture).");
 			SetProcessUnhandledInput(false);
 			return;
 		}
@@ -98,14 +93,12 @@ public partial class BoardController : Node2D
 
 		// Applique un état initial “comme si serveur”
 		ApplyGameState(BuildLocalGameState());
-
-		FitCameraToBackground();
 	}
 
 	public override void _Notification(int what)
 	{
 		if (what == NotificationWMSizeChanged)
-			FitCameraToBackground();
+			RecomputeGridFromSprite();
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
@@ -340,32 +333,6 @@ public partial class BoardController : Node2D
 	}
 
 	// ============================
-	// Caméra
-	// ============================
-
-	private void FitCameraToBackground()
-	{
-		if (_camera == null) return;
-
-		Vector2 bgSize = new Vector2(BackgroundSizePx, BackgroundSizePx);
-		Vector2 bgCenter = bgSize / 2f;
-
-		_camera.GlobalPosition = bgCenter;
-
-		Vector2 viewport = GetViewportRect().Size;
-		float availableW = Mathf.Max(1f, viewport.X - 2f * CameraMarginPx);
-		float availableH = Mathf.Max(1f, viewport.Y - 2f * CameraMarginPx);
-
-		float zoomX = availableW / bgSize.X;
-		float zoomY = availableH / bgSize.Y;
-
-		float z = Mathf.Min(zoomX, zoomY);
-		z = Mathf.Clamp(z, 0.05f, 10f);
-
-		_camera.Zoom = new Vector2(z, z);
-	}
-
-	// ============================
 	// Résolution références
 	// ============================
 
@@ -373,18 +340,15 @@ public partial class BoardController : Node2D
 	{
 		_stones = GetNodeOrNull<Node2D>(StonesContainerPath);
 		_infoLabel = GetNodeOrNull<Label>(InfoLabelPath);
-		_camera = GetNodeOrNull<Camera2D>(CameraPath);
 		_gridSprite = GetNodeOrNull<Sprite2D>(GridSpritePath);
 
 		// Fallbacks selon ton arbre :
 		_stones ??= GetNodeOrNull<Node2D>("../Stones");
 		_gridSprite ??= GetNodeOrNull<Sprite2D>("../GridSprite");
-		_camera ??= GetNodeOrNull<Camera2D>("../Camera2D");
 		_infoLabel ??= GetNodeOrNull<Label>("../../Ui/InfoLabel");
 
 		if (_stones == null) GD.PushError("BoardController: Stones introuvable (../Stones).");
 		if (_gridSprite == null) GD.PushError("BoardController: GridSprite introuvable (../GridSprite).");
-		if (_camera == null) GD.PushError("BoardController: Camera2D introuvable (../Camera2D).");
 		if (_infoLabel == null) GD.PushError("BoardController: InfoLabel introuvable (../../Ui/InfoLabel).");
 	}
 }

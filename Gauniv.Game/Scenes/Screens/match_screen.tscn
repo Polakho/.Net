@@ -14,16 +14,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 script = ExtResource("1_usroj")
 BoardControllerPath = NodePath("BoardRoot/BoardController")
+RefreshIntervalSeconds = 5.0
 
 [node name="BoardRoot" type="Node2D" parent="."]
+position = Vector2(256, 0)
 
 [node name="BoardController" type="Node2D" parent="BoardRoot"]
 script = ExtResource("2_052ei")
 StonesContainerPath = NodePath("../Stones")
 InfoLabelPath = NodePath("../../Ui/InfoLabel")
-CameraPath = NodePath("../Camera2D")
 GridSpritePath = NodePath("../GridSprite")
 BlackStoneTexture = ExtResource("3_31k75")
 WhiteStoneTexture = ExtResource("4_i8i8u")
@@ -38,8 +41,6 @@ centered = false
 offset = Vector2(64, 64)
 
 [node name="Stones" type="Node2D" parent="BoardRoot"]
-
-[node name="Camera2D" type="Camera2D" parent="BoardRoot"]
 
 [node name="Ui" type="Control" parent="."]
 anchors_preset = 0
@@ -76,7 +77,7 @@ offset_bottom = 105.0
 text = "Joueurs: 0/2"
 
 [node name="WaitingOverlay" type="Control" parent="."]
-anchors_preset = 15
+anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -84,16 +85,16 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Dimmer" type="ColorRect" parent="WaitingOverlay"]
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.55)
 mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
 
 [node name="Content" type="Panel" parent="WaitingOverlay"]
-anchors_preset = 8
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -105,7 +106,7 @@ offset_bottom = 70.0
 mouse_filter = 2
 
 [node name="VBox" type="VBoxContainer" parent="WaitingOverlay/Content"]
-anchors_preset = 15
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -113,18 +114,18 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="TitleLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+layout_mode = 2
 text = "En attente d'un joueur..."
 horizontal_alignment = 1
-mouse_filter = 2
 
 [node name="OverlayGameStateLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+layout_mode = 2
 text = "État: ..."
 horizontal_alignment = 1
-mouse_filter = 2
 
 [node name="OverlayPlayerCountLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+layout_mode = 2
 text = "Joueurs: 0/2"
 horizontal_alignment = 1
-mouse_filter = 2
 
 [connection signal="pressed" from="Ui/BackButton" to="." method="OnBackPressed"]

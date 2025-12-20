@@ -192,9 +192,10 @@ public partial class MatchScreen : Control
 		bool show = ShouldShowWaitingOverlay();
 		_waitingOverlay.Visible = show;
 
-		// Quand on attend, on empêche juste d'interagir avec le plateau, mais on laisse l'UI (Back) accessible.
+		// Important: ne PAS masquer BoardRoot.
+		// (On laisse le plateau visible et on bloque les interactions via l'overlay.)
 		if (_boardRoot != null)
-			_boardRoot.Visible = !show;
+			_boardRoot.Visible = true;
 
 		// Synchroniser les textes avec les labels existants (si possible)
 		if (_overlayGameStateLabel != null)
