@@ -26,6 +26,9 @@ public partial class MatchScreen : Control
 
 	// Node racine du plateau (pour désactiver les clics sans bloquer l'UI)
 	private CanvasItem _boardRoot;
+	private Node2D _boardRootNode;
+	private Sprite2D _gridSprite;
+	private Sprite2D _backgroundSprite;
 
 	public override void _Ready()
 	{
@@ -53,6 +56,11 @@ public partial class MatchScreen : Control
 			GD.PrintErr("[MatchScreen] WaitingOverlay introuvable.");
 
 		_boardRoot = GetNodeOrNull<CanvasItem>("BoardRoot");
+		_boardRootNode = GetNodeOrNull<Node2D>("BoardRoot");
+		_gridSprite = GetNodeOrNull<Sprite2D>("BoardRoot/GridSprite");
+		_backgroundSprite = GetNodeOrNull<Sprite2D>("BoardRoot/Background");
+
+		CenterBoardRoot();
 
 		if (_net != null)
 		{
@@ -83,6 +91,54 @@ public partial class MatchScreen : Control
 			// Pas de réseau => on bloque le plateau par sécurité
 			UpdateWaitingOverlay();
 		}
+	}
+
+	public override void _Notification(int what)
+	{
+		if (what == NotificationWMSizeChanged)
+		{
+			CenterBoardRoot();
+		}
+	}
+
+	private void CenterBoardRoot()
+	{
+		if (_boardRootNode == null)
+			return;
+
+		Vector2 viewportSize = GetViewportRect().Size;
+
+		// Taille du plateau en pixels écran.
+		// Priorité: GridSprite (board.png). Fallback: Background.
+		Sprite2D sprite = _gridSprite;
+		Vector2 texSize = Vector2.Zero;
+		Vector2 scale = Vector2.One;
+		Vector2 spriteOffset = Vector2.Zero;
+
+		if (sprite != null && sprite.Texture != null)
+		{
+			texSize = sprite.Texture.GetSize();
+			scale = sprite.GlobalScale.Abs();
+			spriteOffset = sprite.Offset;
+		}
+		else if (_backgroundSprite != null && _backgroundSprite.Texture != null)
+		{
+			sprite = _backgroundSprite;
+			texSize = sprite.Texture.GetSize();
+			scale = sprite.GlobalScale.Abs();
+			spriteOffset = Vector2.Zero;
+		}
+		else
+		{
+			return;
+		}
+
+		Vector2 boardSize = texSize * scale;
+
+		// Dans ta scène, GridSprite n'est pas centered et a un offset (64,64).
+		// Donc le plateau "visible" commence à BoardRoot + Offset.
+		Vector2 desiredTopLeft = (viewportSize - boardSize) / 2f;
+		_boardRootNode.GlobalPosition = desiredTopLeft - spriteOffset;
 	}
 
 	private void StartRefreshTimer()
