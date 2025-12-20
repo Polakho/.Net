@@ -92,6 +92,11 @@ builder.Services.Configure<FormOptions>(options =>
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
     serverOptions.Limits.MaxRequestBodySize = 2147483648; // 2GB
+
+    // Always listen on both HTTP and HTTPS like at project start
+    // Ports aligned with launchSettings: http 5231, https 7209
+    serverOptions.ListenLocalhost(5231);
+    serverOptions.ListenLocalhost(7209, listenOptions => listenOptions.UseHttps());
 });
 builder.Services.AddOpenApi(options =>
 {

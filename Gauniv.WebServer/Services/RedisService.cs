@@ -43,7 +43,7 @@ namespace Gauniv.WebServer.Services
         public IDatabase Database { get; private set; }
         public RedisService(string connectionString)
         {
-            ConnectionMultiplexer Redis = ConnectionMultiplexer.Connect(connectionString);
+            Redis = ConnectionMultiplexer.Connect(connectionString);
             Database = Redis.GetDatabase(0);
         }
     }
