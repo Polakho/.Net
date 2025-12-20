@@ -12,10 +12,11 @@ services:
         environment:
           - ASPNETCORE_ENVIRONMENT=Development
           - ASPNETCORE_HTTP_PORTS=80
-          - ASPNETCORE_URLS=http://+:80
+          #- ASPNETCORE_HTTPS_PORTS=443
           - ConnectionStrings:DefaultConnection=Server=postgres_primary;Port=5432;Database=db;Username=admin;Password=password
         ports:
-          - "38651:80"
+          - "38652:80"
+          #- "38651:443"
         depends_on:
           - postgres_primary
     nginx:
@@ -26,7 +27,8 @@ services:
         depends_on:
             - gauniv.webserver
         ports:
-            - "8080:80"
-            - "8443:443"
+            - "80:80"
+            - "443:443"
+            - "15000:15000"
             - "30001:30001"
 
