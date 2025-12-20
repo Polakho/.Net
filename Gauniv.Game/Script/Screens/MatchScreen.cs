@@ -10,6 +10,7 @@ public partial class MatchScreen : Control
 	[Export] public string PlayerCountLabelPath = "Ui/PlayerCountLabel";
 	[Export] public string MyColorLabelPath = "Ui/MyColorLabel";
 	[Export] public string TurnLabelPath = "Ui/TurnLabel";
+	[Export] public string PassButtonPath = "Ui/PassButton";
 	[Export] public float RefreshIntervalSeconds = 0.1f;
 
 	// Overlay d'attente (bloque les inputs tant que la partie n'est pas prête)
@@ -22,6 +23,7 @@ public partial class MatchScreen : Control
 	private Label _playerCountLabel;
 	private Label _myColorLabel;
 	private Label _turnLabel;
+	private Button _passButton;
 	private Timer _refreshTimer;
 
 	private Control _waitingOverlay;
@@ -51,6 +53,7 @@ public partial class MatchScreen : Control
 		_playerCountLabel = GetNodeOrNull<Label>(PlayerCountLabelPath);
 		_myColorLabel = GetNodeOrNull<Label>(MyColorLabelPath);
 		_turnLabel = GetNodeOrNull<Label>(TurnLabelPath);
+		_passButton = GetNodeOrNull<Button>(PassButtonPath);
 
 		if (_gameStateLabel == null)
 			GD.PrintErr("[MatchScreen] GameStateLabel introuvable.");
@@ -60,6 +63,8 @@ public partial class MatchScreen : Control
 			GD.PrintErr("[MatchScreen] MyColorLabel introuvable.");
 		if (_turnLabel == null)
 			GD.PrintErr("[MatchScreen] TurnLabel introuvable.");
+		if (_passButton == null)
+			GD.PrintErr("[MatchScreen] PassButton introuvable.");
 
 		// Overlay d'attente
 		_waitingOverlay = GetNodeOrNull<Control>(WaitingOverlayPath);
@@ -194,6 +199,31 @@ public partial class MatchScreen : Control
 		_screenManager.GoTo("res://Scenes/Screens/lobby_screen.tscn");
 	}
 
+	public void OnPassButtonPressed()
+	{
+		if (_net == null || string.IsNullOrEmpty(_net.CurrentGameId))
+		{
+			GD.PrintErr("[MatchScreen] Impossible de passer : pas de partie en cours");
+			return;
+		}
+
+		if (!_net.IsLocalPlayersTurn)
+		{
+			GD.Print("[MatchScreen] Ce n'est pas votre tour, impossible de passer");
+			return;
+		}
+
+		if (_net.CurrentGameState != "InProgress")
+		{
+			GD.Print("[MatchScreen] La partie n'est pas en cours, impossible de passer");
+			return;
+		}
+
+		// Envoyer le pass au serveur (x=0, y=0 mais isPass=true)
+		GD.Print("[MatchScreen] Le joueur passe son tour");
+		_ = _net.SendMakeMove(_net.CurrentGameId, 0, 0, true);
+	}
+
 	private void OnGameStateReceived(GetGameStateResponse state)
 	{
 		if (_board == null) return;
@@ -263,9 +293,33 @@ public partial class MatchScreen : Control
 		if (_turnLabel != null && _net != null)
 		{
 			if (_net.CurrentPlayerCount < 2)
-				_turnLabel.Text = "En attente d’un adversaire...";
+				_turnLabel.Text = "En attente d'un adversaire...";
 			else
-				_turnLabel.Text = _net.IsLocalPlayersTurn ? "Votre tour" : "Tour de l’adversaire";
+				_turnLabel.Text = _net.IsLocalPlayersTurn ? "Votre tour" : "Tour de l'adversaire";
+		}
+
+		// Activer/désactiver le bouton "Passer" selon le contexte
+		if (_passButton != null && _net != null)
+		{
+			// Le bouton est actif seulement si :
+			// - La partie est en cours
+			// - C'est le tour du joueur local
+			// - Il y a 2 joueurs connectés
+			bool canPass = _net.CurrentGameState == "InProgress" 
+			               && _net.IsLocalPlayersTurn 
+			               && _net.CurrentPlayerCount >= 2;
+			
+			_passButton.Disabled = !canPass;
+			
+			// Optionnel : changer le texte du bouton pour indiquer pourquoi il est désactivé
+			if (_net.CurrentPlayerCount < 2)
+				_passButton.Text = "Passer (en attente...)";
+			else if (_net.CurrentGameState != "InProgress")
+				_passButton.Text = "Passer (partie terminée)";
+			else if (!_net.IsLocalPlayersTurn)
+				_passButton.Text = "Passer (pas votre tour)";
+			else
+				_passButton.Text = "Passer mon tour";
 		}
 	}
 

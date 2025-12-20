@@ -16,8 +16,4 @@
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="FIX_DECALAGE_GRILLE.md" />
-    <Content Include="OPTIMISATIONS_REACTIVITE.md" />
-  </ItemGroup>
 </Project>
