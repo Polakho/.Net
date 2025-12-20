@@ -96,6 +96,9 @@ public class JoinGameResponse
     
     [Key(2)]
     public GetGameStateResponse GameState { get; set; }
+
+    [Key(3)]
+    public string YourPlayerId { get; set; }
 }
 
 [MessagePackObject]

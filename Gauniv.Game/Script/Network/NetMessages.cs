@@ -1,6 +1,5 @@
 using MessagePack;
 using System.Collections.Generic;
-using System;
 
 // Même enum que coté serveur
 public static class MessageType
@@ -104,6 +103,7 @@ public class JoinGameResponse
 	[Key(0)] public string GameId { get; set; }
 	[Key(1)] public string Result { get; set; }
 	[Key(2)] public GetGameStateResponse GameState { get; set; }
+	[Key(3)] public string YourPlayerId { get; set; }
 }
 
 [MessagePackObject]

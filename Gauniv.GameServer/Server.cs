@@ -133,7 +133,7 @@ namespace Gauniv.GameServer
                     // Broadcast updated list to everyone
                     await BroadcastGameListAsync();
                     
-                    var responseData = MessagePackSerializer.Serialize(new JoinGameResponse { GameId = gameId, Result = "Joined game successfully" });
+                    var responseData = MessagePackSerializer.Serialize(new JoinGameResponse { GameId = gameId, Result = "Joined game successfully", YourPlayerId = player.Id.ToString() });
                     return new MessageGeneric { Type = MessageType.CreateGame, Data = responseData };
                 
                 case MessageType.JoinGame:
@@ -144,7 +144,7 @@ namespace Gauniv.GameServer
                     // Broadcast updated list to everyone
                     await BroadcastGameListAsync();
                     
-                    var joinResponseData = MessagePackSerializer.Serialize(new JoinGameResponse { Result = joinResult, GameId = joinRequest.GameId});
+                    var joinResponseData = MessagePackSerializer.Serialize(new JoinGameResponse { Result = joinResult, GameId = joinRequest.GameId, YourPlayerId = player.Id.ToString() });
                     return new MessageGeneric { Type = MessageType.JoinGame, Data = joinResponseData };
 
                 case MessageType.LeaveGame:
@@ -166,16 +166,19 @@ namespace Gauniv.GameServer
                     return new MessageGeneric { Type = MessageType.GameState, Data = stateResponseData };
                     
                 case MessageType.MakeMove:
-                    Console.Write($"{server}Processing MakeMove request from player {player.Id}...");
+                    Console.WriteLine($"{server}Processing MakeMove request from player {player.Id} ({player.Name})...");
                     var moveRequest = MessagePackSerializer.Deserialize<MakeMoveRequest>(message.Data);
+                    Console.WriteLine($"{server}Move details: GameId={moveRequest.GameId}, X={moveRequest.X}, Y={moveRequest.Y}, IsPass={moveRequest.IsPass}");
                     var moveResult = await _gameService.MakeMoveAsync(moveRequest.GameId, player, moveRequest.X, moveRequest.Y, moveRequest.IsPass);
                     if (moveResult is WrongMoveResponse wrongMove)
                     {
+                        Console.WriteLine($"{server}Move rejected: {wrongMove.Reason}");
                         var wrongMoveData = MessagePackSerializer.Serialize(wrongMove);
                         return new MessageGeneric { Type = MessageType.WrongMove, Data = wrongMoveData };
                     }
                     else if (moveResult is GetGameStateResponse gameState)
                     {
+                        Console.WriteLine($"{server}Move accepted! New currentPlayer: {gameState.currentPlayer}");
                         var gameStateData = MessagePackSerializer.Serialize(gameState);
                         var broadcastMessage = new MessageGeneric { Type = MessageType.GameState, Data = gameStateData };
                         byte[] data = MessagePackSerializer.Serialize(broadcastMessage);
@@ -185,13 +188,14 @@ namespace Gauniv.GameServer
                         // Envoyer à tous les joueurs et spectateurs
                         var recipients = game.Players.Concat(game.Spectators);
                         
+                        Console.WriteLine($"{server}Broadcasting new game state to {recipients.Count()} recipients");
                         foreach (var recipient in recipients)
                         {
                             if (_players.TryGetValue(recipient.Id.ToString(), out var recipientPlayer))
                             {
                                 try
                                 {
-                                    Console.WriteLine($"{server}Sending to player {recipient.Id}: {recipientPlayer.Name}");
+                                    Console.WriteLine($"{server}  → Sending to player {recipient.Id}: {recipientPlayer.Name}");
                                     var recipientStream = recipientPlayer.Stream;
                                     await recipientStream.WriteAsync(data, 0, data.Length);
                                 }

@@ -8,7 +8,9 @@ public partial class MatchScreen : Control
 	[Export] public NodePath BoardControllerPath;
 	[Export] public string GameStateLabelPath = "Ui/GameStateLabel";
 	[Export] public string PlayerCountLabelPath = "Ui/PlayerCountLabel";
-	[Export] public float RefreshIntervalSeconds = 1.0f;
+	[Export] public string MyColorLabelPath = "Ui/MyColorLabel";
+	[Export] public string TurnLabelPath = "Ui/TurnLabel";
+	[Export] public float RefreshIntervalSeconds = 0.1f;
 
 	// Overlay d'attente (bloque les inputs tant que la partie n'est pas prête)
 	[Export] public string WaitingOverlayPath = "WaitingOverlay";
@@ -18,6 +20,8 @@ public partial class MatchScreen : Control
 	private BoardController _board;
 	private Label _gameStateLabel;
 	private Label _playerCountLabel;
+	private Label _myColorLabel;
+	private Label _turnLabel;
 	private Timer _refreshTimer;
 
 	private Control _waitingOverlay;
@@ -29,6 +33,9 @@ public partial class MatchScreen : Control
 	private Node2D _boardRootNode;
 	private Sprite2D _gridSprite;
 	private Sprite2D _backgroundSprite;
+
+	// Flag pour éviter de réafficher l'overlay après le début de partie
+	private bool _gameHasStarted = false;
 
 	public override void _Ready()
 	{
@@ -42,11 +49,17 @@ public partial class MatchScreen : Control
 		// Récupérer les labels
 		_gameStateLabel = GetNodeOrNull<Label>(GameStateLabelPath);
 		_playerCountLabel = GetNodeOrNull<Label>(PlayerCountLabelPath);
+		_myColorLabel = GetNodeOrNull<Label>(MyColorLabelPath);
+		_turnLabel = GetNodeOrNull<Label>(TurnLabelPath);
 
 		if (_gameStateLabel == null)
 			GD.PrintErr("[MatchScreen] GameStateLabel introuvable.");
 		if (_playerCountLabel == null)
 			GD.PrintErr("[MatchScreen] PlayerCountLabel introuvable.");
+		if (_myColorLabel == null)
+			GD.PrintErr("[MatchScreen] MyColorLabel introuvable.");
+		if (_turnLabel == null)
+			GD.PrintErr("[MatchScreen] TurnLabel introuvable.");
 
 		// Overlay d'attente
 		_waitingOverlay = GetNodeOrNull<Control>(WaitingOverlayPath);
@@ -108,37 +121,18 @@ public partial class MatchScreen : Control
 
 		Vector2 viewportSize = GetViewportRect().Size;
 
-		// Taille du plateau en pixels écran.
-		// Priorité: GridSprite (board.png). Fallback: Background.
-		Sprite2D sprite = _gridSprite;
-		Vector2 texSize = Vector2.Zero;
-		Vector2 scale = Vector2.One;
-		Vector2 spriteOffset = Vector2.Zero;
-
-		if (sprite != null && sprite.Texture != null)
-		{
-			texSize = sprite.Texture.GetSize();
-			scale = sprite.GlobalScale.Abs();
-			spriteOffset = sprite.Offset;
-		}
-		else if (_backgroundSprite != null && _backgroundSprite.Texture != null)
-		{
-			sprite = _backgroundSprite;
-			texSize = sprite.Texture.GetSize();
-			scale = sprite.GlobalScale.Abs();
-			spriteOffset = Vector2.Zero;
-		}
-		else
-		{
-			return;
-		}
-
-		Vector2 boardSize = texSize * scale;
-
-		// Dans ta scène, GridSprite n'est pas centered et a un offset (64,64).
-		// Donc le plateau "visible" commence à BoardRoot + Offset.
-		Vector2 desiredTopLeft = (viewportSize - boardSize) / 2f;
-		_boardRootNode.GlobalPosition = desiredTopLeft - spriteOffset;
+		// Le plateau (background.png) fait 640x640px
+		// On veut simplement le centrer dans la fenêtre
+		float boardSizePx = 640f;
+		
+		// Position pour centrer le plateau (coin supérieur gauche du plateau)
+		Vector2 centeredPos = (viewportSize - new Vector2(boardSizePx, boardSizePx)) / 2f;
+		
+		// Le BoardRoot contient Background et GridSprite qui ne sont pas centrés (centered=false)
+		// donc ils commencent à la position du BoardRoot
+		_boardRootNode.Position = centeredPos;
+		
+		GD.Print($"[MatchScreen.CenterBoardRoot] viewportSize={viewportSize}, centeredPos={centeredPos}");
 	}
 
 	private void StartRefreshTimer()
@@ -155,6 +149,15 @@ public partial class MatchScreen : Control
 
 	private void OnRefreshTimerTimeout()
 	{
+		// Pendant la partie, le serveur broadcast déjà les changements d'état
+		// Donc on réduit la fréquence des requêtes pour éviter la surcharge
+		if (_gameHasStarted)
+		{
+			// Refresh moins fréquent pendant la partie (toutes les 2 secondes)
+			if (_refreshTimer != null)
+				_refreshTimer.WaitTime = 2.0f;
+		}
+		
 		if (!string.IsNullOrEmpty(_net?.CurrentGameId))
 		{
 			_ = _net.SendGetGameState(_net.CurrentGameId);
@@ -195,12 +198,27 @@ public partial class MatchScreen : Control
 	{
 		if (_board == null) return;
 
+		// Mapping des états du serveur vers le client
+		string gameStateStatus = state.GameState ?? "Pending";
+		if (gameStateStatus == "WaitingForPlayers")
+			gameStateStatus = "Pending";
+		
+		GD.Print($"[MatchScreen] OnGameStateReceived: ServerState={state.GameState}, MappedState={gameStateStatus}");
+
+		// Si la partie est en cours et qu'on a 2 joueurs, marquer que la partie a commencé
+		if (gameStateStatus == "InProgress" && state.PlayerCount >= 2)
+		{
+			_gameHasStarted = true;
+		}
+
 		// Conversion GetGameStateResponse -> BoardController.GameState (ton type interne)
 		var localState = new BoardController.GameState
 		{
 			BoardSize = state.BoardSize,
-			CurrentPlayer = state.currentPlayer == "Black" ? 1 : 2,
-			GameStateStatus = state.GameState ?? "Pending" // "Pending", "InProgress", "Finished"
+			// Le serveur envoie un playerId, pas une couleur. Pour l'instant on laisse l'affichage du tour au niveau UI,
+			// et on garde un mapping simple pour le plateau (1=noir, 2=blanc) basé uniquement sur les pierres.
+			CurrentPlayer = 0,
+			GameStateStatus = gameStateStatus // "Pending", "InProgress", "Finished"
 		};
 
 		for (int x = 0; x < state.BoardSize; x++)
@@ -231,10 +249,32 @@ public partial class MatchScreen : Control
 		{
 			_playerCountLabel.Text = $"Joueurs: {_net.CurrentPlayerCount}/2";
 		}
+
+		if (_myColorLabel != null && _net != null)
+		{
+			_myColorLabel.Text = _net.LocalPlayerColor switch
+			{
+				StoneColor.Black => "Vous jouez: Noir",
+				StoneColor.White => "Vous jouez: Blanc",
+				_ => "Vous jouez: (en attente...)"
+			};
+		}
+
+		if (_turnLabel != null && _net != null)
+		{
+			if (_net.CurrentPlayerCount < 2)
+				_turnLabel.Text = "En attente d’un adversaire...";
+			else
+				_turnLabel.Text = _net.IsLocalPlayersTurn ? "Votre tour" : "Tour de l’adversaire";
+		}
 	}
 
 	private bool ShouldShowWaitingOverlay()
 	{
+		// Une fois que la partie a commencé, ne plus afficher l'overlay
+		if (_gameHasStarted)
+			return false;
+
 		// Règle principale demandée: tant que 2 joueurs ne sont pas connectés
 		if (_net == null) return true;
 		return _net.CurrentPlayerCount < 2;
@@ -246,6 +286,13 @@ public partial class MatchScreen : Control
 			return;
 
 		bool show = ShouldShowWaitingOverlay();
+		
+		// Log pour déboguer le comportement de l'overlay
+		if (_waitingOverlay.Visible != show)
+		{
+			GD.Print($"[MatchScreen] Overlay visibility change: {_waitingOverlay.Visible} → {show} (_gameHasStarted={_gameHasStarted}, PlayerCount={_net?.CurrentPlayerCount})");
+		}
+		
 		_waitingOverlay.Visible = show;
 
 		// Important: ne PAS masquer BoardRoot.
@@ -272,6 +319,13 @@ public partial class MatchScreen : Control
 		{
 			_gameStateLabel.Text = $"Erreur: {reason}";
 		}
+		
+		// Demander immédiatement l'état du jeu pour être sûr d'être à jour
+		if (!string.IsNullOrEmpty(_net?.CurrentGameId))
+		{
+			_ = _net.SendGetGameState(_net.CurrentGameId);
+		}
+		
 		UpdateWaitingOverlay();
 	}
 }

@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using MessagePack;
 
 public partial class GameServerClient : Node
@@ -26,6 +25,11 @@ public partial class GameServerClient : Node
 	public event Action<string> JoinResultReceived;
 	public event Action<GetGameStateResponse> GameStateReceived;
 	public event Action<string> WrongMoveReceived;
+
+	public string LocalPlayerId { get; private set; }
+	public StoneColor? LocalPlayerColor { get; private set; }
+	public bool IsLocalPlayersTurn { get; private set; }
+	private bool _hasInferredColor;
 
 	public void ClearCurrentGameId()
 	{
@@ -98,6 +102,11 @@ public partial class GameServerClient : Node
 					GD.Print($"[NET] Game created and joined with id: {response.GameId}");
 					CurrentGameId = response.GameId;
 					LastJoinResult = response.Result;
+					LocalPlayerId = response.YourPlayerId;
+					GD.Print($"[NET] YourPlayerId (CreateGame) = {LocalPlayerId}");
+					LocalPlayerColor = null;
+					IsLocalPlayersTurn = false;
+					_hasInferredColor = false;
 					CallDeferred(nameof(EmitGameCreated));
 				}
 				break;
@@ -111,10 +120,17 @@ public partial class GameServerClient : Node
 					GD.Print($"[NET] Game ID: {response.GameId}");
 					CurrentGameId = response.GameId;
 					LastJoinResult = response.Result;
+					LocalPlayerId = response.YourPlayerId;
+					GD.Print($"[NET] YourPlayerId (JoinGame) = {LocalPlayerId}");
+					LocalPlayerColor = null;
+					IsLocalPlayersTurn = false;
+					_hasInferredColor = false;
+
 					if (response.GameState != null)
 					{
 						_lastGameState = response.GameState;
 						UpdateGameStateInfo(response.GameState);
+						MaybeInferLocalColorAndTurn(response.GameState);
 					}
 					CallDeferred(nameof(EmitJoinResult));
 				}
@@ -165,6 +181,7 @@ public partial class GameServerClient : Node
 				CurrentGameId = state.GameId;
 				_lastGameState = state;
 				UpdateGameStateInfo(state);
+				MaybeInferLocalColorAndTurn(state);
 				CallDeferred(nameof(EmitGameStateReceived));
 				break;
 			}
@@ -176,6 +193,32 @@ public partial class GameServerClient : Node
 				CallDeferred(nameof(EmitWrongMove));
 				break;
 			}
+		}
+	}
+
+	private void MaybeInferLocalColorAndTurn(GetGameStateResponse state)
+	{
+		if (state == null)
+			return;
+
+		if (string.IsNullOrEmpty(LocalPlayerId))
+			return;
+
+		// currentPlayer = id du joueur qui doit jouer.
+		bool isMyTurn = state.currentPlayer == LocalPlayerId;
+		IsLocalPlayersTurn = isMyTurn;
+
+		if (_hasInferredColor)
+			return;
+
+		// Le serveur assigne aléatoirement les couleurs, mais le joueur NOIR commence toujours.
+		// Donc si c'est mon tour au premier GameState (quand PlayerCount >= 2), je suis Noir.
+		// Sinon, je suis Blanc.
+		if (state.PlayerCount >= 2 && !string.IsNullOrEmpty(state.currentPlayer))
+		{
+			LocalPlayerColor = isMyTurn ? StoneColor.Black : StoneColor.White;
+			_hasInferredColor = true;
+			GD.Print($"[NET] LocalPlayerColor déduite: {LocalPlayerColor} (LocalPlayerId={LocalPlayerId}, currentPlayer={state.currentPlayer})");
 		}
 	}
 
@@ -230,6 +273,7 @@ public partial class GameServerClient : Node
 
 	public async Task SendMakeMove(string gameId, int x, int y, bool isPass)
 	{
+		GD.Print($"[NET] Sending MakeMove: gameId={gameId}, pos=({x},{y}), pass={isPass}");
 		var payload = new MakeMoveRequest { GameId = gameId, X = x, Y = y, IsPass = isPass };
 		await Send(MessageType.MakeMove, payload);
 	}

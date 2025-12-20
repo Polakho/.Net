@@ -21,7 +21,6 @@ BoardControllerPath = NodePath("BoardRoot/BoardController")
 RefreshIntervalSeconds = 5.0
 
 [node name="BoardRoot" type="Node2D" parent="."]
-position = Vector2(0, 0)
 
 [node name="BoardController" type="Node2D" parent="BoardRoot"]
 script = ExtResource("2_052ei")
@@ -77,6 +76,22 @@ offset_top = 75.0
 offset_right = 300.0
 offset_bottom = 105.0
 text = "Joueurs: 0/2"
+
+[node name="MyColorLabel" type="Label" parent="Ui"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 110.0
+offset_right = 300.0
+offset_bottom = 140.0
+text = "Votre couleur: ?"
+
+[node name="TurnLabel" type="Label" parent="Ui"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 145.0
+offset_right = 300.0
+offset_bottom = 175.0
+text = "Tour: ?"
 
 [node name="WaitingOverlay" type="Control" parent="."]
 anchors_preset = 0
