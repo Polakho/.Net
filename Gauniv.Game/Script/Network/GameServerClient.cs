@@ -18,6 +18,7 @@ public partial class GameServerClient : Node
 	public string LastJoinResult { get; private set; }
 	public string CurrentGameState { get; private set; }
 	public int CurrentPlayerCount { get; private set; }
+	public int CurrentSpectatorCount { get; private set; }
 
 	// Events UI (toujours invoqués depuis le thread principal)
 	public event Action<GetListGamesResponse> GameListReceived;
@@ -29,6 +30,7 @@ public partial class GameServerClient : Node
 	public string LocalPlayerId { get; private set; }
 	public StoneColor? LocalPlayerColor { get; private set; }
 	public bool IsLocalPlayersTurn { get; private set; }
+	public bool IsJoiningAsSpectator { get; set; }
 	private bool _hasInferredColor;
 
 	public void ClearCurrentGameId()
@@ -348,11 +350,13 @@ public partial class GameServerClient : Node
 		{
 			CurrentGameState = state.GameState ?? "En cours";
 			CurrentPlayerCount = state.PlayerCount;
+			CurrentSpectatorCount = state.SpectatorCount;
 		}
 		else
 		{
 			CurrentGameState = "En cours";
 			CurrentPlayerCount = 0;
+			CurrentSpectatorCount = 0;
 		}
 	}
 }

@@ -8,6 +8,7 @@ public partial class MatchScreen : Control
 	[Export] public NodePath BoardControllerPath;
 	[Export] public string GameStateLabelPath = "Ui/GameStateLabel";
 	[Export] public string PlayerCountLabelPath = "Ui/PlayerCountLabel";
+	[Export] public string SpectatorCountLabelPath = "Ui/SpectatorCountLabel";
 	[Export] public string MyColorLabelPath = "Ui/MyColorLabel";
 	[Export] public string TurnLabelPath = "Ui/TurnLabel";
 	[Export] public string PassButtonPath = "Ui/PassButton";
@@ -27,6 +28,7 @@ public partial class MatchScreen : Control
 	private BoardController _board;
 	private Label _gameStateLabel;
 	private Label _playerCountLabel;
+	private Label _spectatorCountLabel;
 	private Label _myColorLabel;
 	private Label _turnLabel;
 	private Button _passButton;
@@ -64,6 +66,7 @@ public partial class MatchScreen : Control
 		// Récupérer les labels
 		_gameStateLabel = GetNodeOrNull<Label>(GameStateLabelPath);
 		_playerCountLabel = GetNodeOrNull<Label>(PlayerCountLabelPath);
+		_spectatorCountLabel = GetNodeOrNull<Label>(SpectatorCountLabelPath);
 		_myColorLabel = GetNodeOrNull<Label>(MyColorLabelPath);
 		_turnLabel = GetNodeOrNull<Label>(TurnLabelPath);
 		_passButton = GetNodeOrNull<Button>(PassButtonPath);
@@ -72,6 +75,8 @@ public partial class MatchScreen : Control
 			GD.PrintErr("[MatchScreen] GameStateLabel introuvable.");
 		if (_playerCountLabel == null)
 			GD.PrintErr("[MatchScreen] PlayerCountLabel introuvable.");
+		if (_spectatorCountLabel == null)
+			GD.PrintErr("[MatchScreen] SpectatorCountLabel introuvable.");
 		if (_myColorLabel == null)
 			GD.PrintErr("[MatchScreen] MyColorLabel introuvable.");
 		if (_turnLabel == null)
@@ -335,6 +340,11 @@ public partial class MatchScreen : Control
 		if (_playerCountLabel != null && _net != null)
 		{
 			_playerCountLabel.Text = $"Joueurs: {_net.CurrentPlayerCount}/2";
+		}
+
+		if (_spectatorCountLabel != null && _net != null)
+		{
+			_spectatorCountLabel.Text = $"Spectateurs: {_net.CurrentSpectatorCount}";
 		}
 
 		if (_myColorLabel != null && _net != null)

@@ -138,8 +138,18 @@ public partial class LobbyScreen : Control
 
 	public async void OnSpectatePressed()
 	{
+		if (_net == null)
+			return;
+
+		// Si rien de sélectionné mais qu'on a une liste de parties, on prend la première
+		if (string.IsNullOrEmpty(_selectedGameId) && _net.LastGameList != null && _net.LastGameList.Games.Count > 0)
+		{
+			_selectedGameId = _net.LastGameList.Games[0].Id;
+		}
+
+		// Marquer qu'on va rejoindre en tant que spectateur
+		_net.IsJoiningAsSpectator = true;
 		await _net.SendJoinGame(_selectedGameId, asSpectator: true);
-		_screenManager.GoTo("res://Scenes/Screens/spectate_screen.tscn");
 	}
 
 	// --- Callback de la liste (signal Godot) ---
@@ -153,9 +163,19 @@ public partial class LobbyScreen : Control
 
 	private void OnJoinResultReceived(string result)
 	{
-		// Si le join est OK, on va en match (tu peux affiner plus tard)
+		// Si le join est OK, on va en match ou en spectate selon le mode
 		if (!string.IsNullOrEmpty(result) && (result.Contains("success", StringComparison.OrdinalIgnoreCase) || result.Contains("Joined", StringComparison.OrdinalIgnoreCase)))
-			_screenManager.GoTo("res://Scenes/Screens/match_screen.tscn");
+		{
+			if (_net.IsJoiningAsSpectator)
+			{
+				_net.IsJoiningAsSpectator = false; // Réinitialiser le flag
+				_screenManager.GoTo("res://Scenes/Screens/spectate_screen.tscn");
+			}
+			else
+			{
+				_screenManager.GoTo("res://Scenes/Screens/match_screen.tscn");
+			}
+		}
 	}
 
 	public async void OnRefreshPressed()

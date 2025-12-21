@@ -30,6 +30,7 @@ public partial class BoardController : Node2D
 	private GameServerClient _netClient;
 	private string _currentPlayerId;
 	private string _gameState = "Pending"; // "Pending", "InProgress", "Finished"
+	private bool _isSpectator = false;
 
 	// Etat local (prototype). Plus tard : l'état viendra uniquement du serveur.
 	private int[,] _grid;        // 0 vide, 1 noir, 2 blanc
@@ -73,6 +74,18 @@ public partial class BoardController : Node2D
 	public void SetNetworkClient(GameServerClient netClient)
 	{
 		_netClient = netClient;
+	}
+
+	public void SetSpectatorMode(bool isSpectator)
+	{
+		_isSpectator = isSpectator;
+		GD.Print($"[BoardController] Mode spectateur défini à: {_isSpectator}");
+		
+		// Désactiver les inputs si en mode spectateur
+		if (_isSpectator)
+		{
+			SetProcessInput(false);
+		}
 	}
 
 	// ============================
@@ -138,6 +151,13 @@ public partial class BoardController : Node2D
 		// Vérifications robustes pour éviter les ObjectDisposedException
 		if (_hoverPreview == null || !IsInstanceValid(_hoverPreview) || _hoverPreview.IsQueuedForDeletion())
 			return;
+		
+		// Ne pas afficher le cercle en mode spectateur
+		if (_isSpectator)
+		{
+			_hoverPreview.Visible = false;
+			return;
+		}
 			
 		if (_gameState != "InProgress")
 		{
@@ -181,6 +201,10 @@ public partial class BoardController : Node2D
 
 	public override void _Input(InputEvent @event)
 	{
+		// Bloquer les inputs en mode spectateur
+		if (_isSpectator)
+			return;
+			
 		if (@event is not InputEventMouseButton mb)
 			return;
 		

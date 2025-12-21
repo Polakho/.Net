@@ -130,6 +130,7 @@ public class GameService
                 Board = game.Board.Grid,
                 GameState = game.State.ToString(),
                 PlayerCount = game.Players.Count,
+                SpectatorCount = game.Spectators.Count,
                 WinnerId = game.Winner?.Id.ToString() ?? string.Empty,
                 BlackScore = blackScore,
                 WhiteScore = whiteScore
@@ -224,6 +225,7 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
                 Board = game.Board.Grid,
                 GameState = game.State.ToString(),
                 PlayerCount = game.Players.Count,
+                SpectatorCount = game.Spectators.Count,
                 WinnerId = game.Winner?.Id.ToString() ?? string.Empty,
                 BlackScore = blackScore,
                 WhiteScore = whiteScore

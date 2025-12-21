@@ -137,6 +137,9 @@ public class GetGameStateResponse
     
     [Key(8)]
     public int WhiteScore { get; set; }
+    
+    [Key(9)]
+    public int SpectatorCount { get; set; }
 }
 
 [MessagePackObject]

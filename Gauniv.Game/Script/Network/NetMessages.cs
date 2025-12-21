@@ -66,6 +66,7 @@ public class GetGameStateResponse
 	[Key(6)] public string WinnerId { get; set; }
 	[Key(7)] public int BlackScore { get; set; }
 	[Key(8)] public int WhiteScore { get; set; }
+	[Key(9)] public int SpectatorCount { get; set; }
 }
 
 // Enum local identique à celui du serveur
