@@ -16,10 +16,10 @@ namespace Gauniv.Client.ViewModel
 {
     public partial class AuthentificationViewModel: ObservableObject
     {
-        private readonly AuthService _authService;
+        private readonly NetworkService _authService;
 
         [ObservableProperty]
-        private string _Username;
+        private string _Email;
         [ObservableProperty]
         private string _Password;
         [ObservableProperty]
@@ -27,7 +27,7 @@ namespace Gauniv.Client.ViewModel
 
         public AuthentificationViewModel()
         {
-            _authService = new AuthService();
+            _authService = NetworkService.Instance;
         }
 
         [RelayCommand]
@@ -38,7 +38,7 @@ namespace Gauniv.Client.ViewModel
             _IsAuthenticating = true;
             try
             {
-                var success = await _authService.AuthenticateAsync(_Username, _Password);
+                var success =  await _authService.AuthenticateAsync(_Email, _Password);
                 if (success)
                 {
                     // We return to the previous page

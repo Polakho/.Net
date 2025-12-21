@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Gauniv.Client.Pages;
 using Gauniv.Client.Services;
+using Gauniv.Client.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -22,11 +23,10 @@ namespace Gauniv.Client.ViewModel
         [ObservableProperty]
         private bool _IsLoading;
 
-        public IndexViewModel()
+        public MyGamesViewModel()
         {
             _gameService = new GameService();
             _Games = new ObservableCollection<Game>();
-            LoadGamesCommand.Execute(null);
         }
 
         [RelayCommand]
@@ -37,7 +37,7 @@ namespace Gauniv.Client.ViewModel
             _IsLoading = true;
             try
             {
-                var gameList = await _gameService.GetGamesAsync();
+                var gameList = await _gameService.GetGamesOwnedAsync();
                 _Games.Clear();
                 foreach (var game in gameList)
                 {

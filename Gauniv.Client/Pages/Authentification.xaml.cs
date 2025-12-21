@@ -1,4 +1,4 @@
-namespace Gauiv.Client.Services
+namespace Gauniv.Client.Pages
 {
     public partial class Authentification : ContentPage
     {

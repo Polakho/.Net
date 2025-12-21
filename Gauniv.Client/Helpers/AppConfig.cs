@@ -2,19 +2,19 @@ namespace Gauniv.Client.Helpers
 {
     public static class AppConfig
     {
-        public const string LocalIpAddress = "https://4b0nuxk7wab0.share.zrok.io";
-        public const string ApiPort = "443";
+        public const string LocalIpAddress = "https://localhost";
+        public const string ApiPort = "";
 
         public static string BaseUrl
         {
             get
             {
-                if (DeviceInfo.Platform == DevicePlatform.Android)
+                if (!string.IsNullOrEmpty(ApiPort))
                 {
                     return $"{LocalIpAddress}:{ApiPort}";
                 }       
 
-                return $"{LocalIpAddress}:{ApiPort}";
+                return $"{LocalIpAddress}";
             }
         }
 

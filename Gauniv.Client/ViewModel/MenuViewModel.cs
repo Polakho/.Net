@@ -27,5 +27,10 @@ namespace Gauniv.Client.ViewModel
         {
             IsConnected = true;
         }
+
+        public void Disconnect()
+        {
+            IsConnected = false;
+        }
     }
 }

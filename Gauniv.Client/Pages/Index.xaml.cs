@@ -33,5 +33,6 @@ public partial class Index : ContentPage
 	public Index()
 	{
 		InitializeComponent();
+		BindingContext = new Gauniv.Client.ViewModel.IndexViewModel();
 	}
 }

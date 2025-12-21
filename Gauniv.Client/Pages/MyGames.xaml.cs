@@ -26,6 +26,8 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
+using Gauniv.Client.ViewModel;
+
 namespace Gauniv.Client.Pages;
 
 public partial class MyGames : ContentPage
@@ -33,5 +35,14 @@ public partial class MyGames : ContentPage
 	public MyGames()
 	{
 		InitializeComponent();
+	}
+
+	protected override async void OnAppearing()
+	{
+		base.OnAppearing();
+		if (BindingContext is MyGamesViewModel vm)
+		{
+			await vm.LoadGamesCommand.ExecuteAsync(null);	
+		}
 	}
 }

@@ -35,6 +35,11 @@ using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
+using Gauniv.Client.Helpers;
+using System.Diagnostics;
+using System.Text.Json;
+using System.Net;
 
 namespace Gauniv.Client.Services
 {
@@ -45,10 +50,61 @@ namespace Gauniv.Client.Services
         [ObservableProperty]
         private string token;
         public HttpClient HttpClient;
+        
 
         public NetworkService() {
-            HttpClient = new HttpClient();
+            
+            var handler = new HttpClientHandler{
+                UseCookies = true,
+                CookieContainer = new CookieContainer()
+            };
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            
+            HttpClient = new HttpClient(handler){
+                BaseAddress = new Uri(AppConfig.BaseUrl)
+            };
+            
             Token = null;
+        }
+
+        public async Task<bool> AuthenticateAsync(string username, string password, bool? useCookies = true, bool? useSessionCookies = null)
+        {
+            var client = HttpClient;
+            var payload = new
+            {
+                Email = username,
+                Password = password
+            };
+
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var uri = $"{AppConfig.BaseUrl}/Bearer/login";
+            var query = new List<string>();
+            if (useCookies.HasValue) query.Add($"useCookies={(useCookies.Value ? "true" : "false")}");
+            if (useSessionCookies.HasValue) query.Add($"useSessionCookies={(useSessionCookies.Value ? "true" : "false")}");
+            if (query.Count > 0) uri += "?" + string.Join("&", query);
+
+            HttpResponseMessage response;
+            try
+            {
+                response = await client.PostAsync(uri, content);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Login request error: {ex.Message}");
+                return false;
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                OnConnected?.Invoke();
+                return true;
+            }
+
+            var errorBody = await response.Content.ReadAsStringAsync();
+            Trace.WriteLine($"Login failed: {(int)response.StatusCode} {response.ReasonPhrase}. Body: {errorBody}");
+            return false;
         }
 
         public event Action OnConnected;

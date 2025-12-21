@@ -15,14 +15,14 @@
 
         <Grid RowDefinitions="Auto, *">
                 <StackLayout Padding="10" Spacing="10" Grid.Row="0">
-                        <Entry Placeholder="Username"
-                                Text="{Binding Username}"
+                        <Entry Placeholder="Email"
+                                Text="{Binding Email}"
                                 Keyboard="Default" />
                         <Entry Placeholder="Password"
                                 Text="{Binding Password}"
                                 IsPassword="True" />
                         <Button Text="Login"
-                                Command="{Binding LoginCommand}"
+                                Command="{Binding AuthenticateCommand}"
                                 IsEnabled="{Binding IsNotBusy}" />
                 </StackLayout>
         </Grid>
