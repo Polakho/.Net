@@ -3,6 +3,7 @@ using Gauniv.Client.Models;
 using Gauniv.Client.Helpers;
 using System.Net.Http.Headers;
 using System.Web;
+using Gauniv.Client.Services;
 
 namespace Gauniv.Client.Services
 {
@@ -60,7 +61,8 @@ namespace Gauniv.Client.Services
                 var url = $"{AppConfig.BaseUrl}/api/1.0.0/Games/GetOwnedGames/ownedGames";
                 Console.WriteLine($"[GameService] GetGamesOwnedAsync URL: {url}");
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
+                if (!string.IsNullOrEmpty(NetworkService.Instance.Token))
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
                 var response = await client.SendAsync(request);
                 Console.WriteLine($"[GameService] GetGamesOwnedAsync status: {response.StatusCode}");
                 response.EnsureSuccessStatusCode();
@@ -83,7 +85,8 @@ namespace Gauniv.Client.Services
                 var client = NetworkService.Instance.HttpClient;
                 var url = $"{AppConfig.BaseUrl}/api/1.0.0/Games/GetOwnedGames/ownedGames?offset={offset}&limit={limit}";
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
+                if (!string.IsNullOrEmpty(NetworkService.Instance.Token))
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
                 var response = await client.SendAsync(request);
                 response.EnsureSuccessStatusCode();
                 var responseData = await response.Content.ReadFromJsonAsync<List<Game>>();
@@ -142,7 +145,8 @@ namespace Gauniv.Client.Services
                 var client = NetworkService.Instance.HttpClient;
                 var url = $"{AppConfig.BaseUrl}/api/1.0.0/Games/GetOwnedGames/ownedGames?offset={nextOffset}&limit=1";
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
+                if (!string.IsNullOrEmpty(NetworkService.Instance.Token))
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
                 var response = await client.SendAsync(request);
                 if (!response.IsSuccessStatusCode)
                     return false;
@@ -154,5 +158,45 @@ namespace Gauniv.Client.Services
                 return false;
             }
         }
+
+        public async Task<bool> IsGameOwnedAsync(int gameId)
+        {
+            try
+            {
+                var client = NetworkService.Instance.HttpClient;
+                var url = $"{AppConfig.BaseUrl}/api/1.0.0/Games/IsGameOwned/isOwned?gameId={gameId}";
+                var resp = await client.GetFromJsonAsync<IsOwnedResponse>(url);
+                return resp?.isOwned ?? false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"IsGameOwned error: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<bool> BuyGameAsync(int gameId)
+        {
+            try
+            {
+                var client = NetworkService.Instance.HttpClient;
+                var url = $"{AppConfig.BaseUrl}/api/1.0.0/Games/BuyGame/buyGame?gameId={gameId}";
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (!string.IsNullOrEmpty(NetworkService.Instance.Token))
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
+                var response = await client.SendAsync(request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"BuyGame error: {ex}");
+                return false;
+            }
+        }
+    }
+
+    public class IsOwnedResponse
+    {
+        public bool isOwned { get; set; }
     }
 }

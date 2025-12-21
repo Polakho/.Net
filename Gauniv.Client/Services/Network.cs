@@ -51,6 +51,13 @@ namespace Gauniv.Client.Services
         private string token;
         public HttpClient HttpClient;
         
+        private bool _isConnected;
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set => SetProperty(ref _isConnected, value);
+        }
+        
 
         public NetworkService() {
             
@@ -65,6 +72,7 @@ namespace Gauniv.Client.Services
             };
             
             Token = null;
+            IsConnected = false;
         }
 
         public async Task<bool> AuthenticateAsync(string username, string password, bool? useCookies = true, bool? useSessionCookies = null)
@@ -98,6 +106,8 @@ namespace Gauniv.Client.Services
 
             if (response.IsSuccessStatusCode)
             {
+                // Mark as connected even when using cookie auth (no bearer token)
+                IsConnected = true;
                 OnConnected?.Invoke();
                 return true;
             }

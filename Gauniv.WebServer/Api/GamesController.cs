@@ -89,6 +89,65 @@ namespace Gauniv.WebServer.Api
             return Ok(gameDto);
         }
 
+        [HttpGet("isOwned")]
+        [Authorize]
+        public async Task<IActionResult> IsGameOwned([FromQuery] int gameId = 0)
+        {
+            var local_user = await userManager.GetUserAsync(User);
+            if (local_user == null)
+            {
+                return Unauthorized();
+            }
+
+            var userWithOwnedGames = await appDbContext.Users
+                .Include(u => u.OwnedGames)
+                .FirstOrDefaultAsync(u => u.Id == local_user.Id);
+
+            if (userWithOwnedGames == null)
+            {
+                return NotFound("User not found");
+            }
+
+            bool isOwned = userWithOwnedGames.OwnedGames.Any(g => g.Id == gameId);
+            return Ok(new { IsOwned = isOwned });
+        }
+
+        [HttpGet("buyGame")]
+        [Authorize]
+        public async Task<IActionResult> BuyGame([FromQuery] int gameId = 0)
+        {
+            var local_user = await userManager.GetUserAsync(User);
+            if (local_user == null)
+            {
+                return Unauthorized();
+            }
+
+            var userWithOwnedGames = await appDbContext.Users
+                .Include(u => u.OwnedGames)
+                .FirstOrDefaultAsync(u => u.Id == local_user.Id);
+
+            if (userWithOwnedGames == null)
+            {
+                return NotFound("User not found");
+            }
+
+            var gameToBuy = await appDbContext.Games.FirstOrDefaultAsync(g => g.Id == gameId);
+            if (gameToBuy == null)
+            {
+                return NotFound("Game not found");
+            }
+
+            if (userWithOwnedGames.OwnedGames.Any(g => g.Id == gameId))
+            {
+                return BadRequest("Game already owned");
+            }
+
+            userWithOwnedGames.OwnedGames.Add(gameToBuy);
+            await appDbContext.SaveChangesAsync();
+
+            return Ok("Game purchased successfully");
+        }
+
         [HttpGet("ownedGames")]
         [Authorize]
         public async Task<IActionResult> GetOwnedGames([FromQuery] int offset = 0, [FromQuery] int limit = 50, [FromQuery] string[] TagNames = null)

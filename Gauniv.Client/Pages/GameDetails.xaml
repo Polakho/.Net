@@ -53,6 +53,14 @@ Please respect the team's standards for any future contribution
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+
+            <!-- Actions -->
+            <Grid ColumnDefinitions="*, *" IsVisible="{Binding IsAuthenticated}" Padding="0,12,0,0">
+                <Button Text="Acheter" Command="{Binding BuyCommand}" IsVisible="{Binding ShowBuy}" />
+                <Button Text="Télécharger" Grid.Column="1" IsVisible="{Binding ShowDownload}" />
+            </Grid>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -75,6 +75,7 @@ public partial class MyGames : ContentPage
 
             var vm = new GameDetailsViewModel();
             vm.SetGame(game);
+            await vm.InitializeAsync();
             var page = new GameDetails { BindingContext = vm };
             await Navigation.PushAsync(page);
 
