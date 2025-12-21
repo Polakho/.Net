@@ -1,10 +1,6 @@
-﻿using Godot;
+using Godot;
 using System;
 
-/// <summary>
-/// Service utilitaire pour actualiser régulièrement la liste des parties.
-/// Peut être attaché à n'importe quel nœud comme autoload ou dans la scène.
-/// </summary>
 public partial class GameListRefreshService : Node
 {
 	[Export] public float RefreshIntervalSeconds = 5.0f;
@@ -19,7 +15,7 @@ public partial class GameListRefreshService : Node
 
 	public override void _Ready()
 	{
-		// Chercher le GameServerClient
+
 		Node current = GetParent();
 		while (current != null && _gameServerClient == null)
 		{
@@ -33,13 +29,12 @@ public partial class GameListRefreshService : Node
 
 		if (_gameServerClient == null)
 		{
-			GD.PrintErr("[GameListRefreshService] GameServerClient non trouvé");
+			GD.PrintErr("[GameListRefreshService] GameServerClient non trouv�");
 			return;
 		}
 
-		GD.Print("[GameListRefreshService] GameServerClient trouvé");
+		GD.Print("[GameListRefreshService] GameServerClient trouv�");
 
-		// Créer et configurer le timer
 		_refreshTimer = new Timer();
 		_refreshTimer.WaitTime = Mathf.Max(1.0f, RefreshIntervalSeconds);
 		_refreshTimer.Timeout += OnRefreshTimerTimeout;
@@ -60,9 +55,6 @@ public partial class GameListRefreshService : Node
 		}
 	}
 
-	/// <summary>
-	/// Démarre l'actualisation automatique de la liste
-	/// </summary>
 	public void StartRefresh()
 	{
 		if (_isRefreshing || _refreshTimer == null || _gameServerClient == null)
@@ -71,16 +63,12 @@ public partial class GameListRefreshService : Node
 		_isRefreshing = true;
 		_refreshTimer.Start();
 
-		GD.Print($"[GameListRefreshService] Refresh démarré (intervalle: {RefreshIntervalSeconds}s)");
+		GD.Print($"[GameListRefreshService] Refresh d�marr� (intervalle: {RefreshIntervalSeconds}s)");
 		RefreshStarted?.Invoke(true);
 
-		// Première actualisation immédiate
 		_ = _gameServerClient.SendGetGameList();
 	}
 
-	/// <summary>
-	/// Arrête l'actualisation automatique
-	/// </summary>
 	public void StopRefresh()
 	{
 		if (!_isRefreshing || _refreshTimer == null)
@@ -89,13 +77,10 @@ public partial class GameListRefreshService : Node
 		_isRefreshing = false;
 		_refreshTimer.Stop();
 
-		GD.Print("[GameListRefreshService] Refresh arrêté");
+		GD.Print("[GameListRefreshService] Refresh arr�t�");
 		RefreshStopped?.Invoke(true);
 	}
 
-	/// <summary>
-	/// Bascule l'état du refresh
-	/// </summary>
 	public void ToggleRefresh()
 	{
 		if (_isRefreshing)
@@ -104,41 +89,28 @@ public partial class GameListRefreshService : Node
 			StartRefresh();
 	}
 
-	/// <summary>
-	/// Forcer une actualisation immédiate
-	/// </summary>
 	public async void ForceRefreshNow()
 	{
 		if (_gameServerClient == null)
 		{
-			GD.PrintErr("[GameListRefreshService] Impossible de rafraîchir: GameServerClient non disponible");
+			GD.PrintErr("[GameListRefreshService] Impossible de rafra�chir: GameServerClient non disponible");
 			return;
 		}
 
-		GD.Print("[GameListRefreshService] Refresh immédiat demandé");
+		GD.Print("[GameListRefreshService] Refresh imm�diat demand�");
 		await _gameServerClient.SendGetGameList();
 	}
 
-	/// <summary>
-	/// Callback du timer d'actualisation
-	/// </summary>
 	private async void OnRefreshTimerTimeout()
 	{
 		if (_gameServerClient != null)
 		{
-			GD.Print("[GameListRefreshService] Actualisation automatique de la liste des parties");
 			await _gameServerClient.SendGetGameList();
 		}
 	}
 
-	/// <summary>
-	/// Retourne l'état du refresh
-	/// </summary>
 	public bool IsRefreshing => _isRefreshing;
 
-	/// <summary>
-	/// Modifie l'intervalle de rafraîchissement (doit être arrêté/redémarré pour prendre effet)
-	/// </summary>
 	public void SetRefreshInterval(float seconds)
 	{
 		RefreshIntervalSeconds = Mathf.Max(1.0f, seconds);

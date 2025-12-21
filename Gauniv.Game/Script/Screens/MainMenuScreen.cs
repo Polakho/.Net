@@ -6,7 +6,7 @@ public partial class MainMenuScreen : Control
 
 	public override void _Ready()
 	{
-		// Comme MainMenuScreen est enfant direct de ScreenManager
+
 		_screenManager = GetParent<ScreenManager>();
 	}
 

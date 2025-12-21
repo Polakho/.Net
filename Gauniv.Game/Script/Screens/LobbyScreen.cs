@@ -6,7 +6,6 @@ public partial class LobbyScreen : Control
 	private ScreenManager _screenManager;
 	private GameServerClient _net;
 
-	// Renseigne ces NodePath dans l'Inspecteur
 	[Export] public NodePath GameListPath;
 
 	private ItemList _gameListUI;
@@ -34,7 +33,6 @@ public partial class LobbyScreen : Control
 			GD.PrintErr("[LobbyScreen] ✗ ERREUR: Impossible de trouver NetClient!");
 		}
 
-
 		_gameListUI = GetNode<ItemList>(GameListPath);
 		GD.Print($"[LobbyScreen] GameListUI trouvé via NodePath '{GameListPath}'? {_gameListUI != null}");
 		GD.Print($"[LobbyScreen] GameListUI est de type GameList? {_gameListUI is GameList}");
@@ -44,8 +42,7 @@ public partial class LobbyScreen : Control
 			GD.Print("[LobbyScreen] ✓ _net n'est pas null, souscription aux événements");
 			_net.GameCreated += OnGameCreated;
 			_net.JoinResultReceived += OnJoinResultReceived;
-			
-			// Passer le GameServerClient au GameList
+
 			if (_gameListUI is GameList gameListScript)
 			{
 				GD.Print("[LobbyScreen] ✓ Appel de gameListScript.SetGameServerClient(_net)");
@@ -62,7 +59,6 @@ public partial class LobbyScreen : Control
 			GD.PrintErr("[LobbyScreen] ✗ ERREUR: _net est NULL!");
 		}
 
-		// Connecter l'événement de sélection dans la liste
 		if (_gameListUI != null)
 		{
 			GD.Print("[LobbyScreen] ✓ Connexion de l'événement ItemSelected");
@@ -73,13 +69,11 @@ public partial class LobbyScreen : Control
 			GD.PrintErr("[LobbyScreen] ✗ ERREUR: _gameListUI est NULL, impossible de connecter ItemSelected!");
 		}
 
-		// Connecter l'événement de visibilité pour rafraîchir la liste quand le lobby devient visible
 		VisibilityChanged += OnVisibilityChanged;
 
 		GD.Print("===== [LobbyScreen._Ready] TERMINÉ =====");
 	}
 
-	// Rafraîchir la liste des games automatiquement quand le lobby devient visible
 	private void OnVisibilityChanged()
 	{
 		if (Visible)
@@ -89,7 +83,6 @@ public partial class LobbyScreen : Control
 		}
 	}
 
-	// Callback quand on sélectionne une game dans la liste
 	private void OnGameSelected(long index)
 	{
 		if (_net?.LastGameList != null && index >= 0 && index < _net.LastGameList.Games.Count)
@@ -117,7 +110,6 @@ public partial class LobbyScreen : Control
 	{
 		if (_net == null) return;
 
-		// Pour l'instant, board 9x9 et nom fixe
 		await _net.SendCreateGame(9, "Godot Lobby Game");
 	}
 
@@ -126,7 +118,6 @@ public partial class LobbyScreen : Control
 		if (_net == null)
 			return;
 
-		// Si rien de sélectionné mais qu'on a une liste de parties, on prend la première
 		if (string.IsNullOrEmpty(_selectedGameId) && _net.LastGameList != null && _net.LastGameList.Games.Count > 0)
 		{
 			_selectedGameId = _net.LastGameList.Games[0].Id;
@@ -135,26 +126,19 @@ public partial class LobbyScreen : Control
 		await _net.SendJoinGame(_selectedGameId, asSpectator: false);
 	}
 
-
 	public async void OnSpectatePressed()
 	{
 		if (_net == null)
 			return;
 
-		// Si rien de sélectionné mais qu'on a une liste de parties, on prend la première
 		if (string.IsNullOrEmpty(_selectedGameId) && _net.LastGameList != null && _net.LastGameList.Games.Count > 0)
 		{
 			_selectedGameId = _net.LastGameList.Games[0].Id;
 		}
 
-		// Marquer qu'on va rejoindre en tant que spectateur
 		_net.IsJoiningAsSpectator = true;
 		await _net.SendJoinGame(_selectedGameId, asSpectator: true);
 	}
-
-	// --- Callback de la liste (signal Godot) ---
-
-	// --- Events réseau ---
 
 	private void OnGameCreated(string gameId)
 	{
@@ -163,7 +147,7 @@ public partial class LobbyScreen : Control
 
 	private void OnJoinResultReceived(string result)
 	{
-		// Si le join est OK, on va en match ou en spectate selon le mode
+
 		if (!string.IsNullOrEmpty(result) && (result.Contains("success", StringComparison.OrdinalIgnoreCase) || result.Contains("Joined", StringComparison.OrdinalIgnoreCase)))
 		{
 			if (_net.IsJoiningAsSpectator)
@@ -178,7 +162,7 @@ public partial class LobbyScreen : Control
 		}
 		else
 		{
-			// Afficher un message d'erreur approprié
+
 			string errorMessage = "Impossible de rejoindre la partie.";
 			if (result.Contains("full", StringComparison.OrdinalIgnoreCase))
 			{
@@ -194,7 +178,7 @@ public partial class LobbyScreen : Control
 			}
 			
 			GD.PrintErr($"[LobbyScreen] Erreur de jointure: {errorMessage} (Résultat: {result})");
-			// TODO: Afficher un popup ou un label d'erreur à l'utilisateur
+
 		}
 	}
 
@@ -203,7 +187,6 @@ public partial class LobbyScreen : Control
 		if (_net == null)
 			return;
 
-		GD.Print("[LobbyScreen] Rafraîchissement de la liste des parties...");
 		await _net.SendGetGameList();
 	}
 }

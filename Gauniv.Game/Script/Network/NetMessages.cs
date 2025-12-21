@@ -1,7 +1,6 @@
 using MessagePack;
 using System.Collections.Generic;
 
-// Même enum que coté serveur
 public static class MessageType
 {
 	public const string SetPlayerName = "SetPlayerName";
@@ -69,7 +68,6 @@ public class GetGameStateResponse
 	[Key(9)] public int SpectatorCount { get; set; }
 }
 
-// Enum local identique à celui du serveur
 public enum StoneColor
 {
 	Black = 0,

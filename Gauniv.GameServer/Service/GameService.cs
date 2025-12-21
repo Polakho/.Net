@@ -1,4 +1,4 @@
-﻿﻿using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using Gauniv.GameServer.Message;
 using Gauniv.GameServer.Model;
 
@@ -13,27 +13,11 @@ public class GameService
         _games.TryGetValue(gameId, out var game);
         return game;
     }
-    public void listGames()
-    {
-        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] === LISTE DES PARTIES ACTIVES ({_games.Count}) ===");
-        foreach (var game in _games)
-        {
-            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]   - ID: {game.Key}");
-            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]     Nom: {game.Value.Name}");
-            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]     État: {game.Value.State}");
-            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]     Joueurs: {game.Value.Players.Count}");
-            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]     Spectateurs: {game.Value.Spectators.Count}");
-            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}]     Créée: {game.Value.Created:yyyy-MM-dd HH:mm:ss}");
-        }
-        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] =====================================");
-    }
 
     public Task<string> CreateGameAsync(string gameName, int boardSize)
     {
         var game = new Game(gameName, boardSize);
         _games.TryAdd(game.Id, game);
-        Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✓ Partie créée - ID: {game.Id}, Nom: {gameName}, Taille: {boardSize}x{boardSize}");
-        listGames();
         return Task.FromResult(game.Id);
     }
 
@@ -44,16 +28,13 @@ public class GameService
             if (asSpectator)
             {
                 game.Spectators.Add(player);
-                Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✓ {player.Name} ({player.Id}) a rejoint comme SPECTATEUR la partie {gameId}");
-                listGames();
                 return Task.FromResult("Joined game successfully");
             }
             else
             {
-                // Vérifier que la partie n'a pas déjà 2 joueurs
                 if (game.Players.Count >= 2)
                 {
-                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ❌ {player.Name} ({player.Id}) ne peut pas rejoindre la partie {gameId} - Partie complète (2 joueurs)");
+                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ❌ {player.Name} ne peut pas rejoindre la partie {gameId} - Partie complète");
                     return Task.FromResult("Game is full");
                 }
                 
@@ -61,13 +42,11 @@ public class GameService
                 {
                     game.Players.Add(player);
                     game.UpdateGameState();
-                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✓ {player.Name} ({player.Id}) a rejoint comme JOUEUR la partie {gameId}");
-                    listGames();
                     return Task.FromResult("Joined game successfully");
                 }
                 else
                 {
-                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ❌ {player.Name} ({player.Id}) ne peut pas rejoindre la partie {gameId} - État: {game.State}");
+                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ❌ {player.Name} ne peut pas rejoindre la partie {gameId} - État: {game.State}");
                     return Task.FromResult("Game already started");
                 }
             }
@@ -87,14 +66,11 @@ public class GameService
                 game.Spectators.RemoveAll(s => s.Id == player.Id) > 0)
             {
                 game.UpdateGameState();
-                Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✓ {player.Name} ({player.Id}) a quitté la partie {gameId}");
-                // If nobody remains, remove the game
+                
                 if (game.Players.Count == 0 && game.Spectators.Count == 0)
                 {
                     _games.TryRemove(gameId, out _);
-                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] 🗑️ Partie {gameId} supprimée (plus de joueurs ni de spectateurs)");
                 }
-                listGames();
                 return Task.FromResult("Left game successfully");
             }
             else
@@ -133,7 +109,6 @@ public class GameService
             {
                 GameId = gameId,
                 BoardSize = game.Board.Size,
-                // currentPlayer can be null while waiting for players; avoid NRE
                 currentPlayer = game.currentPlayer != null ? game.currentPlayer.Id.ToString() : string.Empty,
                 Board = game.Board.Grid,
                 GameState = game.State.ToString(),
@@ -150,7 +125,7 @@ public class GameService
         return Task.FromResult<GetGameStateResponse?>(null);
     }
 
-public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bool isPass)
+    public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bool isPass)
     {
         if (_games.TryGetValue(gameId, out var game))
         {
@@ -184,10 +159,7 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
                     return Task.FromResult<object>(new WrongMoveResponse { Reason = "Ko rule violation" });
                 }
                 
-                // Place the stone
                 game.Board.Set(point.Value, player.Color);
-                // Check score 
-                Console.WriteLine($"Scores - Black: {game.Board.blackScore}, White: {game.Board.whiteScore}");
             }
             else
             {
@@ -224,7 +196,6 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
             int blackScore = blackStones + game.Board.blackScore;
             int whiteScore = whiteStones + game.Board.whiteScore;
             
-            Console.WriteLine($"Player {player.Id} made a move in game {gameId} at ({x}, {y}), Pass: {isPass}");
             return Task.FromResult<object>(new GetGameStateResponse
             {
                 GameId = gameId,
@@ -249,5 +220,3 @@ public Task<object> MakeMoveAsync(string gameId, Player player, int x, int y, bo
         return  await Task.FromResult(_games.Values.ToList());
     }
 }
-
-

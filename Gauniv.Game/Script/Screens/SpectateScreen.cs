@@ -12,7 +12,6 @@ public partial class SpectateScreen : Control
 	[Export] public string SpectatorLabelPath = "Ui/SpectatorLabel";
 	[Export] public float RefreshIntervalSeconds = 2.0f;
 
-	// Popup de fin de partie
 	[Export] public string GameOverPopupPath = "GameOverLayer";
 	[Export] public string GameOverTitleLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/TitleLabel";
 	[Export] public string GameOverScoreLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/ScoreLabel";
@@ -25,7 +24,6 @@ public partial class SpectateScreen : Control
 	private Label _spectatorLabel;
 	private Timer _refreshTimer;
 
-	// Popup de fin de partie
 	private CanvasLayer _gameOverPopup;
 	private Label _gameOverTitleLabel;
 	private Label _gameOverScoreLabel;
@@ -43,7 +41,6 @@ public partial class SpectateScreen : Control
 		if (_board == null)
 			GD.PrintErr("[SpectateScreen] BoardController introuvable, renseigne BoardControllerPath.");
 
-		// Récupérer les labels
 		_gameStateLabel = GetNodeOrNull<Label>(GameStateLabelPath);
 		_playerCountLabel = GetNodeOrNull<Label>(PlayerCountLabelPath);
 		_spectatorCountLabel = GetNodeOrNull<Label>(SpectatorCountLabelPath);
@@ -58,7 +55,6 @@ public partial class SpectateScreen : Control
 		if (_spectatorLabel == null)
 			GD.PrintErr("[SpectateScreen] SpectatorLabel introuvable.");
 
-		// Popup de fin de partie
 		_gameOverPopup = GetNodeOrNull<CanvasLayer>(GameOverPopupPath);
 		_gameOverTitleLabel = GetNodeOrNull<Label>(GameOverTitleLabelPath);
 		_gameOverScoreLabel = GetNodeOrNull<Label>(GameOverScoreLabelPath);
@@ -79,23 +75,19 @@ public partial class SpectateScreen : Control
 		{
 			_net.GameStateReceived += OnGameStateReceived;
 
-			// Passer le NetworkClient au BoardController et le mettre en mode spectateur
 			if (_board != null)
 			{
 				_board.SetNetworkClient(_net);
 				_board.SetSpectatorMode(true);
 			}
 
-			// Mettre à jour les labels avec les infos actuelles
 			UpdateLabels();
 
-			// Si on connaît déjà la game courante, on demande son état
 			if (!string.IsNullOrEmpty(_net.CurrentGameId))
 			{
 				_ = _net.SendGetGameState(_net.CurrentGameId);
 			}
 
-			// Démarrer le timer de refresh automatique
 			StartRefreshTimer();
 		}
 	}
@@ -110,7 +102,7 @@ public partial class SpectateScreen : Control
 
 	public override void _Process(double delta)
 	{
-		// S'assurer que le plateau reste centré à chaque frame
+
 		if (_boardRootNode != null)
 		{
 			Vector2 currentViewportSize = GetViewportRect().Size;
@@ -178,16 +170,14 @@ public partial class SpectateScreen : Control
 
 	public void OnBackPressed()
 	{
-		// Déconnecter le spectateur de la partie
+
 		if (!string.IsNullOrEmpty(_net?.CurrentGameId))
 		{
 			_ = _net.SendLeaveGame(_net.CurrentGameId);
 		}
 
-		// Réinitialiser l'ID de la partie courante
 		_net?.ClearCurrentGameId();
 
-		// Retour au lobby
 		_screenManager.GoTo("res://Scenes/Screens/lobby_screen.tscn");
 	}
 
@@ -201,7 +191,6 @@ public partial class SpectateScreen : Control
 		
 		GD.Print($"[SpectateScreen] OnGameStateReceived: ServerState={state.GameState}, MappedState={gameStateStatus}");
 
-		// Conversion GetGameStateResponse -> BoardController.GameState
 		var localState = new BoardController.GameState
 		{
 			BoardSize = state.BoardSize,
@@ -221,10 +210,8 @@ public partial class SpectateScreen : Control
 
 		_board.ApplyGameState(localState);
 
-		// Mettre à jour les labels
 		UpdateLabels();
 
-		// Vérifier si la partie est terminée et afficher le popup
 		if (gameStateStatus == "Finished" && !_gameOverShown)
 		{
 			ShowGameOverPopup(state);
@@ -259,7 +246,6 @@ public partial class SpectateScreen : Control
 	{
 		if (_gameOverPopup == null) return;
 
-		// Déterminer le résultat
 		string resultText;
 		if (string.IsNullOrEmpty(state.WinnerId))
 		{
@@ -270,7 +256,6 @@ public partial class SpectateScreen : Control
 			resultText = "Partie Terminée !";
 		}
 
-		// Afficher le titre et les scores
 		if (_gameOverTitleLabel != null)
 			_gameOverTitleLabel.Text = resultText;
 
@@ -279,18 +264,15 @@ public partial class SpectateScreen : Control
 			_gameOverScoreLabel.Text = $"Score Final:\nNoir: {state.BlackScore}\nBlanc: {state.WhiteScore}";
 		}
 
-		// Afficher le popup
 		_gameOverPopup.Visible = true;
-		GD.Print($"[SpectateScreen] Affichage du popup de fin de partie: {resultText}");
 	}
 
 	private void OnGameOverBackPressed()
 	{
-		// Masquer le popup
+
 		if (_gameOverPopup != null)
 			_gameOverPopup.Visible = false;
 
-		// Retourner au lobby
 		OnBackPressed();
 	}
 }
