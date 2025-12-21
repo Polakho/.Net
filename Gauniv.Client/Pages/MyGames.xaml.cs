@@ -27,6 +27,7 @@
 // Please respect the team's standards for any future contribution
 #endregion
 using Gauniv.Client.ViewModel;
+using System.Collections.ObjectModel;
 
 namespace Gauniv.Client.Pages;
 
@@ -35,6 +36,7 @@ public partial class MyGames : ContentPage
 	public MyGames()
 	{
 		InitializeComponent();
+        BindingContext = new MyGamesViewModel();
 	}
 
 	protected override async void OnAppearing()
@@ -42,7 +44,24 @@ public partial class MyGames : ContentPage
 		base.OnAppearing();
 		if (BindingContext is MyGamesViewModel vm)
 		{
-			await vm.LoadGamesCommand.ExecuteAsync(null);	
+			await vm.InitializeAsync();
 		}
 	}
+
+    private void OnMyGamesTagSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (BindingContext is MyGamesViewModel vm)
+            {
+                var selected = e.CurrentSelection?.OfType<Gauniv.Client.Models.Tags>()?.ToList() ?? new List<Gauniv.Client.Models.Tags>();
+                System.Diagnostics.Debug.WriteLine($"[MyGames.xaml.cs] OnMyGamesTagSelectionChanged count={selected.Count}");
+                vm.SelectedTags = new ObservableCollection<Gauniv.Client.Models.Tags>(selected);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[MyGames.xaml.cs] OnMyGamesTagSelectionChanged error: {ex}");
+        }
+    }
 }

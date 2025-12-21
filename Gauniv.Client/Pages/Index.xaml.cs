@@ -26,13 +26,43 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
+using Gauniv.Client.ViewModel;
+using System.Collections.ObjectModel;
 namespace Gauniv.Client.Pages;
 
 public partial class Index : ContentPage
 {
-	public Index()
-	{
-		InitializeComponent();
-		BindingContext = new Gauniv.Client.ViewModel.IndexViewModel();
-	}
+    public Index()
+    {
+        InitializeComponent();
+        BindingContext = new IndexViewModel();
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+		System.Diagnostics.Debug.WriteLine(">>> INDEX OnAppearing <<<");
+        if (BindingContext is IndexViewModel vm)
+        {
+            await vm.InitializeAsync();
+        }
+    }
+
+    // Forward tag selection changes from XAML to the ViewModel
+    private void OnTagSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (BindingContext is IndexViewModel vm)
+            {
+                var selected = e.CurrentSelection?.OfType<Gauniv.Client.Models.Tags>()?.ToList() ?? new List<Gauniv.Client.Models.Tags>();
+                System.Diagnostics.Debug.WriteLine($"[Index.xaml.cs] OnTagSelectionChanged count={selected.Count}");
+                vm.SelectedTags = new ObservableCollection<Gauniv.Client.Models.Tags>(selected);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Index.xaml.cs] OnTagSelectionChanged error: {ex}");
+        }
+    }
 }
