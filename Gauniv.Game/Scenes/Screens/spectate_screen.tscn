@@ -1,28 +1,231 @@
-[gd_scene load_steps=2 format=3 uid="uid://dml6k7if1na5f"]
+[gd_scene load_steps=11 format=3 uid="uid://dml6k7if1na5f"]
 
-[ext_resource type="Script" uid="uid://be4b56asp73x0" path="res://Script/Screens/SpectateScreen.cs" id="1_ak40o"]
+[ext_resource type="Script" path="res://Script/Screens/SpectateScreen.cs" id="1_ak40o"]
+[ext_resource type="Script" uid="uid://df76hnhgfkd63" path="res://Script/App/BoardController.cs" id="2_052ei"]
+[ext_resource type="Texture2D" uid="uid://b2np807x23p05" path="res://background.png" id="2_cxgpp"]
+[ext_resource type="Texture2D" uid="uid://bx8radcxn5vxc" path="res://stone_black.png" id="3_31k75"]
+[ext_resource type="Texture2D" uid="uid://cs6ej0yxy0wkx" path="res://board.png" id="3_052ei"]
+[ext_resource type="Texture2D" uid="uid://xlicryfw1tcj" path="res://stone_white.png" id="4_i8i8u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_InfoPanel"]
+bg_color = Color(0.95, 0.95, 0.97, 0.95)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BackButton"]
+bg_color = Color(0.5, 0.5, 0.6, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BackButtonHover"]
+bg_color = Color(0.55, 0.55, 0.65, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_GameOverPanel"]
+bg_color = Color(0.95, 0.95, 0.97, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 20
+shadow_offset = Vector2(0, 8)
 
 [node name="SpectateScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ak40o")
+BoardControllerPath = NodePath("BoardRoot/BoardController")
+RefreshIntervalSeconds = 2.0
 
-[node name="Label" type="Label" parent="."]
+[node name="BoardRoot" type="Node2D" parent="."]
+
+[node name="BoardController" type="Node2D" parent="BoardRoot"]
+script = ExtResource("2_052ei")
+StonesContainerPath = NodePath("../Stones")
+InfoLabelPath = NodePath("../../Ui/InfoPanel/InfoMargin/InfoLayout/InfoLabel")
+GridSpritePath = NodePath("../GridSprite")
+BlackStoneTexture = ExtResource("3_31k75")
+WhiteStoneTexture = ExtResource("4_i8i8u")
+
+[node name="Background" type="Sprite2D" parent="BoardRoot"]
+texture = ExtResource("2_cxgpp")
+centered = false
+
+[node name="GridSprite" type="Sprite2D" parent="BoardRoot"]
+texture = ExtResource("3_052ei")
+centered = false
+offset = Vector2(64, 64)
+
+[node name="Stones" type="Node2D" parent="BoardRoot"]
+
+[node name="Ui" type="Control" parent="."]
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InfoPanel" type="PanelContainer" parent="Ui"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Spectate"
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 335.0
+offset_bottom = 285.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_InfoPanel")
 
-[node name="BackButton" type="Button" parent="."]
-layout_mode = 0
-offset_left = 11.0
-offset_top = 25.0
-offset_right = 56.0
-offset_bottom = 56.0
-text = "Back"
+[node name="InfoMargin" type="MarginContainer" parent="Ui/InfoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
-[connection signal="pressed" from="BackButton" to="." method="OnBackPressed"]
+[node name="InfoLayout" type="VBoxContainer" parent="Ui/InfoPanel/InfoMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+
+[node name="InfoLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.5, 0.9, 1)
+theme_override_font_sizes/font_size = 24
+text = "👁 Mode Spectateur"
+
+[node name="Spacer1" type="Control" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
+
+[node name="GameStateLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "📊 État: Chargement..."
+
+[node name="PlayerCountLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "👥 Joueurs: 0/2"
+
+[node name="SpectatorCountLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "👁 Spectateurs: 0"
+
+[node name="SpectatorLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.5, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "Vous êtes spectateur"
+
+[node name="GameOverLayer" type="CanvasLayer" parent="."]
+layer = 100
+visible = false
+
+[node name="GameOverPopup" type="Control" parent="GameOverLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="GameOverLayer/GameOverPopup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.1, 0.15, 0.85)
+
+[node name="Panel" type="PanelContainer" parent="GameOverLayer/GameOverPopup"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_GameOverPanel")
+
+[node name="PanelMargin" type="MarginContainer" parent="GameOverLayer/GameOverPopup/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="VBox" type="VBoxContainer" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.5, 0.9, 1)
+theme_override_font_sizes/font_size = 38
+text = "🏁 Partie Terminée !"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 22
+text = "Score Final:
+⚫ Noir: 0
+⚪ Blanc: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BackButton" type="Button" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox"]
+custom_minimum_size = Vector2(250, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
+text = "← Retour au lobby"
+
+[node name="UiLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="BackButton" type="Button" parent="UiLayer"]
+offset_left = 15.0
+offset_top = 300.0
+offset_right = 135.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
+text = "← Quitter"
+
+[connection signal="pressed" from="UiLayer/BackButton" to="." method="OnBackPressed"]
+

@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using MessagePack;
 
 public partial class GameServerClient : Node
@@ -13,17 +12,29 @@ public partial class GameServerClient : Node
 	private TcpClient _client;
 	private NetworkStream _stream;
 
-	// État dernier connu
 	public GetListGamesResponse LastGameList { get; private set; }
 	public string CurrentGameId { get; private set; }
 	public string LastJoinResult { get; private set; }
+	public string CurrentGameState { get; private set; }
+	public int CurrentPlayerCount { get; private set; }
+	public int CurrentSpectatorCount { get; private set; }
 
-	// Events UI (toujours invoqués depuis le thread principal)
 	public event Action<GetListGamesResponse> GameListReceived;
 	public event Action<string> GameCreated;
 	public event Action<string> JoinResultReceived;
 	public event Action<GetGameStateResponse> GameStateReceived;
 	public event Action<string> WrongMoveReceived;
+
+	public string LocalPlayerId { get; private set; }
+	public StoneColor? LocalPlayerColor { get; private set; }
+	public bool IsLocalPlayersTurn { get; private set; }
+	public bool IsJoiningAsSpectator { get; set; }
+	private bool _hasInferredColor;
+
+	public void ClearCurrentGameId()
+	{
+		CurrentGameId = string.Empty;
+	}
 
 	public override async void _Ready()
 	{
@@ -38,7 +49,6 @@ public partial class GameServerClient : Node
 
 		GD.Print("Connected to GameServer");
 
-		// Démarrage de la boucle de lecture en tâche de fond
 		_ = Task.Run(ReadLoopAsync);
 
 		await SendSetPlayerName("GodotClient");
@@ -73,34 +83,46 @@ public partial class GameServerClient : Node
 	
 	private void HandleMessage(MessageGeneric message)
 	{
-		GD.Print($"[NET] Received type = {message.Type}");
-
 		switch (message.Type)
 		{
 			case MessageType.SetPlayerName:
 			{
 				var data = MessagePackSerializer.Deserialize<SetPlayerNameRequest>(message.Data);
-				GD.Print($"[NET] Server name is: {data.Name}");
 				break;
 			}
 			case MessageType.CreateGame:
 			{
-				var dict = MessagePackSerializer.Deserialize<Dictionary<string, string>>(message.Data);
-				if (dict.TryGetValue("GameId", out var gameId))
+				var response = MessagePackSerializer.Deserialize<JoinGameResponse>(message.Data);
+				if (response != null && !string.IsNullOrEmpty(response.GameId))
 				{
-					GD.Print($"[NET] Game created with id: {gameId}");
-					CurrentGameId = gameId;
-					CallDeferred(nameof(EmitGameCreated));  // ← UI plus tard
+					CurrentGameId = response.GameId;
+					LastJoinResult = response.Result;
+					LocalPlayerId = response.YourPlayerId;
+					LocalPlayerColor = null;
+					IsLocalPlayersTurn = false;
+					_hasInferredColor = false;
+					CallDeferred(nameof(EmitGameCreated));
 				}
 				break;
 			}
 			case MessageType.JoinGame:
 			{
-				var dict = MessagePackSerializer.Deserialize<Dictionary<string, string>>(message.Data);
-				if (dict.TryGetValue("Result", out var result))
+				var response = MessagePackSerializer.Deserialize<JoinGameResponse>(message.Data);
+				if (response != null)
 				{
-					GD.Print($"[NET] Join result: {result}");
-					LastJoinResult = result;
+					CurrentGameId = response.GameId;
+					LastJoinResult = response.Result;
+					LocalPlayerId = response.YourPlayerId;
+					LocalPlayerColor = null;
+					IsLocalPlayersTurn = false;
+					_hasInferredColor = false;
+
+					if (response.GameState != null)
+					{
+						_lastGameState = response.GameState;
+						UpdateGameStateInfo(response.GameState);
+						MaybeInferLocalColorAndTurn(response.GameState);
+					}
 					CallDeferred(nameof(EmitJoinResult));
 				}
 				break;
@@ -109,33 +131,51 @@ public partial class GameServerClient : Node
 			{
 				var list = MessagePackSerializer.Deserialize<GetListGamesResponse>(message.Data);
 				LastGameList = list;
-				GD.Print($"[NET] Received {list.Games.Count} games");
 				CallDeferred(nameof(EmitGameListReceived));
 				break;
 			}
 			case MessageType.GameState:
 			{
 				var state = MessagePackSerializer.Deserialize<GetGameStateResponse>(message.Data);
-				GD.Print($"[NET] GameState for {state.GameId}, size={state.BoardSize}, current={state.currentPlayer}");
 				CurrentGameId = state.GameId;
-				_lastGameState = state;       // champ à ajouter si tu veux
+				_lastGameState = state;
+				UpdateGameStateInfo(state);
+				MaybeInferLocalColorAndTurn(state);
 				CallDeferred(nameof(EmitGameStateReceived));
 				break;
 			}
 			case MessageType.WrongMove:
 			{
 				var wrong = MessagePackSerializer.Deserialize<WrongMoveResponse>(message.Data);
-				GD.Print($"[NET] Wrong move: {wrong.Reason}");
-				_lastWrongReason = wrong.Reason;   // champ string à ajouter
+				_lastWrongReason = wrong.Reason;
 				CallDeferred(nameof(EmitWrongMove));
 				break;
 			}
 		}
 	}
 
-	// --------------------
-	// Envois "haut niveau"
-	// --------------------
+	private void MaybeInferLocalColorAndTurn(GetGameStateResponse state)
+	{
+		if (state == null)
+			return;
+
+		if (string.IsNullOrEmpty(LocalPlayerId))
+			return;
+
+		bool isMyTurn = state.currentPlayer == LocalPlayerId;
+		IsLocalPlayersTurn = isMyTurn;
+
+		if (_hasInferredColor)
+			return;
+
+		if (state.PlayerCount >= 2 && !string.IsNullOrEmpty(state.currentPlayer))
+		{
+			LocalPlayerColor = isMyTurn ? StoneColor.Black : StoneColor.White;
+			_hasInferredColor = true;
+			GD.Print($"[NET] LocalPlayerColor déduite: {LocalPlayerColor} (LocalPlayerId={LocalPlayerId}, currentPlayer={state.currentPlayer})");
+		}
+	}
+
 	public async Task JoinGame(string gameId, bool asSpectator)
 	{
 		var request = new JoinGameRequest
@@ -164,9 +204,15 @@ public partial class GameServerClient : Node
 		await Send(MessageType.JoinGame, payload);
 	}
 
+	public async Task SendLeaveGame(string gameId)
+	{
+		var payload = new LeaveGameRequest { GameId = gameId };
+		await Send(MessageType.LeaveGame, payload);
+	}
+
 	public async Task SendGetGameList()
 	{
-		// le serveur s’en fiche des données, on envoie juste une string
+
 		await Send(MessageType.GetGameList, "hello");
 	}
 
@@ -181,10 +227,6 @@ public partial class GameServerClient : Node
 		var payload = new MakeMoveRequest { GameId = gameId, X = x, Y = y, IsPass = isPass };
 		await Send(MessageType.MakeMove, payload);
 	}
-
-	// --------------------
-	// Envoi générique
-	// --------------------
 
 	private async Task Send<T>(string type, T payload)
 	{
@@ -202,8 +244,6 @@ public partial class GameServerClient : Node
 
 		byte[] data = MessagePackSerializer.Serialize(msg);
 		await _stream.WriteAsync(data, 0, data.Length);
-
-		GD.Print($"[NET] Sent {type}");
 	}
 	
 	private GetGameStateResponse _lastGameState;
@@ -234,5 +274,21 @@ public partial class GameServerClient : Node
 	{
 		if (!string.IsNullOrEmpty(_lastWrongReason))
 			WrongMoveReceived?.Invoke(_lastWrongReason);
+	}
+
+	private void UpdateGameStateInfo(GetGameStateResponse state)
+	{
+		if (state != null)
+		{
+			CurrentGameState = state.GameState ?? "En cours";
+			CurrentPlayerCount = state.PlayerCount;
+			CurrentSpectatorCount = state.SpectatorCount;
+		}
+		else
+		{
+			CurrentGameState = "En cours";
+			CurrentPlayerCount = 0;
+			CurrentSpectatorCount = 0;
+		}
 	}
 }

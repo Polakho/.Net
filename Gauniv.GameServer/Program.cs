@@ -6,8 +6,13 @@ namespace Gauniv.GameServer
     {
         static async Task Main(string[] args)
         {
+            Console.WriteLine($"========================================");
+            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] DÉMARRAGE DU SERVEUR GAUNIV GAME SERVER");
+            Console.WriteLine($"========================================");
+            
             var server = new Server(5000);
             _ = Task.Run(() => server.StartAsync());
+            /*
             await Task.Delay(1000);
 
             var GameClient = new GameClient("1");
@@ -89,7 +94,10 @@ namespace Gauniv.GameServer
             await Task.Delay(3000);
 
             testCaptures(gameId, GameClient, GameClient2);
+            */
             
+            Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Serveur en attente de connexions...");
+            Console.WriteLine($"Appuyez sur Ctrl+C pour arrêter le serveur");
             await Task.Delay(-1);
         }
 

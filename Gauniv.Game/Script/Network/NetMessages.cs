@@ -1,13 +1,12 @@
 using MessagePack;
 using System.Collections.Generic;
-using System;
 
-// Même enum que coté serveur
 public static class MessageType
 {
 	public const string SetPlayerName = "SetPlayerName";
 	public const string CreateGame    = "CreateGame";
 	public const string JoinGame      = "JoinGame";
+	public const string LeaveGame     = "LeaveGame";
 	public const string GetGameState  = "GetGameState";
 	public const string GameState     = "GameState";
 	public const string MakeMove      = "MakeMove";
@@ -43,6 +42,12 @@ public class JoinGameRequest
 }
 
 [MessagePackObject]
+public class LeaveGameRequest
+{
+	[Key(0)] public string GameId { get; set; }
+}
+
+[MessagePackObject]
 public class GetGameStateRequest
 {
 	[Key(0)] public string GameId { get; set; }
@@ -55,9 +60,14 @@ public class GetGameStateResponse
 	[Key(1)] public int BoardSize { get; set; }
 	[Key(2)] public string currentPlayer { get; set; }
 	[Key(3)] public StoneColor?[,] Board { get; set; }
+	[Key(4)] public string GameState { get; set; }
+	[Key(5)] public int PlayerCount { get; set; }
+	[Key(6)] public string WinnerId { get; set; }
+	[Key(7)] public int BlackScore { get; set; }
+	[Key(8)] public int WhiteScore { get; set; }
+	[Key(9)] public int SpectatorCount { get; set; }
 }
 
-// Enum local identique à celui du serveur
 public enum StoneColor
 {
 	Black = 0,
@@ -87,6 +97,15 @@ public class PlayerInfo
 	[Key(0)] public string Id { get; set; }
 	[Key(1)] public string Name { get; set; }
 	[Key(2)] public bool IsSpectator { get; set; }
+}
+
+[MessagePackObject]
+public class JoinGameResponse
+{
+	[Key(0)] public string GameId { get; set; }
+	[Key(1)] public string Result { get; set; }
+	[Key(2)] public GetGameStateResponse GameState { get; set; }
+	[Key(3)] public string YourPlayerId { get; set; }
 }
 
 [MessagePackObject]

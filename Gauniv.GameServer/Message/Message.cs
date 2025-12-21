@@ -1,4 +1,4 @@
-﻿using Gauniv.GameServer.Model;
+﻿﻿﻿using Gauniv.GameServer.Model;
 using MessagePack;
 
 namespace Gauniv.GameServer.Message;
@@ -69,6 +69,23 @@ public class JoinGameRequest
 }
 
 [MessagePackObject]
+public class LeaveGameRequest
+{
+    [Key(0)]
+    public string GameId { get; set; }
+}
+
+[MessagePackObject]
+public class LeaveGameResponse
+{
+    [Key(0)]
+    public string GameId { get; set; }
+    
+    [Key(1)]
+    public string Result { get; set; }
+}
+
+[MessagePackObject]
 public class JoinGameResponse
 {
     [Key(0)]
@@ -76,6 +93,12 @@ public class JoinGameResponse
     
     [Key(1)]
     public string Result { get; set; }
+    
+    [Key(2)]
+    public GetGameStateResponse GameState { get; set; }
+
+    [Key(3)]
+    public string YourPlayerId { get; set; }
 }
 
 [MessagePackObject]
@@ -99,6 +122,24 @@ public class GetGameStateResponse
     
     [Key(3)]
     public StoneColor?[,] Board { get; set; }
+
+    [Key(4)]
+    public string GameState { get; set; }
+
+    [Key(5)]
+    public int PlayerCount { get; set; }
+    
+    [Key(6)]
+    public string WinnerId { get; set; }
+    
+    [Key(7)]
+    public int BlackScore { get; set; }
+    
+    [Key(8)]
+    public int WhiteScore { get; set; }
+    
+    [Key(9)]
+    public int SpectatorCount { get; set; }
 }
 
 [MessagePackObject]

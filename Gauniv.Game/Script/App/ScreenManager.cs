@@ -8,7 +8,7 @@ public partial class ScreenManager : Control
 
 	public override void _Ready()
 	{
-		// Force ScreenManager à remplir le viewport
+
 		SetAnchorsPreset(LayoutPreset.FullRect);
 		OffsetLeft = 0;
 		OffsetTop = 0;
@@ -43,7 +43,6 @@ public partial class ScreenManager : Control
 		_current = screen;
 		AddChild(_current);
 
-		// Force l’écran à remplir ScreenManager
 		_current.SetAnchorsPreset(LayoutPreset.FullRect);
 		_current.OffsetLeft = 0;
 		_current.OffsetTop = 0;
