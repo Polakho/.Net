@@ -176,6 +176,26 @@ public partial class LobbyScreen : Control
 				_screenManager.GoTo("res://Scenes/Screens/match_screen.tscn");
 			}
 		}
+		else
+		{
+			// Afficher un message d'erreur approprié
+			string errorMessage = "Impossible de rejoindre la partie.";
+			if (result.Contains("full", StringComparison.OrdinalIgnoreCase))
+			{
+				errorMessage = "La partie est complète (2 joueurs maximum).";
+			}
+			else if (result.Contains("started", StringComparison.OrdinalIgnoreCase))
+			{
+				errorMessage = "La partie a déjà commencé.";
+			}
+			else if (result.Contains("not found", StringComparison.OrdinalIgnoreCase))
+			{
+				errorMessage = "Partie introuvable.";
+			}
+			
+			GD.PrintErr($"[LobbyScreen] Erreur de jointure: {errorMessage} (Résultat: {result})");
+			// TODO: Afficher un popup ou un label d'erreur à l'utilisateur
+		}
 	}
 
 	public async void OnRefreshPressed()

@@ -45,24 +45,32 @@ public class GameService
             {
                 game.Spectators.Add(player);
                 Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✓ {player.Name} ({player.Id}) a rejoint comme SPECTATEUR la partie {gameId}");
+                listGames();
+                return Task.FromResult("Joined game successfully");
             }
             else
             {
+                // Vérifier que la partie n'a pas déjà 2 joueurs
+                if (game.Players.Count >= 2)
+                {
+                    Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ❌ {player.Name} ({player.Id}) ne peut pas rejoindre la partie {gameId} - Partie complète (2 joueurs)");
+                    return Task.FromResult("Game is full");
+                }
+                
                 if (game.State == Game.GameState.WaitingForPlayers)
                 {
                     game.Players.Add(player);
                     game.UpdateGameState();
                     Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ✓ {player.Name} ({player.Id}) a rejoint comme JOUEUR la partie {gameId}");
+                    listGames();
+                    return Task.FromResult("Joined game successfully");
                 }
                 else
                 {
                     Console.WriteLine($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] ❌ {player.Name} ({player.Id}) ne peut pas rejoindre la partie {gameId} - État: {game.State}");
+                    return Task.FromResult("Game already started");
                 }
-                // TODO: could add logic to handle joining full/in-progress games
             }
-
-            listGames();
-            return Task.FromResult("Joined game successfully");
         }
         else
         {

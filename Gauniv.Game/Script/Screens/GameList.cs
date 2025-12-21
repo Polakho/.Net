@@ -1,4 +1,4 @@
-﻿using Godot;
+﻿﻿using Godot;
 using System;
 
 public partial class GameList : ItemList
@@ -133,7 +133,12 @@ public partial class GameList : ItemList
 			}
 			GD.Print($"[GameList] Board Size: {game.BoardSize}");
 			
-			string displayText = $"[{game.Id}] {game.Name} ({game.Players.Count} players, {game.BoardSize}x{game.BoardSize})";
+			int playerCount = game.Players?.Count ?? 0;
+			int spectatorCount = game.Spectators?.Count ?? 0;
+			string statusText = playerCount >= 2 ? "[COMPLET]" : $"[{playerCount}/2]";
+			string spectatorText = spectatorCount > 0 ? $" ({spectatorCount} spectateur{(spectatorCount > 1 ? "s" : "")})" : "";
+			string displayText = $"{statusText} {game.Name} - {game.BoardSize}x{game.BoardSize}{spectatorText}";
+			
 			AddItem(displayText);
 			GD.Print($"[GameList] ✓ Item #{itemIndex} ajouté: {displayText}");
 			GD.Print($"[GameList] ItemList contient maintenant {ItemCount} items");
