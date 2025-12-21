@@ -8,7 +8,6 @@ Licence MIT
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-Any new method must be in a different namespace than the previous ones
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions: 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. 
@@ -31,10 +30,76 @@ Please respect the team's standards for any future contribution
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:models="clr-namespace:Gauniv.Client.Models"
              x:Class="Gauniv.Client.Pages.MyGames"
              Title="MyGames"
-             x:DataType="vm:MyGamesViewModel"
-             BindingContext="{vm:MyGamesViewModel}">
-    <Label Text="List de mes jeux" />
+             x:DataType="vm:MyGamesViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <VerticalStackLayout Spacing="8" Padding="10">
+            <Label Text="Liste de mes jeux" />
+
+            <!-- Search and filters -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="8">
+                <VerticalStackLayout>
+                    <Label Text="Rechercher" FontSize="12"/>
+                    <Entry Placeholder="Rechercher par nom..." Text="{Binding SearchString}" />
+                </VerticalStackLayout>
+                <Grid Grid.Column="1" ColumnDefinitions="*, *" ColumnSpacing="8">
+                    <VerticalStackLayout>
+                        <Label Text="Prix min (€)" FontSize="12"/>
+                        <Entry Keyboard="Numeric" Placeholder="0" Text="{Binding MinPriceText}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1">
+                        <Label Text="Prix max (€)" FontSize="12"/>
+                        <Entry Keyboard="Numeric" Placeholder="∞" Text="{Binding MaxPriceText}" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Grid>
+
+            <!-- Tags filter -->
+            <VerticalStackLayout>
+                <Label Text="Filtrer par tags :" />
+                <CollectionView
+                    ItemsSource="{Binding Tags}"
+                    ItemsLayout="HorizontalList"
+                    HeightRequest="60"
+                    SelectionMode="Multiple"
+                    SelectionChanged="OnMyGamesTagSelectionChanged">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Tags">
+                            <Border Padding="12,8" Margin="4" Stroke="LightGray" StrokeThickness="1" BackgroundColor="Transparent">
+                                <Label Text="{Binding Name}" FontSize="14" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+
+            <!-- Control buttons incl. pagination -->
+            <Grid ColumnDefinitions="Auto, Auto, Auto, *" ColumnSpacing="8">
+                <Button Text="Recharger" Command="{Binding LoadGamesCommand}" IsEnabled="{Binding IsNotBusy}" />
+                <Button Text="Réinitialiser" Command="{Binding ResetFiltersCommand}" Grid.Column="1" />
+                <HorizontalStackLayout Grid.Column="2" Spacing="8" HorizontalOptions="End">
+                    <Button Text="Précédent" Command="{Binding PrevPageCommand}" IsEnabled="{Binding CanPrev}" />
+                    <Button Text="Suivant" Command="{Binding NextPageCommand}" IsEnabled="{Binding CanNext}" />
+                </HorizontalStackLayout>
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- Games list -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChanged="OnMyGameSelected">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Game">
+                    <Border Stroke="LightGray" StrokeThickness="1" Margin="5" Padding="10">
+                        <VerticalStackLayout>
+                            <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" TextColor="{StaticResource Primary}" />
+                            <Label Text="{Binding Description}" FontSize="14" TextColor="Gray" MaxLines="2" LineBreakMode="TailTruncation" />
+                            <Label Text="{Binding Price, StringFormat='Price: {0:C}'}" FontSize="14" TextColor="{StaticResource Secondary}" HorizontalOptions="End" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage>

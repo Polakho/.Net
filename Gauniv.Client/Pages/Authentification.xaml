@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
+                xmlns:models="clr-namespace:Gauniv.Client.Models"
+                xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                x:Class="Gauniv.Client.Pages.Authentification"
+                Title="Authentification"
+                x:DataType="vm:AuthentificationViewModel"
+                BindingContext="{vm:AuthentificationViewModel}">
+
+        <Label Text="Authentification Page"/>
+
+        <Grid RowDefinitions="Auto, *">
+                <StackLayout Padding="10" Spacing="10" Grid.Row="0">
+                        <Entry Placeholder="Email"
+                                Text="{Binding Email}"
+                                Keyboard="Default" />
+                        <Entry Placeholder="Password"
+                                Text="{Binding Password}"
+                                IsPassword="True" />
+                        <Button Text="Login"
+                                Command="{Binding AuthenticateCommand}"
+                                IsEnabled="{Binding IsNotBusy}" />
+                </StackLayout>
+        </Grid>
+</ContentPage>

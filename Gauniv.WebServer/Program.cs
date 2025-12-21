@@ -41,6 +41,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.OpenApi;
 using System.Globalization;
 
 
@@ -95,6 +96,19 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 });
 builder.Services.AddOpenApi(options =>
 {
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Servers.Clear();
+
+        document.Servers.Add(new OpenApiServer
+        {
+            Url = "/",
+            Description = "Reverse-proxy (local / nginx / zrok..)"
+        });
+
+        return Task.CompletedTask;
+    });
+
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 });
 builder.Services.AddRazorPages();

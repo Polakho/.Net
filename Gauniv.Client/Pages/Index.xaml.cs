@@ -26,12 +26,67 @@
 // 
 // Please respect the team's standards for any future contribution
 #endregion
+using Gauniv.Client.ViewModel;
+using Gauniv.Client.Models;
+using System.Collections.ObjectModel;
+
 namespace Gauniv.Client.Pages;
 
 public partial class Index : ContentPage
 {
-	public Index()
-	{
-		InitializeComponent();
-	}
+    public Index()
+    {
+        InitializeComponent();
+        BindingContext = new IndexViewModel();
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+		System.Diagnostics.Debug.WriteLine(">>> INDEX OnAppearing <<<");
+        if (BindingContext is IndexViewModel vm)
+        {
+            await vm.InitializeAsync();
+        }
+    }
+
+    // Forward tag selection changes from XAML to the ViewModel
+    private void OnTagSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            if (BindingContext is IndexViewModel vm)
+            {
+                var selected = e.CurrentSelection?.OfType<Gauniv.Client.Models.Tags>()?.ToList() ?? new List<Gauniv.Client.Models.Tags>();
+                System.Diagnostics.Debug.WriteLine($"[Index.xaml.cs] OnTagSelectionChanged count={selected.Count}");
+                vm.SelectedTags = new ObservableCollection<Gauniv.Client.Models.Tags>(selected);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Index.xaml.cs] OnTagSelectionChanged error: {ex}");
+        }
+    }
+
+    private async void OnGameSelected(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            var game = e.CurrentSelection?.OfType<Game>()?.FirstOrDefault();
+            if (game == null) return;
+
+            var vm = new GameDetailsViewModel();
+            vm.SetGame(game);
+            await vm.InitializeAsync();
+            var page = new GameDetails { BindingContext = vm };
+            await Navigation.PushAsync(page);
+
+            // clear selection to allow reselecting the same item later
+            (sender as CollectionView)!.SelectedItem = null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Index.xaml.cs] OnGameSelected error: {ex}");
+        }
+    }
 }

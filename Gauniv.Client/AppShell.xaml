@@ -24,6 +24,10 @@
                 Route="profile">
         <ShellContent ContentTemplate="{DataTemplate local:Profile}" />
     </FlyoutItem>
+    <FlyoutItem Title="Authentification"
+                Route="authentification">
+        <ShellContent ContentTemplate="{DataTemplate local:Authentification}" />
+    </FlyoutItem>
     <FlyoutItem Title="My Games"
                 Route="mygames">
         <FlyoutItem.Style>

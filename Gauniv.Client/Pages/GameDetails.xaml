@@ -8,7 +8,6 @@ Licence MIT
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-Any new method must be in a different namespace than the previous ones
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions: 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. 
@@ -30,17 +29,40 @@ Please respect the team's standards for any future contribution
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Gauniv.Client.ViewModel"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:models="clr-namespace:Gauniv.Client.Models"
              x:Class="Gauniv.Client.Pages.GameDetails"
-             Title="GameDetails"
-             BindingContext="{vm:GameDetailsViewModel}"
+             Title="Détails du jeu"
              x:DataType="vm:GameDetailsViewModel">
-    <Label Text="Game details" />
-    <!-- 
-    On veut afficher le detail d'un jeu: nom, description
-    si il est possédé
-    - si oui
-        si il est en cours de téléchargement, si il est en cours de jeu, si il est installé
-    - si non le prix et la possibilité d'achat
-    -->
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="{Binding Name}" FontSize="24" FontAttributes="Bold" />
+            <Label Text="{Binding Description}" FontSize="14" TextColor="Gray" />
+
+            <Label Text="{Binding Price, StringFormat='Prix: {0:C}'}" FontSize="16" TextColor="{StaticResource Secondary}" />
+
+            <Label Text="Tags" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding Tags}" ItemsLayout="HorizontalList" HeightRequest="60">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Tags">
+                        <Border Padding="10,6" Margin="4" Stroke="LightGray" StrokeThickness="1" BackgroundColor="Transparent">
+                            <Label Text="{Binding Name}" />
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Purchase / download actions -->
+            <Grid ColumnDefinitions="Auto,Auto,Auto" IsVisible="{Binding IsAuthenticated}" Padding="0,12,0,0" ColumnSpacing="8">
+                <Button Text="Acheter" Command="{Binding BuyCommand}" IsVisible="{Binding ShowBuy}" />
+                <Button Text="Télécharger" Grid.Column="1" Command="{Binding DownloadCommand}" IsVisible="{Binding ShowDownload}" />
+                <Button Text="Supprimer" Grid.Column="2" Command="{Binding DeleteCommand}" IsVisible="{Binding ShowDelete}" />
+            </Grid>
+
+            <!-- Launch action when downloaded -->
+            <Button Text="{Binding LaunchText}" Command="{Binding LaunchCommand}" IsVisible="{Binding ShowLaunch}" />
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
