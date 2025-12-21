@@ -19,6 +19,8 @@ services:
           #- "38651:443"
         depends_on:
           - postgres_primary
+        volumes:
+          - ./Gauniv.WebServer/BinaryFilesGames:/app/BinaryFilesGames:rw
     nginx:
         image: nginx:latest
         volumes:

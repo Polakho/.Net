@@ -30,7 +30,20 @@ namespace Gauniv.Client.ViewModel
         [ObservableProperty] private bool _IsLoading;
 
         public bool ShowBuy => IsAuthenticated && !IsOwned;
-        public bool ShowDownload => IsAuthenticated && IsOwned;
+        public bool ShowDownload => IsAuthenticated && IsOwned && !IsDownloaded;
+
+        [ObservableProperty] private bool _isDownloaded;
+        partial void OnIsDownloadedChanged(bool value)
+        {
+            OnPropertyChanged(nameof(ShowDelete));
+            OnPropertyChanged(nameof(ShowLaunch));
+            OnPropertyChanged(nameof(ShowDownload));
+        }
+
+        public bool ShowDelete => IsDownloaded;
+        public bool ShowLaunch => IsDownloaded;
+
+        [ObservableProperty] private string _launchText = "Lancer";
 
         public GameDetailsViewModel()
         {
@@ -55,7 +68,6 @@ namespace Gauniv.Client.ViewModel
                 foreach (var t in game.Tags)
                     Tags.Add(t);
             }
-            // Ensure visibility reflects current state
             OnPropertyChanged(nameof(ShowBuy));
             OnPropertyChanged(nameof(ShowDownload));
         }
@@ -65,6 +77,8 @@ namespace Gauniv.Client.ViewModel
             if (!IsAuthenticated)
             {
                 IsOwned = false;
+                IsDownloaded = false;
+                LaunchText = "Lancer";
                 OnPropertyChanged(nameof(ShowBuy));
                 OnPropertyChanged(nameof(ShowDownload));
                 return;
@@ -73,6 +87,8 @@ namespace Gauniv.Client.ViewModel
             {
                 IsLoading = true;
                 IsOwned = await _service.IsGameOwnedAsync(Id);
+                IsDownloaded = _service.IsGameDownloaded(Id);
+                LaunchText = "Lancer";
             }
             finally
             {
@@ -98,6 +114,60 @@ namespace Gauniv.Client.ViewModel
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task Download()
+        {
+            if (!IsAuthenticated) return;
+            IsLoading = true;
+            var path = await _service.DownloadGameAsync(Id);
+            IsLoading = false;
+            IsDownloaded = path != null;
+        }
+
+        [RelayCommand]
+        private void Delete()
+        {
+            if (_service.DeleteDownloadedGame(Id))
+            {
+                IsDownloaded = false;
+                LaunchText = "Lancer";
+            }
+        }
+
+        [RelayCommand]
+        private void Launch()
+        {
+            var path = _service.GetDownloadedPath(Id);
+            if (string.IsNullOrEmpty(path)) return;
+
+            var isWindows = OperatingSystem.IsWindows();
+            var isExe = System.IO.Path.GetExtension(path).Equals(".exe", StringComparison.OrdinalIgnoreCase);
+            if (!isWindows || !isExe)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Launch] Not supported on this platform or file type. isWindows={isWindows}, isExe={isExe}");
+                return;
+            }
+
+            try
+            {
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = path,
+                        UseShellExecute = true,
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(path) ?? NetworkService.Instance.InstallDirectory
+                    }
+                };
+                process.Start();
+                // Keep button text as "Lancer"; no stop logic
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Launch error: {ex}");
             }
         }
     }

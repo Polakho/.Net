@@ -33,10 +33,13 @@ Please respect the team's standards for any future contribution
              x:Class="Gauniv.Client.Pages.Profile"
              Title="Profile"
              BindingContext="{vm:ProfileViewModel}">
-    <VerticalStackLayout>
-        <Label Text="Profile" />
+    <VerticalStackLayout Padding="16" Spacing="12">
+        <Label Text="Profil" FontSize="20" FontAttributes="Bold" />
+
+        <Label Text="Dossier d'installation des jeux" />
+        <HorizontalStackLayout Spacing="8">
+            <Entry Text="{Binding InstallDirectory}" HorizontalOptions="FillAndExpand" />
+            <Button Text="Enregistrer" Command="{Binding SaveInstallDirCommand}" />
+        </HorizontalStackLayout>
     </VerticalStackLayout>
-    <!--
-    Ici on veut pouvoir changer sont nom d'utilisateur et son mot de passe ainsi que de dossier de sauvegarde des jeux
-    -->
 </ContentPage>

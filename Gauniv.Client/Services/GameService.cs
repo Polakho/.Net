@@ -2,8 +2,8 @@ using System.Net.Http.Json;
 using Gauniv.Client.Models;
 using Gauniv.Client.Helpers;
 using System.Net.Http.Headers;
-using System.Web;
 using Gauniv.Client.Services;
+using System.Linq;
 
 namespace Gauniv.Client.Services
 {
@@ -190,6 +190,87 @@ namespace Gauniv.Client.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"BuyGame error: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<string?> DownloadGameAsync(int gameId)
+        {
+            try
+            {
+                var client = NetworkService.Instance.HttpClient;
+                var url = $"{AppConfig.BaseUrl}/api/1.0.0/Games/DownloadBinaryFile/download?gameId={gameId}";
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                if (!string.IsNullOrEmpty(NetworkService.Instance.Token))
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", NetworkService.Instance.Token);
+                var response = await client.SendAsync(request);
+
+                System.Diagnostics.Debug.WriteLine($"[Download] URL: {url}");
+                System.Diagnostics.Debug.WriteLine($"[Download] Status: {(int)response.StatusCode} {response.ReasonPhrase}");
+                System.Diagnostics.Debug.WriteLine($"[Download] Content-Type: {response.Content.Headers.ContentType}");
+                var cdHeader = response.Content.Headers.TryGetValues("Content-Disposition", out var cdVals) ? string.Join(", ", cdVals) : "(none)";
+                System.Diagnostics.Debug.WriteLine($"[Download] Content-Disposition: {cdHeader}");
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var bytes = await response.Content.ReadAsByteArrayAsync();
+                System.Diagnostics.Debug.WriteLine($"[Download] Bytes length: {bytes.Length}");
+                var head = BitConverter.ToString(bytes.Take(16).ToArray());
+                System.Diagnostics.Debug.WriteLine($"[Download] First 16 bytes (hex): {head}");
+
+                // Validate PE signature (Windows EXE starts with 'MZ')
+                if (bytes.Length < 2 || bytes[0] != (byte)'M' || bytes[1] != (byte)'Z')
+                {
+                    System.Diagnostics.Debug.WriteLine("[Download] Invalid EXE content: missing MZ header");
+                    return null;
+                }
+
+                var dir = NetworkService.Instance.InstallDirectory;
+                Directory.CreateDirectory(dir);
+
+                var filePath = Path.Combine(dir, $"game_{gameId}.exe");
+                await File.WriteAllBytesAsync(filePath, bytes);
+                System.Diagnostics.Debug.WriteLine($"[Download] Saved to: {filePath}");
+                return filePath;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DownloadGameAsync error: {ex}");
+                return null;
+            }
+        }
+
+        public bool IsGameDownloaded(int gameId)
+        {
+            var dir = NetworkService.Instance.InstallDirectory;
+            var filePath = Path.Combine(dir, $"game_{gameId}.exe");
+            return File.Exists(filePath);
+        }
+
+        public string? GetDownloadedPath(int gameId)
+        {
+            var dir = NetworkService.Instance.InstallDirectory;
+            var filePath = Path.Combine(dir, $"game_{gameId}.exe");
+            return File.Exists(filePath) ? filePath : null;
+        }
+
+        public bool DeleteDownloadedGame(int gameId)
+        {
+            try
+            {
+                var dir = NetworkService.Instance.InstallDirectory;
+                var filePath = Path.Combine(dir, $"game_{gameId}.exe");
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DeleteDownloadedGame error: {ex}");
                 return false;
             }
         }

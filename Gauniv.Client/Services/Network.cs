@@ -40,12 +40,12 @@ using Gauniv.Client.Helpers;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Net;
+using System.IO;
 
 namespace Gauniv.Client.Services
 {
     internal partial class NetworkService : ObservableObject
     {
-
         public static NetworkService Instance { get; private set; } = new NetworkService();
         [ObservableProperty]
         private string token;
@@ -57,10 +57,15 @@ namespace Gauniv.Client.Services
             get => _isConnected;
             private set => SetProperty(ref _isConnected, value);
         }
-        
+
+        private string _installDirectory;
+        public string InstallDirectory
+        {
+            get => _installDirectory;
+            set => SetProperty(ref _installDirectory, value);
+        }
 
         public NetworkService() {
-            
             var handler = new HttpClientHandler{
                 UseCookies = true,
                 CookieContainer = new CookieContainer()
@@ -73,6 +78,9 @@ namespace Gauniv.Client.Services
             
             Token = null;
             IsConnected = false;
+            var defaultDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Gauniv", "Games");
+            try { Directory.CreateDirectory(defaultDir); } catch { }
+            InstallDirectory = defaultDir;
         }
 
         public async Task<bool> AuthenticateAsync(string username, string password, bool? useCookies = true, bool? useSessionCookies = null)
@@ -118,6 +126,5 @@ namespace Gauniv.Client.Services
         }
 
         public event Action OnConnected;
-
     }
 }

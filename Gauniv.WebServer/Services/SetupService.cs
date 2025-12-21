@@ -116,25 +116,38 @@ namespace Gauniv.WebServer.Services
                 {
                     Directory.CreateDirectory(uploadsPath);
                 }
-                
 
-              // Create games
+                // Ensure the base executable exists for all seeded games
+                var zoomItFileName = "ZoomIt.exe";
+                var zoomItFilePath = Path.Combine(uploadsPath, zoomItFileName);
+
+                if (!File.Exists(zoomItFilePath) || new FileInfo(zoomItFilePath).Length == 0)
+                {
+                    var hostEnv = scope.ServiceProvider.GetService<IHostEnvironment>();
+                    string? sourceCandidate = hostEnv != null
+                        ? Path.Combine(hostEnv.ContentRootPath, "BinaryFilesGames", zoomItFileName)
+                        : null;
+
+                    if (sourceCandidate != null && File.Exists(sourceCandidate))
+                    {
+                        File.Copy(sourceCandidate, zoomItFilePath, overwrite: true);
+                    }
+                    else
+                    {
+                        throw new FileNotFoundException($"{zoomItFileName} introuvable. Placez le fichier dans '{uploadsPath}' ou dans le dossier de contenu '{hostEnv?.ContentRootPath}\\BinaryFilesGames'.");
+                    }
+                }
+
+                // Create games using the same base executable
                 List<Game> local_games = new List<Game>();
                 for (int i = 0; i < 10; i++)
                 {
-
-                    var gameContent = $"This is the binary content of the game {i}";
-                    var gameFileName = $"text.txt";
-                    var gameFilePath = Path.Combine(uploadsPath, gameFileName);
-
-                    await File.WriteAllBytesAsync(gameFilePath, Encoding.UTF8.GetBytes(gameContent));
-
                     var local_game = new Game()
                     {
                         Name = $"Game{i}",
                         Description = $"This is the description of game {i}",
                         Price = i * 10.0,
-                        BinaryFilePath = gameFilePath,  
+                        BinaryFilePath = zoomItFilePath,
                         ImagePath = "/images/Goomba.png",
                         Tags = new List<Tags>()
                         {
@@ -158,7 +171,7 @@ namespace Gauniv.WebServer.Services
                 {
                     Name = $"Jeu RPG Aventure",
                     Description = $"Un jeu d'aventure et de rôle passionnant.",
-                    BinaryFilePath = "/BinaryFilesGames/text.txt",
+                    BinaryFilePath = zoomItFilePath,
                     Price = 29.99,
                     ImagePath = "/images/Goomba.png",
                     Tags = new List<Tags>()

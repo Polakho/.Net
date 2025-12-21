@@ -197,13 +197,11 @@ namespace Gauniv.WebServer.Api
             if (!System.IO.File.Exists(game.BinaryFilePath))
                 return NotFound("File not found");
 
-            var fileInfo = new FileInfo(game.BinaryFilePath);
-            var fileName = Path.GetFileName(game.BinaryFilePath);
             var contentType = "application/octet-stream";
-
-            Response.Headers.Add("Content-Disposition", $"attachment; filename={fileName}");
-            Response.Headers.Add("Content-Length", fileInfo.Length.ToString());
-            return PhysicalFile(game.BinaryFilePath, contentType, enableRangeProcessing: true);
+            var downloadName = Path.GetFileName(game.BinaryFilePath);
+            var result = PhysicalFile(game.BinaryFilePath, contentType, downloadName);
+            result.EnableRangeProcessing = true;
+            return result;
         }
     };
 }
