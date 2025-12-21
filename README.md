@@ -27,7 +27,17 @@ Avec i allant de 1 à 10.
 
 ## Jeu 
 
+Le jeu est un client Godot (C#) de jeu de Go, situé dans `Gauniv.Game` (projet `GoGame`). Il se connecte au serveur de jeux pour : créer une partie, rejoindre une partie à 2 joueurs, ou rejoindre en tant que spectateur.
+
+Pour le lancer, il suffit d'exécuter `Gauniv.Game/GoGame.exe` (une version Windows est déjà fournie dans le dossier) ou d'ouvrir le projet dans Godot 4.5+ et lancer la scène principale.
+
+Par défaut le jeu se connecte au serveur de jeux en TCP sur `127.0.0.1:5000`.
+
 ## Serveur de jeux
+
+Le serveur de jeux est un serveur TCP situé dans `Gauniv.GameServer`. Il gère plusieurs parties de Go (plateau, tours, coups, captures, règle du ko, score), avec 2 joueurs maximum par partie et un nombre de spectateurs illimité.
+
+Il écoute sur le port `5000`. Pour le lancer, exécuter le projet `Gauniv.GameServer` (ou lancer `Gauniv.GameServer.exe` si déjà build). Une fois démarré, le client Godot peut créer/rejoindre des parties depuis le lobby.
 
 ## OPTIONS
 
