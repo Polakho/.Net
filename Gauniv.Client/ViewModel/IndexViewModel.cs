@@ -104,18 +104,14 @@ namespace Gauniv.Client.ViewModel
                 if (_SelectedTags.Any())
                 {
                     var tagNames = _SelectedTags.Select(t => t.Name).ToList();
-                    System.Diagnostics.Debug.WriteLine($"[IndexViewModel] LoadGames with tags: {string.Join(",", tagNames)} (offset={_offset}, limit={PageSize})");
                     gameList = await _gameService.GetGamesAsync(tagNames, _offset, PageSize);
                     CanNext = await _gameService.HasNextGamesAsync(nextOffset, tagNames);
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"[IndexViewModel] LoadGames without tags (offset={_offset}, limit={PageSize})");
                     gameList = await _gameService.GetGamesAsync(_offset, PageSize);
                     CanNext = await _gameService.HasNextGamesAsync(nextOffset);
                 }
-
-                System.Diagnostics.Debug.WriteLine($"[IndexViewModel] Games received: {gameList.Count}");
                 _allGames.Clear();
                 _allGames.AddRange(gameList);
 
@@ -128,7 +124,6 @@ namespace Gauniv.Client.ViewModel
                 }
 
                 ApplyFilters();
-                System.Diagnostics.Debug.WriteLine($"[IndexViewModel] After ApplyFilters: Games displayed={_Games.Count}");
             } 
             finally
             {
@@ -160,12 +155,9 @@ namespace Gauniv.Client.ViewModel
 
         private async Task LoadTagsAsync()
         {
-            Debug.WriteLine("LoadTagsAsync appelée");
             try
             {
                 var tags = await _gameService.GetTagsAsync();
-                Debug.WriteLine($"GetTagsAsync retourné {tags?.Count() ?? 0} tags");
-
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     Tags.Clear();
@@ -173,13 +165,7 @@ namespace Gauniv.Client.ViewModel
                     {
                         Tags.Add(tag);
                     }
-                    Debug.WriteLine($"Tags ObservableCollection remplie: {Tags.Count}");
                 });
-
-                foreach (var tag in Tags)
-                {
-                    Debug.WriteLine($"Tag affiché: {tag.Id} - {tag.Name}");
-                }
             }
             catch (Exception ex)
             {
@@ -190,7 +176,6 @@ namespace Gauniv.Client.ViewModel
         [RelayCommand]
         private void ApplyFilters()
         {
-            Debug.WriteLine($"[IndexViewModel] ApplyFilters start: total={_allGames.Count}, selectedTags={_SelectedTags.Count}, search='{_SearchString}', min='{_MinPriceText}', max='{_MaxPriceText}', seeOwned={_SeeOwned}, notOwned={_NotOwned}, isAuth={IsAuthenticated}");
             IEnumerable<Game> local_query = _allGames;
 
             if (IsAuthenticated)
@@ -210,7 +195,6 @@ namespace Gauniv.Client.ViewModel
                     game.Tags != null &&
                     game.Tags.Any(t => selectedTagNames.Contains(t.Name))
                 );
-                Debug.WriteLine($"[IndexViewModel] After tag filter: count={local_query.Count()}");
             }
 
             var local_search = _SearchString;
@@ -218,26 +202,21 @@ namespace Gauniv.Client.ViewModel
             {
                 local_search = local_search.Trim();
                 local_query = local_query.Where(g => !string.IsNullOrEmpty(g.Name) && g.Name.Contains(local_search, StringComparison.OrdinalIgnoreCase));
-                Debug.WriteLine($"[IndexViewModel] After search filter: count={local_query.Count()}");
             }
 
             if (double.TryParse(_MinPriceText, out var local_min))
             {
                 local_query = local_query.Where(g => g.Price >= local_min);
-                Debug.WriteLine($"[IndexViewModel] After min price filter: count={local_query.Count()}");
             }
             if (double.TryParse(_MaxPriceText, out var local_max))
             {
                 local_query = local_query.Where(g => g.Price <= local_max);
-                Debug.WriteLine($"[IndexViewModel] After max price filter: count={local_query.Count()}");
             }
 
             var local_list = local_query.ToList();
             _Games.Clear();
             foreach (var game in local_list)
                 _Games.Add(game);
-
-            Debug.WriteLine($"[IndexViewModel] ApplyFilters end: displayed={_Games.Count}");
         }
 
         [RelayCommand]
@@ -257,7 +236,6 @@ namespace Gauniv.Client.ViewModel
             _ownedIds.Clear();
             if (!IsAuthenticated)
             {
-                Debug.WriteLine("LoadOwnedAsync: Not authenticated, skipping owned games load.");
                 return;
             }
             try
@@ -265,7 +243,6 @@ namespace Gauniv.Client.ViewModel
                 var local_owned = await _gameService.GetGamesOwnedAsync();
                 if (local_owned == null)
                 {
-                    Debug.WriteLine("LoadOwnedAsync: GetGamesOwnedAsync returned null.");
                     return;
                 }
                 foreach (var g in local_owned)
@@ -276,7 +253,6 @@ namespace Gauniv.Client.ViewModel
                     }
                     _ownedIds.Add(g.Id);
                 }
-                Debug.WriteLine($"LoadOwnedAsync: Owned IDs loaded count={_ownedIds.Count}");
             }
             catch (Exception ex)
             {
@@ -290,12 +266,7 @@ namespace Gauniv.Client.ViewModel
             var args = argsObj as SelectionChangedEventArgs;
             var selection = args?.CurrentSelection?.OfType<Tags>() ?? Enumerable.Empty<Tags>();
             var list = selection.ToList();
-            Debug.WriteLine($"[IndexViewModel] TagsSelectionChanged: currentSelectionCount={list.Count}");
-            if (list.Count > 0)
-                Debug.WriteLine("[IndexViewModel] TagsSelectionChanged: selections=" + string.Join(",", list.Select(t => t.Name)));
-
             SelectedTags = new ObservableCollection<Tags>(list);
-            Debug.WriteLine($"[IndexViewModel] SelectedTags now: {SelectedTags.Count}");
         }
 
 

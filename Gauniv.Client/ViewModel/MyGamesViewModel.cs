@@ -55,7 +55,6 @@ namespace Gauniv.Client.ViewModel
                 Tags.Clear();
                 foreach (var t in tags)
                     Tags.Add(t);
-                Debug.WriteLine($"[MyGamesViewModel] Tags loaded: {Tags.Count}");
             }
             catch (Exception ex)
             {
