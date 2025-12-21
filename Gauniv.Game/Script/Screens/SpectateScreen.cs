@@ -6,16 +6,16 @@ public partial class SpectateScreen : Control
 	private GameServerClient _net;
 
 	[Export] public NodePath BoardControllerPath;
-	[Export] public string GameStateLabelPath = "Ui/GameStateLabel";
-	[Export] public string PlayerCountLabelPath = "Ui/PlayerCountLabel";
-	[Export] public string SpectatorCountLabelPath = "Ui/SpectatorCountLabel";
-	[Export] public string SpectatorLabelPath = "Ui/SpectatorLabel";
+	[Export] public string GameStateLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/GameStateLabel";
+	[Export] public string PlayerCountLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/PlayerCountLabel";
+	[Export] public string SpectatorCountLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/SpectatorCountLabel";
+	[Export] public string SpectatorLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/SpectatorLabel";
 	[Export] public float RefreshIntervalSeconds = 2.0f;
 
 	[Export] public string GameOverPopupPath = "GameOverLayer";
-	[Export] public string GameOverTitleLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/TitleLabel";
-	[Export] public string GameOverScoreLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/ScoreLabel";
-	[Export] public string GameOverButtonPath = "GameOverLayer/GameOverPopup/Panel/VBox/BackButton";
+	[Export] public string GameOverTitleLabelPath = "GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox/TitleLabel";
+	[Export] public string GameOverScoreLabelPath = "GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox/ScoreLabel";
+	[Export] public string GameOverButtonPath = "GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox/BackButton";
 
 	private BoardController _board;
 	private Label _gameStateLabel;

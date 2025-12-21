@@ -1,10 +1,117 @@
-[gd_scene load_steps=3 format=3 uid="uid://ctv34ks22fjdb"]
+[gd_scene load_steps=14 format=3 uid="uid://ctv34ks22fjdb"]
 
 [ext_resource type="Script" path="res://Script/Screens/LobbyScreen.cs" id="1_ydnej"]
 [ext_resource type="Script" path="res://Script/Screens/GameList.cs" id="2_gameL"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ydnej"]
-bg_color = Color(0.6784314, 0.6784314, 0.6784314, 1)
+bg_color = Color(0.95, 0.95, 0.97, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 10
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_CreateButton"]
+bg_color = Color(0.2, 0.7, 0.4, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_CreateButtonHover"]
+bg_color = Color(0.25, 0.75, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_JoinButton"]
+bg_color = Color(0.2, 0.6, 0.9, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_JoinButtonHover"]
+bg_color = Color(0.25, 0.65, 0.95, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_SpectateButton"]
+bg_color = Color(0.7, 0.5, 0.9, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_SpectateButtonHover"]
+bg_color = Color(0.75, 0.55, 0.95, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_RefreshButton"]
+bg_color = Color(0.9, 0.6, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_RefreshButtonHover"]
+bg_color = Color(0.95, 0.65, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BackButton"]
+bg_color = Color(0.5, 0.5, 0.6, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BackButtonHover"]
+bg_color = Color(0.55, 0.55, 0.65, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [node name="LobbyScreen" type="Control"]
 layout_mode = 3
@@ -23,7 +130,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.6784314, 0.6784314, 0.6784314, 1)
+color = Color(0.15, 0.2, 0.3, 1)
 
 [node name="Root" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -32,6 +139,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
 
 [node name="Center" type="CenterContainer" parent="Root"]
 layout_mode = 2
@@ -49,11 +160,13 @@ theme_override_constants/margin_bottom = 24
 
 [node name="MainLayout" type="VBoxContainer" parent="Root/Center/Card/CardMargin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 20
 
 [node name="Title" type="Label" parent="Root/Center/Card/CardMargin/MainLayout"]
 layout_mode = 2
-text = "Lobby"
+theme_override_colors/font_color = Color(0.2, 0.6, 0.9, 1)
+theme_override_font_sizes/font_size = 36
+text = "🎮 Lobby"
 horizontal_alignment = 1
 
 [node name="Content" type="HBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout"]
@@ -63,55 +176,81 @@ alignment = 1
 [node name="LeftPanel" type="VBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout/Content"]
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_constants/separation = 10
 
 [node name="GamesLabel" type="Label" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
 layout_mode = 2
-text = "Games"
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 20
+text = "📋 Parties disponibles"
 
 [node name="GameList" type="ItemList" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
+custom_minimum_size = Vector2(400, 300)
 layout_mode = 2
+theme_override_font_sizes/font_size = 16
 script = ExtResource("2_gameL")
 auto_width = true
 auto_height = true
 item_count = 1
 
 [node name="Refresh" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel"]
+custom_minimum_size = Vector2(150, 50)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
-text = "Refresh"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_RefreshButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_RefreshButtonHover")
+text = "🔄 Actualiser"
 icon_alignment = 1
 vertical_icon_alignment = 2
 
 [node name="RightPanel" type="VBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout/Content"]
 layout_mode = 2
 size_flags_horizontal = 10
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
 [node name="CreateButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(180, 60)
 layout_mode = 2
-text = "Create"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_CreateButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_CreateButtonHover")
+text = "➕ Créer"
 
 [node name="JoinButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(180, 60)
 layout_mode = 2
-text = "Join"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_JoinButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_JoinButtonHover")
+text = "🎯 Rejoindre"
 
 [node name="SpectateButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(180, 60)
 layout_mode = 2
-text = "Spectate"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_SpectateButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_SpectateButtonHover")
+text = "👁 Observer"
 
 [node name="Footer" type="HBoxContainer" parent="Root/Center/Card/CardMargin/MainLayout"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="BackButton" type="Button" parent="Root/Center/Card/CardMargin/MainLayout/Footer"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(140, 50)
 layout_mode = 2
 size_flags_horizontal = 0
-text = "Back"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
+text = "← Retour"
 
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/LeftPanel/Refresh" to="." method="OnRefreshPressed"]
 [connection signal="pressed" from="Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/CreateButton" to="." method="OnCreatePressed"]

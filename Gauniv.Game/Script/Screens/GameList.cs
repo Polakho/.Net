@@ -5,6 +5,9 @@ public partial class GameList : ItemList
 {
 	private GameServerClient _net;
 
+	[Signal]
+	public delegate void GameListUpdatedEventHandler();
+
 	public void SetGameServerClient(GameServerClient net)
 	{
 		GD.Print("===== [GameList.SetGameServerClient] APPEL�E =====");
@@ -85,6 +88,7 @@ public partial class GameList : ItemList
 		{
 			GD.PrintErr("[GameList] gameList est NULL!");
 			AddItem("ERROR: gameList is null");
+			EmitSignal(SignalName.GameListUpdated);
 			return;
 		}
 
@@ -92,12 +96,14 @@ public partial class GameList : ItemList
 		{
 			GD.PrintErr("[GameList] gameList.Games est NULL!");
 			AddItem("ERROR: gameList.Games is null");
+			EmitSignal(SignalName.GameListUpdated);
 			return;
 		}
 
 		if (gameList.Games.Count == 0)
 		{
 			AddItem("No games available");
+			EmitSignal(SignalName.GameListUpdated);
 			return;
 		}
 
@@ -111,6 +117,9 @@ public partial class GameList : ItemList
 			
 			AddItem(displayText);
 		}
+		
+		// Notifier que la liste a été mise à jour
+		EmitSignal(SignalName.GameListUpdated);
 	}
 }
 

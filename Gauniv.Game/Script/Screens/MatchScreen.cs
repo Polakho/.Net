@@ -6,22 +6,22 @@ public partial class MatchScreen : Control
 	private GameServerClient _net;
 
 	[Export] public NodePath BoardControllerPath;
-	[Export] public string GameStateLabelPath = "Ui/GameStateLabel";
-	[Export] public string PlayerCountLabelPath = "Ui/PlayerCountLabel";
-	[Export] public string SpectatorCountLabelPath = "Ui/SpectatorCountLabel";
-	[Export] public string MyColorLabelPath = "Ui/MyColorLabel";
-	[Export] public string TurnLabelPath = "Ui/TurnLabel";
+	[Export] public string GameStateLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/GameStateLabel";
+	[Export] public string PlayerCountLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/PlayerCountLabel";
+	[Export] public string SpectatorCountLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/SpectatorCountLabel";
+	[Export] public string MyColorLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/MyColorLabel";
+	[Export] public string TurnLabelPath = "Ui/InfoPanel/InfoMargin/InfoLayout/TurnLabel";
 	[Export] public string PassButtonPath = "Ui/PassButton";
 	[Export] public float RefreshIntervalSeconds = 0.1f;
 
 	[Export] public string WaitingOverlayPath = "WaitingOverlay";
-	[Export] public string OverlayGameStateLabelPath = "WaitingOverlay/Content/VBox/OverlayGameStateLabel";
-	[Export] public string OverlayPlayerCountLabelPath = "WaitingOverlay/Content/VBox/OverlayPlayerCountLabel";
+	[Export] public string OverlayGameStateLabelPath = "WaitingOverlay/Content/ContentMargin/VBox/OverlayGameStateLabel";
+	[Export] public string OverlayPlayerCountLabelPath = "WaitingOverlay/Content/ContentMargin/VBox/OverlayPlayerCountLabel";
 
 	[Export] public string GameOverPopupPath = "GameOverLayer";
-	[Export] public string GameOverTitleLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/TitleLabel";
-	[Export] public string GameOverScoreLabelPath = "GameOverLayer/GameOverPopup/Panel/VBox/ScoreLabel";
-	[Export] public string GameOverButtonPath = "GameOverLayer/GameOverPopup/Panel/VBox/BackButton";
+	[Export] public string GameOverTitleLabelPath = "GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox/TitleLabel";
+	[Export] public string GameOverScoreLabelPath = "GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox/ScoreLabel";
+	[Export] public string GameOverButtonPath = "GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox/BackButton";
 
 	private BoardController _board;
 	private Label _gameStateLabel;

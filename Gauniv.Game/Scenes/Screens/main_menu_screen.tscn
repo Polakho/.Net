@@ -1,9 +1,63 @@
-[gd_scene load_steps=3 format=3 uid="uid://bvfqv77pn3jfj"]
+[gd_scene load_steps=8 format=3 uid="uid://bvfqv77pn3jfj"]
 
 [ext_resource type="Script" uid="uid://drsxnjt8jk105" path="res://Script/Screens/MainMenuScreen.cs" id="1_rhm1l"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mdeqe"]
-bg_color = Color(0.6784314, 0.6784314, 0.6784314, 1)
+bg_color = Color(0.95, 0.95, 0.97, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 10
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PlayButton"]
+bg_color = Color(0.2, 0.6, 0.9, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PlayButtonHover"]
+bg_color = Color(0.25, 0.65, 0.95, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PlayButtonPressed"]
+bg_color = Color(0.18, 0.55, 0.85, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_QuitButton"]
+bg_color = Color(0.8, 0.3, 0.3, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_QuitButtonHover"]
+bg_color = Color(0.85, 0.35, 0.35, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
 
 [node name="MainMenuScreen" type="Control"]
 layout_mode = 3
@@ -21,7 +75,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.6789437, 0.6789437, 0.6789437, 1)
+color = Color(0.15, 0.2, 0.3, 1)
 
 [node name="Root" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -44,32 +98,51 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_mdeqe")
 
 [node name="CardMargin" type="MarginContainer" parent="Root/CenterContainer/Card"]
 layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
 
 [node name="Layout" type="VBoxContainer" parent="Root/CenterContainer/Card/CardMargin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
 
 [node name="Title" type="Label" parent="Root/CenterContainer/Card/CardMargin/Layout"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 0.9, 1)
+theme_override_font_sizes/font_size = 48
 text = "GAUNIV"
+horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Root/CenterContainer/Card/CardMargin/Layout"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.4, 0.5, 1)
+theme_override_font_sizes/font_size = 18
 text = "Go Multiplayer Client"
+horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="Root/CenterContainer/Card/CardMargin/Layout"]
-custom_minimum_size = Vector2(0, 15)
+custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 
 [node name="PlayButton" type="Button" parent="Root/CenterContainer/Card/CardMargin/Layout"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
-text = "Play"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_PlayButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_PlayButtonHover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_PlayButtonPressed")
+text = "▶ Jouer"
 
 [node name="QuitButton" type="Button" parent="Root/CenterContainer/Card/CardMargin/Layout"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(300, 50)
 layout_mode = 2
-text = "Quit"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_QuitButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_QuitButtonHover")
+text = "✕ Quitter"
 
 [node name="GameServerClient" type="Node" parent="."]
 

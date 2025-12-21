@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dshyb7e1n6eg7"]
+[gd_scene load_steps=14 format=3 uid="uid://dshyb7e1n6eg7"]
 
 [ext_resource type="Script" uid="uid://b4bho62l4k6nq" path="res://Script/Screens/MatchScreen.cs" id="1_usroj"]
 [ext_resource type="Script" uid="uid://df76hnhgfkd63" path="res://Script/App/BoardController.cs" id="2_052ei"]
@@ -6,6 +6,70 @@
 [ext_resource type="Texture2D" uid="uid://bx8radcxn5vxc" path="res://stone_black.png" id="3_31k75"]
 [ext_resource type="Texture2D" uid="uid://cs6ej0yxy0wkx" path="res://board.png" id="3_052ei"]
 [ext_resource type="Texture2D" uid="uid://xlicryfw1tcj" path="res://stone_white.png" id="4_i8i8u"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_InfoPanel"]
+bg_color = Color(0.95, 0.95, 0.97, 0.95)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BackButton"]
+bg_color = Color(0.5, 0.5, 0.6, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_BackButtonHover"]
+bg_color = Color(0.55, 0.55, 0.65, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PassButton"]
+bg_color = Color(0.9, 0.6, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.2)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PassButtonHover"]
+bg_color = Color(0.95, 0.65, 0.25, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 6
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_WaitingPanel"]
+bg_color = Color(0.95, 0.95, 0.97, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.4)
+shadow_size = 15
+shadow_offset = Vector2(0, 5)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_GameOverPanel"]
+bg_color = Color(0.95, 0.95, 0.97, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 20
+shadow_offset = Vector2(0, 8)
 
 [node name="MatchScreen" type="Control"]
 layout_mode = 3
@@ -27,7 +91,7 @@ RefreshIntervalSeconds = 5.0
 [node name="BoardController" type="Node2D" parent="BoardRoot"]
 script = ExtResource("2_052ei")
 StonesContainerPath = NodePath("../Stones")
-InfoLabelPath = NodePath("../../Ui/InfoLabel")
+InfoLabelPath = NodePath("../../Ui/InfoPanel/InfoMargin/InfoLayout/InfoLabel")
 GridSpritePath = NodePath("../GridSprite")
 BlackStoneTexture = ExtResource("3_31k75")
 WhiteStoneTexture = ExtResource("4_i8i8u")
@@ -50,66 +114,88 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="InfoPanel" type="PanelContainer" parent="Ui"]
+layout_mode = 0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = 335.0
+offset_bottom = 285.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_InfoPanel")
+
+[node name="InfoMargin" type="MarginContainer" parent="Ui/InfoPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="InfoLayout" type="VBoxContainer" parent="Ui/InfoPanel/InfoMargin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
 [node name="BackButton" type="Button" parent="Ui"]
 layout_mode = 0
-offset_left = 200.0
-offset_right = 245.0
-offset_bottom = 31.0
-text = "Back"
+offset_left = 15.0
+offset_top = 300.0
+offset_right = 135.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
+text = "← Retour"
 
-[node name="InfoLabel" type="Label" parent="Ui"]
-layout_mode = 0
-offset_left = 1.0
-offset_right = 41.0
-offset_bottom = 23.0
+[node name="InfoLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 0.9, 1)
+theme_override_font_sizes/font_size = 24
+text = "🎮 Partie en cours"
 
-[node name="GameStateLabel" type="Label" parent="Ui"]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 40.0
-offset_right = 300.0
-offset_bottom = 70.0
-text = "État: Chargement..."
+[node name="Spacer1" type="Control" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+custom_minimum_size = Vector2(0, 5)
+layout_mode = 2
 
-[node name="PlayerCountLabel" type="Label" parent="Ui"]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 75.0
-offset_right = 300.0
-offset_bottom = 105.0
-text = "Joueurs: 0/2"
+[node name="GameStateLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "📊 État: Chargement..."
 
-[node name="SpectatorCountLabel" type="Label" parent="Ui"]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 110.0
-offset_right = 300.0
-offset_bottom = 140.0
-text = "Spectateurs: 0"
+[node name="PlayerCountLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "👥 Joueurs: 0/2"
 
-[node name="MyColorLabel" type="Label" parent="Ui"]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 145.0
-offset_right = 300.0
-offset_bottom = 175.0
-text = "Votre couleur: ?"
+[node name="SpectatorCountLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "👁 Spectateurs: 0"
 
-[node name="TurnLabel" type="Label" parent="Ui"]
-layout_mode = 0
-offset_left = 10.0
-offset_top = 180.0
-offset_right = 300.0
-offset_bottom = 210.0
-text = "Tour: ?"
+[node name="MyColorLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "🎨 Votre couleur: ?"
+
+[node name="TurnLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "⏱ Tour: ?"
 
 [node name="PassButton" type="Button" parent="Ui"]
 layout_mode = 0
-offset_left = 10.0
-offset_top = 215.0
-offset_right = 150.0
-offset_bottom = 255.0
-text = "Passer mon tour"
+offset_left = 15.0
+offset_top = 360.0
+offset_right = 185.0
+offset_bottom = 410.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_PassButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_PassButtonHover")
+text = "⏩ Passer"
 
 [node name="WaitingOverlay" type="Control" parent="."]
 anchors_preset = 0
@@ -126,40 +212,51 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0, 0, 0, 0.55)
+color = Color(0.1, 0.15, 0.2, 0.75)
 
-[node name="Content" type="Panel" parent="WaitingOverlay"]
+[node name="Content" type="PanelContainer" parent="WaitingOverlay"]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -180.0
-offset_top = -70.0
-offset_right = 180.0
-offset_bottom = 70.0
+offset_left = -220.0
+offset_top = -100.0
+offset_right = 220.0
+offset_bottom = 100.0
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_WaitingPanel")
 
-[node name="VBox" type="VBoxContainer" parent="WaitingOverlay/Content"]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="TitleLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+[node name="ContentMargin" type="MarginContainer" parent="WaitingOverlay/Content"]
 layout_mode = 2
-text = "En attente d'un joueur..."
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="VBox" type="VBoxContainer" parent="WaitingOverlay/Content/ContentMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 15
+
+[node name="TitleLabel" type="Label" parent="WaitingOverlay/Content/ContentMargin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.6, 0.9, 1)
+theme_override_font_sizes/font_size = 26
+text = "⏳ En attente d'un joueur..."
 horizontal_alignment = 1
 
-[node name="OverlayGameStateLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+[node name="OverlayGameStateLabel" type="Label" parent="WaitingOverlay/Content/ContentMargin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 18
 text = "État: ..."
 horizontal_alignment = 1
 
-[node name="OverlayPlayerCountLabel" type="Label" parent="WaitingOverlay/Content/VBox"]
+[node name="OverlayPlayerCountLabel" type="Label" parent="WaitingOverlay/Content/ContentMargin/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 18
 text = "Joueurs: 0/2"
 horizontal_alignment = 1
 
@@ -182,67 +279,61 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.7)
+color = Color(0.05, 0.1, 0.15, 0.85)
 
-[node name="Panel" type="Panel" parent="GameOverLayer/GameOverPopup"]
+[node name="Panel" type="PanelContainer" parent="GameOverLayer/GameOverPopup"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -150.0
-offset_right = 200.0
-offset_bottom = 150.0
+offset_left = -250.0
+offset_top = -200.0
+offset_right = 250.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_GameOverPanel")
 
-[node name="VBox" type="VBoxContainer" parent="GameOverLayer/GameOverPopup/Panel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Spacer1" type="Control" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
-custom_minimum_size = Vector2(0, 20)
+[node name="PanelMargin" type="MarginContainer" parent="GameOverLayer/GameOverPopup/Panel"]
 layout_mode = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
 
-[node name="TitleLabel" type="Label" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
+[node name="VBox" type="VBoxContainer" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 32
-text = "Victoire !"
+theme_override_constants/separation = 20
+
+[node name="TitleLabel" type="Label" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.7, 0.4, 1)
+theme_override_font_sizes/font_size = 42
+text = "🏆 Victoire !"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Spacer2" type="Control" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
-custom_minimum_size = Vector2(0, 20)
+[node name="ScoreLabel" type="Label" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox"]
 layout_mode = 2
-
-[node name="ScoreLabel" type="Label" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
+theme_override_font_sizes/font_size = 22
 text = "Score Final:
-Noir: 0
-Blanc: 0"
+⚫ Noir: 0
+⚪ Blanc: 0"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Spacer3" type="Control" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
-custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
-
-[node name="BackButton" type="Button" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
-custom_minimum_size = Vector2(200, 50)
+[node name="BackButton" type="Button" parent="GameOverLayer/GameOverPopup/Panel/PanelMargin/VBox"]
+custom_minimum_size = Vector2(250, 60)
 layout_mode = 2
 size_flags_horizontal = 4
-text = "Retour au lobby"
-
-[node name="Spacer4" type="Control" parent="GameOverLayer/GameOverPopup/Panel/VBox"]
-custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
+text = "← Retour au lobby"
 
 [connection signal="pressed" from="Ui/BackButton" to="." method="OnBackPressed"]
 [connection signal="pressed" from="Ui/PassButton" to="." method="OnPassButtonPressed"]

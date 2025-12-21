@@ -9,6 +9,8 @@ public partial class LobbyScreen : Control
 	[Export] public NodePath GameListPath;
 
 	private ItemList _gameListUI;
+	private Button _joinButton;
+	private Button _spectateButton;
 
 	private string _selectedGameId;
 
@@ -37,6 +39,13 @@ public partial class LobbyScreen : Control
 		GD.Print($"[LobbyScreen] GameListUI trouvé via NodePath '{GameListPath}'? {_gameListUI != null}");
 		GD.Print($"[LobbyScreen] GameListUI est de type GameList? {_gameListUI is GameList}");
 
+		// Récupération des boutons
+		_joinButton = GetNodeOrNull<Button>("Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/JoinButton");
+		_spectateButton = GetNodeOrNull<Button>("Root/Center/Card/CardMargin/MainLayout/Content/RightPanel/SpectateButton");
+		
+		// Désactiver les boutons au démarrage
+		UpdateButtonStates();
+
 		if (_net != null)
 		{
 			GD.Print("[LobbyScreen] ✓ _net n'est pas null, souscription aux événements");
@@ -47,6 +56,9 @@ public partial class LobbyScreen : Control
 			{
 				GD.Print("[LobbyScreen] ✓ Appel de gameListScript.SetGameServerClient(_net)");
 				gameListScript.SetGameServerClient(_net);
+				
+				// S'abonner au signal de mise à jour de la liste
+				gameListScript.GameListUpdated += OnGameListUpdated;
 			}
 			else
 			{
@@ -83,12 +95,40 @@ public partial class LobbyScreen : Control
 		}
 	}
 
+	private void OnGameListUpdated()
+	{
+		GD.Print("[LobbyScreen] Liste des parties mise à jour");
+		UpdateButtonStates();
+	}
+
+	private void UpdateButtonStates()
+	{
+		bool hasGames = _net?.LastGameList != null && _net.LastGameList.Games.Count > 0;
+		bool hasSelection = !string.IsNullOrEmpty(_selectedGameId);
+		
+		// Activer les boutons seulement si une partie est sélectionnée OU s'il y a au moins une partie
+		bool enableButtons = hasGames;
+		
+		if (_joinButton != null)
+		{
+			_joinButton.Disabled = !enableButtons;
+		}
+		
+		if (_spectateButton != null)
+		{
+			_spectateButton.Disabled = !enableButtons;
+		}
+		
+		GD.Print($"[LobbyScreen] État des boutons: hasGames={hasGames}, hasSelection={hasSelection}, enabled={enableButtons}");
+	}
+
 	private void OnGameSelected(long index)
 	{
 		if (_net?.LastGameList != null && index >= 0 && index < _net.LastGameList.Games.Count)
 		{
 			_selectedGameId = _net.LastGameList.Games[(int)index].Id;
 			GD.Print($"[LobbyScreen] Game sélectionnée: {_selectedGameId}");
+			UpdateButtonStates();
 		}
 	}
 
@@ -98,6 +138,11 @@ public partial class LobbyScreen : Control
 		{
 			_net.GameCreated -= OnGameCreated;
 			_net.JoinResultReceived -= OnJoinResultReceived;
+		}
+		
+		if (_gameListUI is GameList gameListScript)
+		{
+			gameListScript.GameListUpdated -= OnGameListUpdated;
 		}
 	}
 
@@ -123,6 +168,12 @@ public partial class LobbyScreen : Control
 			_selectedGameId = _net.LastGameList.Games[0].Id;
 		}
 
+		if (string.IsNullOrEmpty(_selectedGameId))
+		{
+			GD.PrintErr("[LobbyScreen] Aucune partie sélectionnée. Veuillez sélectionner ou créer une partie.");
+			return;
+		}
+
 		await _net.SendJoinGame(_selectedGameId, asSpectator: false);
 	}
 
@@ -134,6 +185,12 @@ public partial class LobbyScreen : Control
 		if (string.IsNullOrEmpty(_selectedGameId) && _net.LastGameList != null && _net.LastGameList.Games.Count > 0)
 		{
 			_selectedGameId = _net.LastGameList.Games[0].Id;
+		}
+
+		if (string.IsNullOrEmpty(_selectedGameId))
+		{
+			GD.PrintErr("[LobbyScreen] Aucune partie disponible à observer. Veuillez créer ou attendre qu'une partie soit disponible.");
+			return;
 		}
 
 		_net.IsJoiningAsSpectator = true;
