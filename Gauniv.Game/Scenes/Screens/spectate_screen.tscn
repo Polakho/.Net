@@ -103,17 +103,6 @@ theme_override_constants/margin_bottom = 20
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="BackButton" type="Button" parent="Ui"]
-layout_mode = 0
-offset_left = 15.0
-offset_top = 300.0
-offset_right = 135.0
-offset_bottom = 345.0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
-theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
-text = "← Quitter"
 
 [node name="InfoLabel" type="Label" parent="Ui/InfoPanel/InfoMargin/InfoLayout"]
 layout_mode = 2
@@ -224,5 +213,19 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
 theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
 text = "← Retour au lobby"
 
-[connection signal="pressed" from="Ui/BackButton" to="." method="OnBackPressed"]
+[node name="UiLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="BackButton" type="Button" parent="UiLayer"]
+offset_left = 15.0
+offset_top = 300.0
+offset_right = 135.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_BackButton")
+theme_override_styles/hover = SubResource("StyleBoxFlat_BackButtonHover")
+text = "← Quitter"
+
+[connection signal="pressed" from="UiLayer/BackButton" to="." method="OnBackPressed"]
 

@@ -22,6 +22,13 @@ shadow_color = Color(0, 0, 0, 0.2)
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PlayButtonPressed"]
+bg_color = Color(0.18, 0.55, 0.85, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PlayButtonHover"]
 bg_color = Color(0.25, 0.65, 0.95, 1)
 corner_radius_top_left = 8
@@ -31,13 +38,6 @@ corner_radius_bottom_left = 8
 shadow_color = Color(0, 0, 0, 0.3)
 shadow_size = 6
 shadow_offset = Vector2(0, 3)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_PlayButtonPressed"]
-bg_color = Color(0.18, 0.55, 0.85, 1)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_QuitButton"]
 bg_color = Color(0.8, 0.3, 0.3, 1)
@@ -118,7 +118,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.4, 0.5, 1)
 theme_override_font_sizes/font_size = 18
-text = "Go Multiplayer Client"
+text = "Client pour jeu de Go en ligne"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="Root/CenterContainer/Card/CardMargin/Layout"]
@@ -131,8 +131,8 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_PlayButton")
-theme_override_styles/hover = SubResource("StyleBoxFlat_PlayButtonHover")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_PlayButtonPressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_PlayButtonHover")
 text = "▶ Jouer"
 
 [node name="QuitButton" type="Button" parent="Root/CenterContainer/Card/CardMargin/Layout"]
