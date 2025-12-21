@@ -73,6 +73,22 @@ namespace Gauniv.WebServer.Api
             return Ok(gamesDto);
         }
 
+        [HttpGet("gameDetails")]
+        public async Task<IActionResult> GetGameDetails([FromQuery] int gameId = 0)
+        {
+            var game = await appDbContext.Games
+                .Include(g => g.Tags)
+                .FirstOrDefaultAsync(g => g.Id == gameId);
+
+            if (game == null)
+            {
+                return NotFound("Game not found");
+            }
+
+            var gameDto = mapper.Map<GameDto>(game);
+            return Ok(gameDto);
+        }
+
         [HttpGet("ownedGames")]
         [Authorize]
         public async Task<IActionResult> GetOwnedGames([FromQuery] int offset = 0, [FromQuery] int limit = 50, [FromQuery] string[] TagNames = null)

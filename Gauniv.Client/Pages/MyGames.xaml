@@ -8,7 +8,6 @@ Licence MIT
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
-Any new method must be in a different namespace than the previous ones
 and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
 subject to the following conditions: 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. 
@@ -88,7 +87,8 @@ Please respect the team's standards for any future contribution
             </Grid>
         </VerticalStackLayout>
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Games}" SelectionMode="Single">
+        <!-- Games list -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChanged="OnMyGameSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Game">
                     <Border Stroke="LightGray" StrokeThickness="1" Margin="5" Padding="10">

@@ -120,7 +120,7 @@ Please respect the team's standards for any future contribution
         </VerticalStackLayout>
 
         <!-- Games list -->
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Games}" SelectionMode="Single">
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Games}" SelectionMode="Single" SelectionChanged="OnGameSelected">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Game">
                     <Border Stroke="LightGray" StrokeThickness="1" Margin="5" Padding="10">

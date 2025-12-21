@@ -27,6 +27,7 @@
 // Please respect the team's standards for any future contribution
 #endregion
 using Gauniv.Client.ViewModel;
+using Gauniv.Client.Models;
 using System.Collections.ObjectModel;
 
 namespace Gauniv.Client.Pages;
@@ -62,6 +63,26 @@ public partial class MyGames : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[MyGames.xaml.cs] OnMyGamesTagSelectionChanged error: {ex}");
+        }
+    }
+
+    private async void OnMyGameSelected(object sender, SelectionChangedEventArgs e)
+    {
+        try
+        {
+            var game = e.CurrentSelection?.OfType<Game>()?.FirstOrDefault();
+            if (game == null) return;
+
+            var vm = new GameDetailsViewModel();
+            vm.SetGame(game);
+            var page = new GameDetails { BindingContext = vm };
+            await Navigation.PushAsync(page);
+
+            (sender as CollectionView)!.SelectedItem = null;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[MyGames.xaml.cs] OnMyGameSelected error: {ex}");
         }
     }
 }
