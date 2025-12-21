@@ -42,7 +42,7 @@ offset = Vector2(64, 64)
 [node name="Stones" type="Node2D" parent="BoardRoot"]
 
 [node name="Ui" type="Control" parent="."]
-anchors_preset = 15
+anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
@@ -158,6 +158,7 @@ layer = 100
 visible = false
 
 [node name="GameOverPopup" type="Control" parent="GameOverLayer"]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

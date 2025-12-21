@@ -339,8 +339,8 @@ public partial class MatchScreen : Control
 			// - C'est le tour du joueur local
 			// - Il y a 2 joueurs connectés
 			bool canPass = _net.CurrentGameState == "InProgress" 
-			               && _net.IsLocalPlayersTurn 
-			               && _net.CurrentPlayerCount >= 2;
+						   && _net.IsLocalPlayersTurn 
+						   && _net.CurrentPlayerCount >= 2;
 			
 			_passButton.Disabled = !canPass;
 			
