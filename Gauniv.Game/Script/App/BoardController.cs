@@ -601,7 +601,7 @@ public partial class BoardController : Node2D
 		};
 
 		// Créer une texture circulaire procédurale
-		var image = Image.Create(64, 64, false, Image.Format.Rgba8);
+		var image = Image.CreateEmpty(64, 64, false, Image.Format.Rgba8);
 		
 		Vector2 center = new Vector2(32, 32);
 		float radius = 28f;

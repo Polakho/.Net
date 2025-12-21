@@ -14,6 +14,15 @@ config/name="GoGame"
 run/main_scene="uid://8px8enunwe5m"
 config/features=PackedStringArray("4.5", "C#", "Forward Plus")
 
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/resizable=true
+window/size/mode=0
+window/stretch/mode="disabled"
+window/stretch/aspect="keep"
+
 [dotnet]
 
 project/assembly_name="GoGame"

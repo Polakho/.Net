@@ -145,6 +145,27 @@ public partial class MatchScreen : Control
 		}
 	}
 
+	public override void _Process(double delta)
+	{
+		// S'assurer que le plateau reste centré à chaque frame
+		// Cela garantit qu'aucun décalage ne se produit
+		if (_boardRootNode != null)
+		{
+			Vector2 currentViewportSize = GetViewportRect().Size;
+			float boardSizePx = 640f;
+			Vector2 expectedPos = (currentViewportSize - new Vector2(boardSizePx, boardSizePx)) / 2f;
+			
+			// Arrondir pour éviter les positions en demi-pixel qui peuvent causer du flou
+			expectedPos = new Vector2(Mathf.Round(expectedPos.X), Mathf.Round(expectedPos.Y));
+			
+			// Mettre à jour uniquement si nécessaire
+			if (_boardRootNode.Position != expectedPos)
+			{
+				_boardRootNode.Position = expectedPos;
+			}
+		}
+	}
+
 	private void CenterBoardRoot()
 	{
 		if (_boardRootNode == null)
@@ -158,6 +179,9 @@ public partial class MatchScreen : Control
 		
 		// Position pour centrer le plateau (coin supérieur gauche du plateau)
 		Vector2 centeredPos = (viewportSize - new Vector2(boardSizePx, boardSizePx)) / 2f;
+		
+		// Arrondir pour éviter les positions en demi-pixel qui peuvent causer du flou ou des décalages
+		centeredPos = new Vector2(Mathf.Round(centeredPos.X), Mathf.Round(centeredPos.Y));
 		
 		// Le BoardRoot contient Background et GridSprite qui ne sont pas centrés (centered=false)
 		// donc ils commencent à la position du BoardRoot
